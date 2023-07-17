@@ -12,11 +12,9 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 04/08/16.
  */
-public class SubscribedTopicsTest
-{
+public class SubscribedTopicsTest {
     @Test
-    public void testAddRemoveListeners()
-    {
+    public void testAddRemoveListeners() {
         final SubscribedTopics subTopics = new SubscribedTopics();
         final ListenerImpl listener1 = new ListenerImpl();
         final ListenerImpl listener2 = new ListenerImpl();
@@ -62,8 +60,7 @@ public class SubscribedTopicsTest
     }
 
     @Test
-    public void testAdverts()
-    {
+    public void testAdverts() {
         final UUID instanceId = UUID.randomUUID();
         final SubscribedTopics subTopics = new SubscribedTopics();
         final ListenerImpl listener1 = new ListenerImpl();
@@ -142,8 +139,7 @@ public class SubscribedTopicsTest
         Assert.assertEquals(2, listener2.numTimeoutTopicSocketCalls);
     }
 
-    public static class ListenerImpl implements IAutodiscTopicSubListener
-    {
+    public static class ListenerImpl implements IAutodiscTopicSubListener {
         public int numNewTopicCalls = 0;
         public int numNewTopicSocketCalls = 0;
         public int numTimeoutTopicCalls = 0;
@@ -151,26 +147,22 @@ public class SubscribedTopicsTest
 
 
         @Override
-        public void onNewAutoDiscTopicInfo(AutoDiscTopicInfo info)
-        {
+        public void onNewAutoDiscTopicInfo(AutoDiscTopicInfo info) {
             numNewTopicCalls++;
         }
 
         @Override
-        public void onTimedOutAutoDiscTopicInfo(AutoDiscTopicInfo info)
-        {
+        public void onTimedOutAutoDiscTopicInfo(AutoDiscTopicInfo info) {
             numTimeoutTopicCalls++;
         }
 
         @Override
-        public void onNewAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info)
-        {
+        public void onNewAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info) {
             numNewTopicSocketCalls++;
         }
 
         @Override
-        public void onTimedOutAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info)
-        {
+        public void onTimedOutAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info) {
             numTimeoutTopicSocketCalls++;
         }
     }

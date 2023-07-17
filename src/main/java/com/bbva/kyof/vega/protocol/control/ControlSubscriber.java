@@ -12,29 +12,34 @@ import java.io.Closeable;
 
 /**
  * Wrapper class to encapsulate an Aeron Subscriber for control messages.
- *
+ * <p>
  * This class is thread safe!!
  */
 @Slf4j
-class ControlSubscriber implements Closeable
-{
-    /** Parameters of the aeron subscriber */
-    @Getter private final ControlSubscriberParams params;
+class ControlSubscriber implements Closeable {
+    /**
+     * Parameters of the aeron subscriber
+     */
+    @Getter
+    private final ControlSubscriberParams params;
 
-    /** Aeron subscription wrapped by this subscriber */
+    /**
+     * Aeron subscription wrapped by this subscriber
+     */
     private final Subscription subscription;
 
-    /** Lock of the class for synchronization */
+    /**
+     * Lock of the class for synchronization
+     */
     private final Object lock = new Object();
 
     /**
      * Create a new Aeron Subscriber
      *
      * @param vegaContext library instance context
-     * @param params parameters for the susbcriber
+     * @param params      parameters for the susbcriber
      */
-    ControlSubscriber(final VegaContext vegaContext, final ControlSubscriberParams params)
-    {
+    ControlSubscriber(final VegaContext vegaContext, final ControlSubscriberParams params) {
         this.params = params;
 
         // Create the Aeron subscriber channel
@@ -47,12 +52,9 @@ class ControlSubscriber implements Closeable
     }
 
     @Override
-    public void close()
-    {
-        synchronized (this.lock)
-        {
-            if (this.subscription.isClosed())
-            {
+    public void close() {
+        synchronized (this.lock) {
+            if (this.subscription.isClosed()) {
                 return;
             }
 
@@ -66,16 +68,13 @@ class ControlSubscriber implements Closeable
      * Perform a reception poll
      *
      * @param fragmentHandler the fragment handler that will process the message
-     * @param maxFragments maximum number of fragments to get in the polling
+     * @param maxFragments    maximum number of fragments to get in the polling
      * @return the number of messages retrieved
      */
-    public int poll(final FragmentHandler fragmentHandler, final int maxFragments)
-    {
-        synchronized (this.lock)
-        {
+    public int poll(final FragmentHandler fragmentHandler, final int maxFragments) {
+        synchronized (this.lock) {
             // Check if closed, it may happen that a poll is performed while it is being closed or after until removed from poller
-            if (this.subscription.isClosed())
-            {
+            if (this.subscription.isClosed()) {
                 return 0;
             }
 

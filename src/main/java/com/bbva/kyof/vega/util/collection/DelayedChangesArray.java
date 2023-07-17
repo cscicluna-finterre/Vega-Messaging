@@ -1,17 +1,11 @@
 package com.bbva.kyof.vega.util.collection;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class represents a generic collection with very special features and limitations. Please read carefully before use!!!<p>
- *
+ * <p>
  * - The internal elements are stored into a primitive genetic collection.<p>
  * - The changes in the collection (add or remove elements) is not performed immediately.<p>
  * - The changes are stored and only performed when the method "applyChanges() is called"<p>
@@ -26,55 +20,75 @@ import java.util.Set;
  *
  * @param <T> Type of the contents of the array
  */
-public final class DelayedChangesArray<T> implements IDelayedChangesArray<T>
-{
-    /** Default initial size if no size is specified on construction */
+public final class DelayedChangesArray<T> implements IDelayedChangesArray<T> {
+    /**
+     * Default initial size if no size is specified on construction
+     */
     private static final int DEFAULT_INITIAL_SIZE = 100;
 
-    /** Default growing factor if no factor is specified on construction */
+    /**
+     * Default growing factor if no factor is specified on construction
+     */
     private static final float DEFAULT_GROW_FACTOR = 1.75f;
 
-    /** List of pending changes to apply */
+    /**
+     * List of pending changes to apply
+     */
     private final List<PendingChange<T>> pendingChanges = new LinkedList<>();
 
-    /** Map with all the stored elements in the collection given their position on it, it is used to avoid looking in
-     * all the collection for deletions */
+    /**
+     * Map with all the stored elements in the collection given their position on it, it is used to avoid looking in
+     * all the collection for deletions
+     */
     private final Map<T, Integer> arrayPositionByElement;
 
-    /** Final elements if all pending changes where applied already, it is used to avoid adding duplicated elements or
-     * remove non existing element */
+    /**
+     * Final elements if all pending changes where applied already, it is used to avoid adding duplicated elements or
+     * remove non existing element
+     */
     private final Set<T> elementsAfterPendingChanges;
 
-    /** Growing factor for the internal arrays, maps and sets */
+    /**
+     * Growing factor for the internal arrays, maps and sets
+     */
     private final float growFactor;
 
-    /** Lock for the modifications on the collection */
+    /**
+     * Lock for the modifications on the collection
+     */
     private final Object modificationsLock = new Object();
 
-    /** Class type of the generic, we need to store in order to grow up the collection */
+    /**
+     * Class type of the generic, we need to store in order to grow up the collection
+     */
     private final Class<T> classType;
 
-    /** Internal collection with all the stored elements */
+    /**
+     * Internal collection with all the stored elements
+     */
     private T[] internalArray;
 
-    /** Number of elements currently in the collection */
+    /**
+     * Number of elements currently in the collection
+     */
     private int numElements = 0;
 
-    /** Construct a new collection *
+    /**
+     * Construct a new collection *
+     *
      * @param classType the class represented by this collection
      */
-    public DelayedChangesArray(final Class<T> classType)
-    {
+    public DelayedChangesArray(final Class<T> classType) {
         this(classType, DEFAULT_INITIAL_SIZE);
     }
 
     /**
      * Constructs a new collection given the initial size, it will preallocate the required memory for performance improvements
-     * @param classType the class type represented by the collection
+     *
+     * @param classType   the class type represented by the collection
      * @param initialSize the initial size of the collection
      */
-    public DelayedChangesArray(final Class<T> classType, final int initialSize)
-    {
+    public DelayedChangesArray(final Class<T> classType, final int initialSize) {
         this(classType, initialSize, DEFAULT_GROW_FACTOR);
     }
 
@@ -83,13 +97,12 @@ public final class DelayedChangesArray<T> implements IDelayedChangesArray<T>
      * It will preallocate the required memory for performance improvements.
      * The collection will grow using the grow factor: 1.5 means a 50% grow
      *
-     * @param classType the class type represented by the collection
+     * @param classType   the class type represented by the collection
      * @param initialSize the initial size of the collection
-     * @param growFactor the grow factor in case the collection needs to grow for size reasons
+     * @param growFactor  the grow factor in case the collection needs to grow for size reasons
      */
     @SuppressWarnings("unchecked")
-    public DelayedChangesArray(final Class<T> classType, final int initialSize, final float growFactor)
-    {
+    public DelayedChangesArray(final Class<T> classType, final int initialSize, final float growFactor) {
         this.growFactor = growFactor;
         this.classType = classType;
         this.internalArray = (T[]) Array.newInstance(classType, initialSize);
@@ -98,24 +111,19 @@ public final class DelayedChangesArray<T> implements IDelayedChangesArray<T>
     }
 
     @Override
-    public T[] getInternalArray()
-    {
+    public T[] getInternalArray() {
         return this.internalArray;
     }
 
     @Override
-    public int getNumElements()
-    {
+    public int getNumElements() {
         return this.numElements;
     }
 
     @Override
-    public boolean addElement(final T element)
-    {
-        synchronized (this.modificationsLock)
-        {
-            if (this.elementsAfterPendingChanges.contains(element))
-            {
+    public boolean addElement(final T element) {
+        synchronized (this.modificationsLock) {
+            if (this.elementsAfterPendingChanges.contains(element)) {
                 return false;
             }
 
@@ -130,12 +138,9 @@ public final class DelayedChangesArray<T> implements IDelayedChangesArray<T>
     }
 
     @Override
-    public boolean removeElement(final T element)
-    {
-        synchronized (this.modificationsLock)
-        {
-            if (!this.elementsAfterPendingChanges.remove(element))
-            {
+    public boolean removeElement(final T element) {
+        synchronized (this.modificationsLock) {
+            if (!this.elementsAfterPendingChanges.remove(element)) {
                 return false;
             }
 
@@ -147,10 +152,8 @@ public final class DelayedChangesArray<T> implements IDelayedChangesArray<T>
     }
 
     @Override
-    public void clear()
-    {
-        synchronized (this.modificationsLock)
-        {
+    public void clear() {
+        synchronized (this.modificationsLock) {
             // Clear all internal contents
             this.pendingChanges.clear();
             this.arrayPositionByElement.clear();
@@ -162,23 +165,16 @@ public final class DelayedChangesArray<T> implements IDelayedChangesArray<T>
     }
 
     @Override
-    public void applyPendingChanges()
-    {
-        synchronized (this.modificationsLock)
-        {
-            if (this.pendingChanges.isEmpty())
-            {
+    public void applyPendingChanges() {
+        synchronized (this.modificationsLock) {
+            if (this.pendingChanges.isEmpty()) {
                 return;
             }
 
-            for (final PendingChange<T> pendingChange : pendingChanges)
-            {
-                if (pendingChange.getChangeType() == ChangeType.ADD)
-                {
+            for (final PendingChange<T> pendingChange : pendingChanges) {
+                if (pendingChange.getChangeType() == ChangeType.ADD) {
                     this.addElementInternalArray(pendingChange.getElement());
-                }
-                else
-                {
+                } else {
                     this.removeElementFromInternalArray(pendingChange.getElement());
                 }
             }
@@ -193,20 +189,16 @@ public final class DelayedChangesArray<T> implements IDelayedChangesArray<T>
      *
      * @param newElement new element to add into the collection
      */
-    private void addElementInternalArray(final T newElement)
-    {
+    private void addElementInternalArray(final T newElement) {
         // Check if there is enough space
-        if (this.numElements < this.internalArray.length)
-        {
+        if (this.numElements < this.internalArray.length) {
             // Add at the end of the internalArray
             this.internalArray[numElements] = newElement;
             // Add the new element to the map
             this.arrayPositionByElement.put(newElement, numElements);
             // Increase the number of element
             numElements++;
-        }
-        else
-        {
+        } else {
             // Grow up the internalArray and try again
             this.growUpArray();
             this.addElementInternalArray(newElement);
@@ -216,21 +208,18 @@ public final class DelayedChangesArray<T> implements IDelayedChangesArray<T>
     /**
      * Grow up the internal collection following the provided grow factor
      */
-    private void growUpArray()
-    {
+    private void growUpArray() {
         // Calculate the new size for the collection
         int newArraySize = (int) (this.internalArray.length * growFactor);
 
         // If the collection has not grown (it can happen with just 1 element, or very small grow factor
         // Increase the size in just one element)
-        if (newArraySize == this.internalArray.length)
-        {
+        if (newArraySize == this.internalArray.length) {
             newArraySize++;
         }
 
         // Grow up the internalArray
-        @SuppressWarnings("unchecked")
-        final T[] newArray = (T[]) Array.newInstance(this.classType, newArraySize);
+        @SuppressWarnings("unchecked") final T[] newArray = (T[]) Array.newInstance(this.classType, newArraySize);
 
         // Copy the internalArray
         System.arraycopy(this.internalArray, 0, newArray, 0, this.internalArray.length);
@@ -245,8 +234,7 @@ public final class DelayedChangesArray<T> implements IDelayedChangesArray<T>
      *
      * @param element the element to remove
      */
-    private void removeElementFromInternalArray(final T element)
-    {
+    private void removeElementFromInternalArray(final T element) {
         // Find the element to remove and remove from the map
         final Integer elementToRemovePosition = this.arrayPositionByElement.remove(element);
 
@@ -254,8 +242,7 @@ public final class DelayedChangesArray<T> implements IDelayedChangesArray<T>
         this.numElements--;
 
         // Move the last element to the empty position if there are still elements in the collection
-        if (this.numElements > 0)
-        {
+        if (this.numElements > 0) {
             // Get the element to move, it will be the last element of the collection
             final T lastElement = this.internalArray[numElements];
             // Move the last element to the position of the element to remove
@@ -273,8 +260,7 @@ public final class DelayedChangesArray<T> implements IDelayedChangesArray<T>
      *
      * @param <T> the type of the element in the collection
      */
-    private static class PendingChange<T>
-    {
+    private static class PendingChange<T> {
         /**
          * The element that is pending action
          */
@@ -290,8 +276,7 @@ public final class DelayedChangesArray<T> implements IDelayedChangesArray<T>
          * @param element    the element to add or remove
          * @param changeType the type of the change
          */
-        protected PendingChange(final T element, final ChangeType changeType)
-        {
+        protected PendingChange(final T element, final ChangeType changeType) {
             this.element = element;
             this.changeType = changeType;
         }
@@ -299,16 +284,14 @@ public final class DelayedChangesArray<T> implements IDelayedChangesArray<T>
         /**
          * Get the change type
          */
-        protected ChangeType getChangeType()
-        {
+        protected ChangeType getChangeType() {
             return changeType;
         }
 
         /**
          * Gets the element to add or remove
          */
-        protected T getElement()
-        {
+        protected T getElement() {
             return element;
         }
     }
@@ -316,8 +299,7 @@ public final class DelayedChangesArray<T> implements IDelayedChangesArray<T>
     /**
      * Enum that represent the type of change for a delayed change in the collection
      */
-    private enum ChangeType
-    {
+    private enum ChangeType {
         /**
          * Add an element in the collection
          */

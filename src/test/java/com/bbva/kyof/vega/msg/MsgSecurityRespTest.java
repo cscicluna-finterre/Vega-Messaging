@@ -18,8 +18,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 08/11/2016.
  */
-public class MsgSecurityRespTest
-{
+public class MsgSecurityRespTest {
     private final static UUID instanceId = UUID.randomUUID();
     private final static UUID requestId = UUID.randomUUID();
     private final static UUID topicPubId = UUID.randomUUID();
@@ -36,8 +35,7 @@ public class MsgSecurityRespTest
     private byte[] encodedSessionKey;
 
     @Before
-    public void before() throws Exception
-    {
+    public void before() throws Exception {
         final KeyPair keyPair1 = RSAKeysHelper.generateKeyPair();
         final KeyPair keyPair2 = RSAKeysHelper.generateKeyPair();
         final KeyPair keyPair3 = RSAKeysHelper.generateKeyPair();
@@ -62,8 +60,7 @@ public class MsgSecurityRespTest
     }
 
     @Test
-    public void testGettersSettersSerializeDeserialize() throws Exception
-    {
+    public void testGettersSettersSerializeDeserialize() throws Exception {
         // Create the message
         final MsgSecurityResp msgSecurity = new MsgSecurityResp();
         msgSecurity.setInstanceId(instanceId);

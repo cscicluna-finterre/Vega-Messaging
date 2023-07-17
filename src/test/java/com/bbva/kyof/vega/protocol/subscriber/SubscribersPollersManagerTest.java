@@ -14,25 +14,23 @@ import io.aeron.driver.MediaDriver;
 import org.agrona.CloseHelper;
 import org.junit.*;
 
-import java.util.UUID;
-
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class SubscribersPollersManagerTest
-{
+public class SubscribersPollersManagerTest {
     private static MediaDriver MEDIA_DRIVER;
     private static Aeron AERON;
     private static SubnetAddress SUBNET_ADDRESS;
     private static VegaContext VEGA_CONTEXT;
 
-    /** File containing the configuration */
+    /**
+     * File containing the configuration
+     */
     private static final String validConfigFile = ConfigReaderTest.class.getClassLoader().getResource("config/pollersManagerTestConfig.xml").getPath();
     private SubscribersPollersManager pollersManager;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         final Aeron.Context ctx1 = new Aeron.Context();
@@ -45,34 +43,29 @@ public class SubscribersPollersManagerTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Before
-    public void before()
-    {
+    public void before() {
         final Listener listener = new Listener();
         pollersManager = new SubscribersPollersManager(VEGA_CONTEXT, listener);
     }
 
     @After
-    public void after()
-    {
+    public void after() {
         pollersManager.close();
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testUnknownPoller() throws Exception
-    {
-       pollersManager.getPoller("unknownPoller");
+    public void testUnknownPoller() throws Exception {
+        pollersManager.getPoller("unknownPoller");
     }
 
     @Test
-    public void testRightPollers() throws Exception
-    {
+    public void testRightPollers() throws Exception {
         final SubcribersPoller poller1 = pollersManager.getPoller("poller1");
         Assert.assertNotNull(poller1);
 
@@ -82,32 +75,26 @@ public class SubscribersPollersManagerTest
         Assert.assertNotNull(pollersManager.getPoller("poller2"));
     }
 
-    private class Listener implements ISubscribersPollerListener
-    {
+    private class Listener implements ISubscribersPollerListener {
         @Override
-        public void onDataMsgReceived(RcvMessage msg)
-        {
+        public void onDataMsgReceived(RcvMessage msg) {
         }
 
         @Override
-        public void onEncryptedDataMsgReceived(RcvMessage msg)
-        {
+        public void onEncryptedDataMsgReceived(RcvMessage msg) {
 
         }
 
         @Override
-        public void onDataRequestMsgReceived(RcvRequest request)
-        {
+        public void onDataRequestMsgReceived(RcvRequest request) {
         }
 
         @Override
-        public void onDataResponseMsgReceived(RcvResponse response)
-        {
+        public void onDataResponseMsgReceived(RcvResponse response) {
         }
 
         @Override
-        public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader)
-        {
+        public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader) {
 
         }
     }

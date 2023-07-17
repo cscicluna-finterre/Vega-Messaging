@@ -12,8 +12,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertArrayEquals;
 
-public class AESCryptoTest
-{
+public class AESCryptoTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AESCryptoTest.class);
 
     private static final int NUM_TESTS = 10000;
@@ -24,21 +23,18 @@ public class AESCryptoTest
     private static AESCrypto AES_CRYPTO;
 
     @BeforeClass
-    public static void testCreateNewInstance() throws Exception
-    {
+    public static void testCreateNewInstance() throws Exception {
         // Create an instance of each type and make sure it works fine
         AES_CRYPTO = AESCrypto.createNewInstance();
     }
 
     @Test
-    public void testGetAESKey() throws Exception
-    {
+    public void testGetAESKey() throws Exception {
         Assert.assertEquals(AES_CRYPTO.getAESKey().length * 8, 128);
     }
 
     @Test
-    public void testEncodeDecodeSingleByteArray() throws Exception
-    {
+    public void testEncodeDecodeSingleByteArray() throws Exception {
         // Create the 3 buffers
         final ByteBuffer msgBuffer = ByteBuffer.allocate(256);
         final ByteBuffer encodedMsgBuffer = ByteBuffer.allocate(256);
@@ -69,21 +65,18 @@ public class AESCryptoTest
     }
 
     @Test
-    public void testEncodeDecodeByteArray() throws Exception
-    {
+    public void testEncodeDecodeByteArray() throws Exception {
         final byte[][] messages = this.createRandomMsgs();
         final byte[][] encodedMsgs = new byte[NUM_TESTS][];
 
         // Warm up
-        for(int i = 0; i < NUM_TESTS; i++)
-        {
+        for (int i = 0; i < NUM_TESTS; i++) {
             encodedMsgs[i] = AES_CRYPTO.encode(messages[i]);
         }
 
         // Measure
         long startTime = System.nanoTime();
-        for(int i = 0; i < NUM_TESTS; i++)
-        {
+        for (int i = 0; i < NUM_TESTS; i++) {
             AES_CRYPTO.encode(messages[i]);
         }
         long stopTime = System.nanoTime();
@@ -91,15 +84,13 @@ public class AESCryptoTest
         LOGGER.info("Byte Array AES encryption time per msg [{}] nanos", ((stopTime - startTime) / NUM_TESTS));
 
         // Now decode the messages
-        for(int i = 0; i < NUM_TESTS; i++)
-        {
+        for (int i = 0; i < NUM_TESTS; i++) {
             assertArrayEquals(AES_CRYPTO.decode(encodedMsgs[i]), messages[i]);
         }
 
         // Finally lets do a performance test
         startTime = System.nanoTime();
-        for(int i = 0; i < NUM_TESTS; i++)
-        {
+        for (int i = 0; i < NUM_TESTS; i++) {
             AES_CRYPTO.decode(encodedMsgs[i]);
         }
         stopTime = System.nanoTime();
@@ -108,15 +99,13 @@ public class AESCryptoTest
     }
 
     @Test
-    public void testEncodeDecodeByteBuffer() throws Exception
-    {
+    public void testEncodeDecodeByteBuffer() throws Exception {
         final ByteBuffer[] messages = this.createRandomByteBufferMsgs();
         final ByteBuffer[] encodedMsgs = this.createEmptyByteBufferArrays(BYTE_BUFFER_RESULT_SIZE);
         final ByteBuffer[] decodedMsgs = this.createEmptyByteBufferArrays(BYTE_BUFFER_RESULT_SIZE);
 
         // Warm up
-        for(int i = 0; i < NUM_TESTS; i++)
-        {
+        for (int i = 0; i < NUM_TESTS; i++) {
             AES_CRYPTO.encode(messages[i], encodedMsgs[i]);
         }
 
@@ -126,8 +115,7 @@ public class AESCryptoTest
 
         // Measure
         long startTime = System.nanoTime();
-        for(int i = 0; i < NUM_TESTS; i++)
-        {
+        for (int i = 0; i < NUM_TESTS; i++) {
             AES_CRYPTO.encode(messages[i], encodedMsgs[i]);
         }
         long stopTime = System.nanoTime();
@@ -139,8 +127,7 @@ public class AESCryptoTest
         this.flipByteBufferArray(encodedMsgs);
 
         // Now decode the messages
-        for(int i = 0; i < NUM_TESTS; i++)
-        {
+        for (int i = 0; i < NUM_TESTS; i++) {
             AES_CRYPTO.decode(encodedMsgs[i], decodedMsgs[i]);
 
             // Extract the arrays and make sure they are equals
@@ -158,8 +145,7 @@ public class AESCryptoTest
 
         // Finally lets do a performance test
         startTime = System.nanoTime();
-        for(int i = 0; i < NUM_TESTS; i++)
-        {
+        for (int i = 0; i < NUM_TESTS; i++) {
             AES_CRYPTO.decode(encodedMsgs[i], decodedMsgs[i]);
         }
         stopTime = System.nanoTime();
@@ -168,19 +154,15 @@ public class AESCryptoTest
     }
 
     @Test
-    public void testEncodeWithNotEnoughSpace() throws Exception
-    {
+    public void testEncodeWithNotEnoughSpace() throws Exception {
         // Create the 3 buffers
         final ByteBuffer msgBuffer = ByteBuffer.wrap("Test Message".getBytes());
         final ByteBuffer encodedMsgBuffer = ByteBuffer.allocate(2);
 
         // Write something and test the encode / decode
-        try
-        {
+        try {
             AES_CRYPTO.encode(msgBuffer, encodedMsgBuffer);
-        }
-        catch (VegaException e)
-        {
+        } catch (VegaException e) {
             // Now with enough space to check there is no problem with the crypto after an error
             AES_CRYPTO.encode(msgBuffer, ByteBuffer.allocate(128));
             return;
@@ -190,10 +172,8 @@ public class AESCryptoTest
     }
 
     @Test
-    public void testEncodeDecodeMultipleSizes() throws Exception
-    {
-        for(int i = 0; i < 4098 * 2; i++)
-        {
+    public void testEncodeDecodeMultipleSizes() throws Exception {
+        for (int i = 0; i < 4098 * 2; i++) {
             // Create the 3 buffers
             final byte[] msg = new byte[i];
             RND.nextBytes(msg);
@@ -203,8 +183,7 @@ public class AESCryptoTest
     }
 
     @Test
-    public void testDecodeWithNotEnoughSpace() throws Exception
-    {
+    public void testDecodeWithNotEnoughSpace() throws Exception {
         // Create the 3 buffers
         final ByteBuffer msgBuffer = ByteBuffer.wrap("Test Message".getBytes());
         final ByteBuffer encodedMsgBuffer = ByteBuffer.allocate(128);
@@ -214,19 +193,15 @@ public class AESCryptoTest
         encodedMsgBuffer.flip();
 
         // Now decode
-        try
-        {
+        try {
             AES_CRYPTO.decode(encodedMsgBuffer, ByteBuffer.allocate(4));
-        }
-        catch (VegaException e)
-        {
+        } catch (VegaException e) {
             AES_CRYPTO.decode(encodedMsgBuffer, ByteBuffer.allocate(128));
         }
     }
 
     @Test
-    public void testDecodeWrongPadding() throws Exception
-    {
+    public void testDecodeWrongPadding() throws Exception {
         // Create the 3 buffers
         final ByteBuffer msgBuffer = ByteBuffer.wrap("Test Message".getBytes());
         final ByteBuffer encodedMsgBuffer = ByteBuffer.allocate(128);
@@ -235,20 +210,16 @@ public class AESCryptoTest
         AES_CRYPTO.encode(msgBuffer, encodedMsgBuffer);
 
         // Now decode
-        try
-        {
+        try {
             AES_CRYPTO.decode(encodedMsgBuffer, ByteBuffer.allocate(4));
-        }
-        catch (VegaException e)
-        {
+        } catch (VegaException e) {
             encodedMsgBuffer.flip();
             AES_CRYPTO.decode(encodedMsgBuffer, ByteBuffer.allocate(128));
         }
     }
 
     @Test(expected = VegaException.class)
-    public void testDecodeWrongPaddingArray() throws Exception
-    {
+    public void testDecodeWrongPaddingArray() throws Exception {
         // Create the 3 buffers
         final ByteBuffer msgBuffer = ByteBuffer.wrap("Test Message".getBytes());
 
@@ -257,14 +228,12 @@ public class AESCryptoTest
     }
 
     @Test(expected = VegaException.class)
-    public void testAesInvalidKey() throws Exception
-    {
+    public void testAesInvalidKey() throws Exception {
         new AESCrypto(new byte[34]);
     }
 
     @Test
-    public void testExpectedEncryptedSize() throws Exception
-    {
+    public void testExpectedEncryptedSize() throws Exception {
         final ByteBuffer buffer = ByteBuffer.allocate(128);
         buffer.position(32);
         buffer.limit(64);
@@ -273,13 +242,11 @@ public class AESCryptoTest
         Assert.assertEquals(AES_CRYPTO.expectedEncryptedSize(buffer), AES_CRYPTO.expectedEncryptedSize(array));
     }
 
-    private byte[][] createRandomMsgs()
-    {
+    private byte[][] createRandomMsgs() {
         // Create
         final byte[][] messages = new byte[NUM_TESTS][];
 
-        for(int i = 0; i < NUM_TESTS; i++)
-        {
+        for (int i = 0; i < NUM_TESTS; i++) {
             final byte[] currentMessage = new byte[MSG_SIZE];
             RND.nextBytes(currentMessage);
             messages[i] = currentMessage;
@@ -288,27 +255,25 @@ public class AESCryptoTest
         return messages;
     }
 
-    private ByteBuffer[] createEmptyByteBufferArrays(final int size)
-    {
+    private ByteBuffer[] createEmptyByteBufferArrays(final int size) {
         // Create
         final ByteBuffer[] result = new ByteBuffer[NUM_TESTS];
 
-        for(int i = 0; i < NUM_TESTS; i++)
-        {
+        for (int i = 0; i < NUM_TESTS; i++) {
             result[i] = ByteBuffer.allocate(size);
         }
 
         return result;
     }
 
-    /** Create an array of random byte buffer messages */
-    private ByteBuffer[] createRandomByteBufferMsgs()
-    {
+    /**
+     * Create an array of random byte buffer messages
+     */
+    private ByteBuffer[] createRandomByteBufferMsgs() {
         // Create
         final ByteBuffer[] messages = new ByteBuffer[NUM_TESTS];
 
-        for(int i = 0; i < NUM_TESTS; i++)
-        {
+        for (int i = 0; i < NUM_TESTS; i++) {
             final ByteBuffer currentMessage = ByteBuffer.allocate(MSG_SIZE);
             RND.nextBytes(currentMessage.array());
             currentMessage.position(0);
@@ -319,20 +284,20 @@ public class AESCryptoTest
         return messages;
     }
 
-    /** Reset the given array of byte buffer positions to 0 */
-    private void flipByteBufferArray(final ByteBuffer[] array)
-    {
-        for(int i = 0; i < NUM_TESTS; i++)
-        {
+    /**
+     * Reset the given array of byte buffer positions to 0
+     */
+    private void flipByteBufferArray(final ByteBuffer[] array) {
+        for (int i = 0; i < NUM_TESTS; i++) {
             array[i].flip();
         }
     }
 
-    /** Reset the given array of byte buffer positions to 0 */
-    private void resetByteBufferArray(final ByteBuffer[] array)
-    {
-        for(int i = 0; i < NUM_TESTS; i++)
-        {
+    /**
+     * Reset the given array of byte buffer positions to 0
+     */
+    private void resetByteBufferArray(final ByteBuffer[] array) {
+        for (int i = 0; i < NUM_TESTS; i++) {
             array[i].clear();
         }
     }

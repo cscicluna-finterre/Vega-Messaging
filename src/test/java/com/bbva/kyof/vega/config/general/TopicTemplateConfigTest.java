@@ -8,41 +8,35 @@ import org.junit.Test;
 /**
  * Created by cnebrera on 01/08/16.
  */
-public class TopicTemplateConfigTest
-{
+public class TopicTemplateConfigTest {
     @Test
-    public void empyConstructor()
-    {
+    public void empyConstructor() {
         new TopicTemplateConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void validateMissingName() throws Exception
-    {
+    public void validateMissingName() throws Exception {
         // Should fail, it is missing the name
         final TopicTemplateConfig invalidConfig = TopicTemplateConfig.builder().build();
         invalidConfig.completeAndValidateConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void validateMissingRcvPoller() throws Exception
-    {
+    public void validateMissingRcvPoller() throws Exception {
         // Should fail, it is missing the transport type
         final TopicTemplateConfig invalidConfig = TopicTemplateConfig.builder().name("aname").build();
         invalidConfig.completeAndValidateConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void validateMissingTransportType() throws Exception
-    {
+    public void validateMissingTransportType() throws Exception {
         // Should fail, it is missing the transport type
         final TopicTemplateConfig invalidConfig = TopicTemplateConfig.builder().name("aname").rcvPoller("poller").build();
         invalidConfig.completeAndValidateConfig();
     }
 
     @Test
-    public void testUnicastDefaultParams() throws Exception
-    {
+    public void testUnicastDefaultParams() throws Exception {
         final TopicTemplateConfig unicastConfig = TopicTemplateConfig.builder().
                 name("aname").
                 rcvPoller("poller").
@@ -61,8 +55,7 @@ public class TopicTemplateConfigTest
     }
 
     @Test
-    public void testMcastDefaultParams() throws Exception
-    {
+    public void testMcastDefaultParams() throws Exception {
         final TopicTemplateConfig mcastConfig = TopicTemplateConfig.builder().
                 name("aname").
                 rcvPoller("poller").
@@ -83,8 +76,7 @@ public class TopicTemplateConfigTest
     }
 
     @Test
-    public void testAlternativeUnicastHostname() throws VegaException
-    {
+    public void testAlternativeUnicastHostname() throws VegaException {
         TopicTemplateConfig.TopicTemplateConfigBuilder builder = new TopicTemplateConfig.TopicTemplateConfigBuilder();
         //by default...
         TopicTemplateConfig config = builder.name("aname").

@@ -11,11 +11,9 @@ import java.util.UUID;
 /**
  * Test the {@link MsgDataHeader} class
  */
-public class MsgDataHeaderTest
-{
+public class MsgDataHeaderTest {
     @Test
-    public void fromBinaryToBinary()
-    {
+    public void fromBinaryToBinary() {
         // Create the header
         final UUID instanceId = UUID.randomUUID();
         final UUID topicId = UUID.randomUUID();

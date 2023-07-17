@@ -23,27 +23,23 @@ import java.util.UUID;
  * Test for the {@link VegaInstance} class
  * Created by XE48745 on 15/09/2015.
  */
-public class InstanceHeartbeatTest
-{
+public class InstanceHeartbeatTest {
     private static final String STAND_ALONE_CONFIG = ConfigReaderTest.class.getClassLoader().getResource("config/vegaInstanceStandAloneDriverTestConfig.xml").getPath();
 
     private static MediaDriver MEDIA_DRIVER;
 
     @BeforeClass
-    public static void beforeClass()
-    {
+    public static void beforeClass() {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Test
-    public void testHeartbeatInstances() throws Exception
-    {
+    public void testHeartbeatInstances() throws Exception {
         final VegaInstanceParams params1 = VegaInstanceParams.builder().
                 instanceName("Instance1").
                 configurationFile(STAND_ALONE_CONFIG).
@@ -55,25 +51,21 @@ public class InstanceHeartbeatTest
                 unmanagedMediaDriver(MEDIA_DRIVER).build();
 
         // Create 2 application instances, use auto-closeable just in case
-        try(final IVegaInstance subInstance = VegaInstance.createNewInstance(params1);
-            final IVegaInstance pubInstance = VegaInstance.createNewInstance(params2))
-        {
+        try (final IVegaInstance subInstance = VegaInstance.createNewInstance(params1);
+             final IVegaInstance pubInstance = VegaInstance.createNewInstance(params2)) {
             // Wait to for the initialization of the instances
             Thread.sleep(4000);
 
             final ClientListener clientListener = new ClientListener();
 
             // Subscribe to 2 topics of each type
-            subInstance.subscribeToTopic("itopic1", new ITopicSubListener()
-            {
+            subInstance.subscribeToTopic("itopic1", new ITopicSubListener() {
                 @Override
-                public void onMessageReceived(IRcvMessage receivedMessage)
-                {
+                public void onMessageReceived(IRcvMessage receivedMessage) {
                 }
 
                 @Override
-                public void onRequestReceived(IRcvRequest receivedRequest)
-                {
+                public void onRequestReceived(IRcvRequest receivedRequest) {
                 }
             });
 
@@ -96,20 +88,17 @@ public class InstanceHeartbeatTest
         }
     }
 
-    private class ClientListener implements IClientConnectionListener
-    {
+    private class ClientListener implements IClientConnectionListener {
         final Set<UUID> clients = new HashSet<>();
 
         @Override
-        public void onClientConnected(String topicName, UUID clientInstanceId)
-        {
+        public void onClientConnected(String topicName, UUID clientInstanceId) {
             clients.add(clientInstanceId);
             Assert.assertEquals(topicName, "itopic1");
         }
 
         @Override
-        public void onClientDisconnected(String topicName, UUID clientInstanceId)
-        {
+        public void onClientDisconnected(String topicName, UUID clientInstanceId) {
             clients.remove(clientInstanceId);
             Assert.assertEquals(topicName, "itopic1");
         }

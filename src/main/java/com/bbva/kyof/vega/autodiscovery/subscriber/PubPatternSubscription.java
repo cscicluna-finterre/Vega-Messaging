@@ -8,30 +8,37 @@ import java.util.regex.Pattern;
 
 /**
  * Represents a subscription to receive information about topics added and removed from the domain that match the given pattern.
- *
+ * <p>
  * When a pattern subscription is started it will listen to any topic of any transport that match the pattern, both pub and sub.
- *
+ * <p>
  * The subscription will send a a notification on the listener for each topic name added. This means that if there are multiple TopicInfos that
  * match the same topic name, it will only send one event. On the same hand the topic removed event will only be triggered when there are no
  * more TopicInfo adverts active for the topic.
  */
-class PubPatternSubscription
-{
-    /** Pattern matcher that will be reseted and reused for each pattern check */
+class PubPatternSubscription {
+    /**
+     * Pattern matcher that will be reseted and reused for each pattern check
+     */
     private final Matcher matcher;
-    /** The pattern in String format */
+    /**
+     * The pattern in String format
+     */
     private final String pattern;
-    /** Listener for events derived from topics additions of removals that match the pattern */
+    /**
+     * Listener for events derived from topics additions of removals that match the pattern
+     */
     private final IAutodiscPubTopicPatternListener listener;
-    /** Store all the AutoDiscTopicInfo objects representing a topic publishers that match the same topic name */
+    /**
+     * Store all the AutoDiscTopicInfo objects representing a topic publishers that match the same topic name
+     */
     private final HashMapOfHashSet<String, AutoDiscTopicInfo> topicPubInfosByTopicName = new HashMapOfHashSet<>();
 
     /**
      * Create a new pattern subscription for the given pattern and listener for events
+     *
      * @param pattern the pattern for this subscription
      */
-    PubPatternSubscription(final String pattern, final IAutodiscPubTopicPatternListener listener)
-    {
+    PubPatternSubscription(final String pattern, final IAutodiscPubTopicPatternListener listener) {
         this.pattern = pattern;
         this.listener = listener;
 
@@ -41,26 +48,21 @@ class PubPatternSubscription
 
     /**
      * Called when there is a new created advert for a topic publisher or subscriber.
-     *
+     * <p>
      * It will store the info and notify if is a new topic name that was not registered
      *
      * @param topicInfo the information of the topic
      */
-    void onNewAdvert(final AutoDiscTopicInfo topicInfo)
-    {
+    void onNewAdvert(final AutoDiscTopicInfo topicInfo) {
         // Check if the topic matches and if it is subscriber, if not ignore
-        if (!this.match(topicInfo.getTopicName()))
-        {
+        if (!this.match(topicInfo.getTopicName())) {
             return;
         }
 
         // Check if we already have the topic name, on that case add but don't notify the listener
-        if (this.topicPubInfosByTopicName.containsKey(topicInfo.getTopicName()))
-        {
+        if (this.topicPubInfosByTopicName.containsKey(topicInfo.getTopicName())) {
             this.topicPubInfosByTopicName.put(topicInfo.getTopicName(), topicInfo);
-        }
-        else
-        {
+        } else {
             // We don't have the topic name yet, add and notify
             this.topicPubInfosByTopicName.put(topicInfo.getTopicName(), topicInfo);
             this.listener.onNewPubTopicForPattern(topicInfo, this.pattern);
@@ -69,22 +71,19 @@ class PubPatternSubscription
 
     /**
      * Called when a topic publisher or subscriber information times out.
-     *
+     * <p>
      * It will remove the info and notify if there are no more topic infos for the topic name that has been removed.
      *
      * @param timedOutTopicInfo the information of the topic
      */
-    void onAdvertTimedOut(final AutoDiscTopicInfo timedOutTopicInfo)
-    {
+    void onAdvertTimedOut(final AutoDiscTopicInfo timedOutTopicInfo) {
         // Remove the information, if not contained don't do anything.
-        if (!this.topicPubInfosByTopicName.remove(timedOutTopicInfo.getTopicName(), timedOutTopicInfo))
-        {
+        if (!this.topicPubInfosByTopicName.remove(timedOutTopicInfo.getTopicName(), timedOutTopicInfo)) {
             return;
         }
 
         // Check if there are more elements for that topic name, if not, notify
-        if (!this.topicPubInfosByTopicName.containsKey(timedOutTopicInfo.getTopicName()))
-        {
+        if (!this.topicPubInfosByTopicName.containsKey(timedOutTopicInfo.getTopicName())) {
             this.listener.onPubTopicForPatternRemoved(timedOutTopicInfo, this.pattern);
         }
     }
@@ -95,8 +94,7 @@ class PubPatternSubscription
      * @param topicName the name of the topic to match against
      * @return true if they matches
      */
-    public boolean match(final String topicName)
-    {
+    public boolean match(final String topicName) {
         // Reset the matcher
         this.matcher.reset(topicName);
 
@@ -104,21 +102,19 @@ class PubPatternSubscription
         return this.matcher.matches();
     }
 
-    /** Clear the internal information */
-    void clear()
-    {
+    /**
+     * Clear the internal information
+     */
+    void clear() {
         this.topicPubInfosByTopicName.clear();
     }
 
     @Override
-    public boolean equals(final Object target)
-    {
-        if (this == target)
-        {
+    public boolean equals(final Object target) {
+        if (this == target) {
             return true;
         }
-        if (target == null || getClass() != target.getClass())
-        {
+        if (target == null || getClass() != target.getClass()) {
             return false;
         }
 
@@ -128,8 +124,7 @@ class PubPatternSubscription
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return this.pattern.hashCode();
     }
 }

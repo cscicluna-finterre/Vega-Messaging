@@ -5,8 +5,7 @@ import com.bbva.kyof.vega.autodiscovery.model.AutoDiscInstanceInfo;
 /**
  * Listener to receive the events triggered by the auto-discovery mechanism
  */
-public interface IAutodiscInstanceListener
-{
+public interface IAutodiscInstanceListener {
     /**
      * Called when a new autodiscovery instance info is added
      *

@@ -18,8 +18,7 @@ import org.junit.Test;
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class AbstractPublishersManagerTest
-{
+public class AbstractPublishersManagerTest {
     TopicTemplateConfig topicConfigUnicast;
     TopicTemplateConfig topicConfigIpc;
     TopicTemplateConfig topicConfigMulticast;
@@ -28,8 +27,7 @@ public class AbstractPublishersManagerTest
     AutodiscManager autodiscManager;
 
     @Before
-    public void beforeTest()
-    {
+    public void beforeTest() {
         topicConfigUnicast = TopicTemplateConfig.builder().name("name").transportType(TransportMediaType.UNICAST).build();
         topicConfigMulticast = TopicTemplateConfig.builder().name("name2").transportType(TransportMediaType.MULTICAST).build();
         topicConfigIpc = TopicTemplateConfig.builder().name("name3").transportType(TransportMediaType.IPC).build();
@@ -42,17 +40,14 @@ public class AbstractPublishersManagerTest
         final IOwnSecPubTopicsChangesListener secPubTopicsChangesListener = EasyMock.createNiceMock(IOwnSecPubTopicsChangesListener.class);
         EasyMock.replay(secPubTopicsChangesListener);
 
-        publisherManager = new AbstractPublishersManager<AbstractTopicPublisher>(vegaContext, secPubTopicsChangesListener)
-        {
+        publisherManager = new AbstractPublishersManager<AbstractTopicPublisher>(vegaContext, secPubTopicsChangesListener) {
             @Override
-            protected void processCreatedTopicPublisher(AbstractTopicPublisher topicPublisher)
-            {
+            protected void processCreatedTopicPublisher(AbstractTopicPublisher topicPublisher) {
 
             }
 
             @Override
-            protected AbstractTopicPublisher instantiateTopicPublisher(String topicName, TopicTemplateConfig templateCfg)
-            {
+            protected AbstractTopicPublisher instantiateTopicPublisher(String topicName, TopicTemplateConfig templateCfg) {
                 final AbstractTopicPublisher result = EasyMock.createNiceMock(AbstractTopicPublisher.class);
                 EasyMock.expect(result.getTopicConfig()).andAnswer(() -> templateCfg).anyTimes();
                 EasyMock.expect(result.getTopicName()).andAnswer(() -> topicName).anyTimes();
@@ -61,58 +56,49 @@ public class AbstractPublishersManagerTest
             }
 
             @Override
-            protected AbstractTopicPublisher instantiateSecureTopicPublisher(String topicName, TopicTemplateConfig templateCfg, TopicSecurityTemplateConfig securityTemplateConfig) throws VegaException
-            {
+            protected AbstractTopicPublisher instantiateSecureTopicPublisher(String topicName, TopicTemplateConfig templateCfg, TopicSecurityTemplateConfig securityTemplateConfig) throws VegaException {
                 return null;
             }
 
             @Override
-            protected void processTopicPublisherBeforeDestroy(AbstractTopicPublisher topicPublisher)
-            {
+            protected void processTopicPublisherBeforeDestroy(AbstractTopicPublisher topicPublisher) {
 
             }
 
             @Override
-            protected void cleanAfterClose()
-            {
+            protected void cleanAfterClose() {
 
             }
 
             @Override
-            public void onNewAutoDiscTopicInfo(AutoDiscTopicInfo info)
-            {
+            public void onNewAutoDiscTopicInfo(AutoDiscTopicInfo info) {
 
             }
 
             @Override
-            public void onTimedOutAutoDiscTopicInfo(AutoDiscTopicInfo info)
-            {
+            public void onTimedOutAutoDiscTopicInfo(AutoDiscTopicInfo info) {
 
             }
 
             @Override
-            public void onNewAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info)
-            {
+            public void onNewAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info) {
 
             }
 
             @Override
-            public void onTimedOutAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info)
-            {
+            public void onTimedOutAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info) {
 
             }
         };
     }
 
     @After
-    public void afterTest() throws Exception
-    {
+    public void afterTest() throws Exception {
         publisherManager.close();
     }
 
     @Test
-    public void testCreateTopicPublisher() throws Exception
-    {
+    public void testCreateTopicPublisher() throws Exception {
         final AbstractTopicPublisher AbstractTopicPublisher = publisherManager.createTopicPublisher("topic", topicConfigUnicast, null);
 
         Assert.assertEquals(AbstractTopicPublisher.getTopicConfig(), topicConfigUnicast);
@@ -120,8 +106,7 @@ public class AbstractPublishersManagerTest
     }
 
     @Test
-    public void testCreateTopicPublisherMulticast() throws Exception
-    {
+    public void testCreateTopicPublisherMulticast() throws Exception {
         final AbstractTopicPublisher AbstractTopicPublisher = publisherManager.createTopicPublisher("topic", topicConfigMulticast, null);
 
         Assert.assertEquals(AbstractTopicPublisher.getTopicConfig(), topicConfigMulticast);
@@ -129,8 +114,7 @@ public class AbstractPublishersManagerTest
     }
 
     @Test
-    public void testCreateTopicPublisherIpc() throws Exception
-    {
+    public void testCreateTopicPublisherIpc() throws Exception {
         final AbstractTopicPublisher AbstractTopicPublisher = publisherManager.createTopicPublisher("topic", topicConfigIpc, null);
 
         Assert.assertEquals(AbstractTopicPublisher.getTopicConfig(), topicConfigIpc);
@@ -138,15 +122,13 @@ public class AbstractPublishersManagerTest
     }
 
     @Test(expected = VegaException.class)
-    public void testCreateTopicPublisherOnClosed() throws Exception
-    {
+    public void testCreateTopicPublisherOnClosed() throws Exception {
         publisherManager.close();
         final AbstractTopicPublisher AbstractTopicPublisher = publisherManager.createTopicPublisher("topic", topicConfigUnicast, null);
     }
 
     @Test
-    public void testGetTopicPublisher() throws Exception
-    {
+    public void testGetTopicPublisher() throws Exception {
         final AbstractTopicPublisher AbstractTopicPublisher = publisherManager.createTopicPublisher("topic", topicConfigUnicast, null);
 
         Assert.assertTrue(AbstractTopicPublisher == publisherManager.getTopicPublisherForTopicName("topic"));
@@ -154,8 +136,7 @@ public class AbstractPublishersManagerTest
     }
 
     @Test
-    public void testGetTopicPublisherAfterClose() throws Exception
-    {
+    public void testGetTopicPublisherAfterClose() throws Exception {
         final AbstractTopicPublisher AbstractTopicPublisher = publisherManager.createTopicPublisher("topic", topicConfigUnicast, null);
 
         publisherManager.close();
@@ -164,22 +145,19 @@ public class AbstractPublishersManagerTest
     }
 
     @Test(expected = VegaException.class)
-    public void testCreateTopicPublisherTwice() throws Exception
-    {
+    public void testCreateTopicPublisherTwice() throws Exception {
         final AbstractTopicPublisher AbstractTopicPublisher = publisherManager.createTopicPublisher("topic", topicConfigUnicast, null);
         publisherManager.createTopicPublisher("topic", topicConfigUnicast, null);
     }
 
     @Test
-    public void removePublisher() throws Exception
-    {
+    public void removePublisher() throws Exception {
         final AbstractTopicPublisher AbstractTopicPublisher = publisherManager.createTopicPublisher("topic", topicConfigUnicast, null);
         publisherManager.destroyTopicPublisher("topic");
     }
 
     @Test(expected = VegaException.class)
-    public void removePublisherOnClosed() throws Exception
-    {
+    public void removePublisherOnClosed() throws Exception {
         final AbstractTopicPublisher AbstractTopicPublisher = publisherManager.createTopicPublisher("topic", topicConfigUnicast, null);
 
         this.publisherManager.close();
@@ -188,8 +166,7 @@ public class AbstractPublishersManagerTest
     }
 
     @Test(expected = VegaException.class)
-    public void removePublisherTwice() throws Exception
-    {
+    public void removePublisherTwice() throws Exception {
         final AbstractTopicPublisher AbstractTopicPublisher = publisherManager.createTopicPublisher("topic", topicConfigUnicast, null);
         publisherManager.destroyTopicPublisher("topic");
         publisherManager.destroyTopicPublisher("topic");

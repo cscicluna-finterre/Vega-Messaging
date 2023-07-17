@@ -1,6 +1,5 @@
 package com.bbva.kyof.vega.protocol.control;
 
-import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.config.general.GlobalConfiguration;
 import com.bbva.kyof.vega.exception.VegaException;
 import com.bbva.kyof.vega.msg.MsgSecurityErrorResp;
@@ -32,8 +31,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 11/11/2016.
  */
-public class ControlMsgsPollerAndPublisherTest
-{
+public class ControlMsgsPollerAndPublisherTest {
     private final static UUID OWN_INSTANCE_ID = UUID.randomUUID();
     private final static UUID TARGET_INSTANCE_ID = UUID.randomUUID();
     private static MediaDriver MEDIA_DRIVER;
@@ -44,8 +42,7 @@ public class ControlMsgsPollerAndPublisherTest
     private static RSACrypto RSACrypto2;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         final KeyPair keyPair1 = RSAKeysHelper.generateKeyPair();
         final KeyPair keyPair2 = RSAKeysHelper.generateKeyPair();
         final KeyPair keyPair3 = RSAKeysHelper.generateKeyPair();
@@ -86,8 +83,7 @@ public class ControlMsgsPollerAndPublisherTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         CONTROL_PUB.close();
         CONTROL_PUB.close();
 
@@ -101,8 +97,7 @@ public class ControlMsgsPollerAndPublisherTest
     }
 
     @Test
-    public void createPollerAndPoll() throws Exception
-    {
+    public void createPollerAndPoll() throws Exception {
         // Create and start the poller
         final Listener listener = new Listener();
 
@@ -121,8 +116,7 @@ public class ControlMsgsPollerAndPublisherTest
         poller.close();
     }
 
-    private void testSendRequest(Listener listener, UnsafeBufferSerializer sendBufferSerializer) throws VegaException, InterruptedException
-    {
+    private void testSendRequest(Listener listener, UnsafeBufferSerializer sendBufferSerializer) throws VegaException, InterruptedException {
         // Send a request, a response and an error response
         final MsgSecurityReq msgSecurity = new MsgSecurityReq();
         msgSecurity.setInstanceId(OWN_INSTANCE_ID);
@@ -154,8 +148,7 @@ public class ControlMsgsPollerAndPublisherTest
         Assert.assertNotNull(listener.getRcvRequest());
     }
 
-    private void testSendResponse(Listener listener, UnsafeBufferSerializer sendBufferSerializer) throws VegaException, InterruptedException
-    {
+    private void testSendResponse(Listener listener, UnsafeBufferSerializer sendBufferSerializer) throws VegaException, InterruptedException {
         // Send a request, a response and an error response
         final MsgSecurityResp msgSecurity = new MsgSecurityResp();
         msgSecurity.setInstanceId(OWN_INSTANCE_ID);
@@ -188,8 +181,7 @@ public class ControlMsgsPollerAndPublisherTest
         Assert.assertNotNull(listener.getRcvResp());
     }
 
-    private void testSendErrorResponse(Listener listener, UnsafeBufferSerializer sendBufferSerializer) throws VegaException, InterruptedException
-    {
+    private void testSendErrorResponse(Listener listener, UnsafeBufferSerializer sendBufferSerializer) throws VegaException, InterruptedException {
         // Send a request, a response and an error response
         final MsgSecurityErrorResp msgSecurity = new MsgSecurityErrorResp();
         msgSecurity.setInstanceId(OWN_INSTANCE_ID);
@@ -223,27 +215,26 @@ public class ControlMsgsPollerAndPublisherTest
     }
 
 
-    private static class Listener implements ISecurityRequestListener, ISecurityResponseListener
-    {
-        @Getter MsgSecurityReq rcvRequest = null;
-        @Getter MsgSecurityResp rcvResp = null;
-        @Getter MsgSecurityErrorResp rcvErrorResp = null;
+    private static class Listener implements ISecurityRequestListener, ISecurityResponseListener {
+        @Getter
+        MsgSecurityReq rcvRequest = null;
+        @Getter
+        MsgSecurityResp rcvResp = null;
+        @Getter
+        MsgSecurityErrorResp rcvErrorResp = null;
 
         @Override
-        public void onSecurityRequestReceived(MsgSecurityReq securityReq)
-        {
+        public void onSecurityRequestReceived(MsgSecurityReq securityReq) {
             this.rcvRequest = securityReq;
         }
 
         @Override
-        public void onSecuirtyResponseReceived(MsgSecurityResp responseMsg)
-        {
+        public void onSecuirtyResponseReceived(MsgSecurityResp responseMsg) {
             this.rcvResp = responseMsg;
         }
 
         @Override
-        public void onSecurityErrorResponseReceived(MsgSecurityErrorResp errorResponseMsg)
-        {
+        public void onSecurityErrorResponseReceived(MsgSecurityErrorResp errorResponseMsg) {
             this.rcvErrorResp = errorResponseMsg;
         }
     }

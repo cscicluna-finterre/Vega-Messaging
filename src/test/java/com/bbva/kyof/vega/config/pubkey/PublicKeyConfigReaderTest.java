@@ -12,8 +12,7 @@ import java.lang.reflect.Constructor;
 /**
  * Created by cnebrera on 10/10/2016.
  */
-public class PublicKeyConfigReaderTest
-{
+public class PublicKeyConfigReaderTest {
     private static final String KEYS_PATH = PrivateKeyConfigReaderTest.class.getClassLoader().getResource("keys").getPath();
     private static final String DEST_DIR = "publicKeyKeyGentest";
 
@@ -22,15 +21,13 @@ public class PublicKeyConfigReaderTest
     private String destPath;
 
     @Before
-    public void before()
-    {
+    public void before() {
         // We want to create a new directory at the same level if it doesn't exists
         this.destPath = new File(KEYS_PATH).getParentFile().getAbsolutePath() + File.separator + DEST_DIR;
 
         // Create the directory if it doesn't exists
         final File destPathFile = new File(destPath);
-        if (!destPathFile.exists())
-        {
+        if (!destPathFile.exists()) {
             destPathFile.mkdirs();
         }
 
@@ -39,23 +36,20 @@ public class PublicKeyConfigReaderTest
 
         final File pubKeyFile = new File(writeKeyFile);
 
-        if (pubKeyFile.exists())
-        {
+        if (pubKeyFile.exists()) {
             pubKeyFile.delete();
         }
     }
 
     @Test
-    public void testConstructor() throws Exception
-    {
+    public void testConstructor() throws Exception {
         Constructor<?>[] cons = PublicKeyConfigReader.class.getDeclaredConstructors();
         cons[0].setAccessible(true);
         cons[0].newInstance((Object[]) null);
     }
 
     @Test
-    public void readConfiguration() throws Exception
-    {
+    public void readConfiguration() throws Exception {
         final PublicKeyConfig readedConfig1 = PublicKeyConfigReader.readConfiguration(KEYS_PATH, 11111);
         final PublicKeyConfig readedConfig2 = PublicKeyConfigReader.readConfiguration(KEYS_PATH, 22222);
 
@@ -67,20 +61,17 @@ public class PublicKeyConfigReaderTest
     }
 
     @Test(expected = VegaException.class)
-    public void readConfigurationNonExistingId() throws Exception
-    {
+    public void readConfigurationNonExistingId() throws Exception {
         PublicKeyConfigReader.readConfiguration(KEYS_PATH, 12111);
     }
 
     @Test(expected = VegaException.class)
-    public void readConfigurationWrongInternalIdInFile() throws Exception
-    {
+    public void readConfigurationWrongInternalIdInFile() throws Exception {
         PublicKeyConfigReader.readConfiguration(KEYS_PATH, 55555);
     }
 
     @Test
-    public void readMarshall() throws Exception
-    {
+    public void readMarshall() throws Exception {
         final PublicKeyConfig readedConfig1 = PublicKeyConfigReader.readConfiguration(KEYS_PATH, APP_SECURITY_ID);
 
         PublicKeyConfigReader.marshallPubKey(readedConfig1, destPath);

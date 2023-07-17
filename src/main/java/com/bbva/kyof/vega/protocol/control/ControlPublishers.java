@@ -23,8 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Only the public access to the response publishers by id is thread safe in this class!
  */
 @Slf4j
-class ControlPublishers implements Closeable
-{
+class ControlPublishers implements Closeable {
     /**
      * Store all the aeron control publishers by the params used to create them
      */
@@ -50,14 +49,12 @@ class ControlPublishers implements Closeable
      *
      * @param vegaContext the vega context of the instance
      */
-    ControlPublishers(final VegaContext vegaContext)
-    {
+    ControlPublishers(final VegaContext vegaContext) {
         this.vegaContext = vegaContext;
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         // Destroy all control publishers
         this.controlPublisherByInstanceId.values().forEach(ControlPublisher::close);
 
@@ -75,8 +72,7 @@ class ControlPublishers implements Closeable
      * @param instanceId the library unique instance id
      * @return the associated publisher, null if none
      */
-    ControlPublisher getControlPublisherForInstance(final UUID instanceId)
-    {
+    ControlPublisher getControlPublisherForInstance(final UUID instanceId) {
         return this.controlPublisherByInstanceId.get(instanceId);
     }
 
@@ -87,11 +83,9 @@ class ControlPublishers implements Closeable
      *
      * @param info the information event
      */
-    void onNewAutoDiscInstanceInfo(final AutoDiscInstanceInfo info)
-    {
+    void onNewAutoDiscInstanceInfo(final AutoDiscInstanceInfo info) {
         // If there is already a control publisher for the instance, ignore, it may happen if there are duplicated events
-        if (this.controlPublisherByInstanceId.containsKey(info.getUniqueId()))
-        {
+        if (this.controlPublisherByInstanceId.containsKey(info.getUniqueId())) {
             return;
         }
 
@@ -101,14 +95,11 @@ class ControlPublishers implements Closeable
 
         // Check if there is already a control publisher with that parameters
         ControlPublisher controlPublisher = this.controlPublishersByParams.get(params);
-        if (controlPublisher == null)
-        {
+        if (controlPublisher == null) {
             log.info("Creating new control publisher for new encountered instance {}", info);
             controlPublisher = new ControlPublisher(this.vegaContext, params);
             this.controlPublishersByParams.put(params, controlPublisher);
-        }
-        else
-        {
+        } else {
             log.info("Reusing existing control publisher for new instance {}", info);
         }
 
@@ -125,14 +116,12 @@ class ControlPublishers implements Closeable
      *
      * @param info the information event
      */
-    void onTimedOutAutoDiscInstanceInfo(final AutoDiscInstanceInfo info)
-    {
+    void onTimedOutAutoDiscInstanceInfo(final AutoDiscInstanceInfo info) {
         // Find the control publisher for the instance
         final ControlPublisher controlPublisher = this.controlPublisherByInstanceId.remove(info.getUniqueId());
 
         // It may not be there if is a duplicated event or was called after closed
-        if (controlPublisher == null)
-        {
+        if (controlPublisher == null) {
             return;
         }
 
@@ -140,12 +129,9 @@ class ControlPublishers implements Closeable
         this.instanceIdsPerControlPub.remove(controlPublisher, info.getUniqueId());
 
         // If the response publisher has no more instances related we should close it
-        if (this.instanceIdsPerControlPub.containsKey(controlPublisher))
-        {
+        if (this.instanceIdsPerControlPub.containsKey(controlPublisher)) {
             log.info("Control publisher still has related instances, won't be closed {}", info);
-        }
-        else
-        {
+        } else {
             log.info("Closing control publisher due to time out instance {}", info);
 
             controlPublisher.close();
@@ -161,15 +147,13 @@ class ControlPublishers implements Closeable
      * @param info AutoDiscInstanceInfo of counterpart
      * @return a well formed ControlPublisherParams
      */
-    private ControlPublisherParams createControlPublisherParamsByAutoDiscInfo(final AutoDiscInstanceInfo info)
-    {
+    private ControlPublisherParams createControlPublisherParamsByAutoDiscInfo(final AutoDiscInstanceInfo info) {
 
         //check the ip to use, by default informed ip
         final ControlRcvConfig myControlRcvConfig = vegaContext.getInstanceConfig().getControlRcvConfig();
 
         int addressIp = info.getResponseTransportIp();
-        if(myControlRcvConfig.getIsResolveHostname() && !myControlRcvConfig.getHostname().equals(info.getControlRcvHostname()))
-        {
+        if (myControlRcvConfig.getIsResolveHostname() && !myControlRcvConfig.getHostname().equals(info.getControlRcvHostname())) {
             addressIp = InetUtil.getIpAddressAsIntByHostnameOrDefault(info.getControlRcvHostname(), info.getControlRcvTransportIp());
             log.trace("ControlPublisher address ip obtained by hostname: [{}] from [{}]", addressIp, info);
         }

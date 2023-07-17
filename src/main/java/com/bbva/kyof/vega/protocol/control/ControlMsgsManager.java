@@ -15,30 +15,45 @@ import java.io.Closeable;
  * the control messages.
  */
 @Slf4j
-public class ControlMsgsManager implements Closeable, IAutodiscInstanceListener
-{
-    /** Vega library isntance context */
+public class ControlMsgsManager implements Closeable, IAutodiscInstanceListener {
+    /**
+     * Vega library isntance context
+     */
     private final VegaContext vegaContext;
 
-    /** Manager for control publishers */
+    /**
+     * Manager for control publishers
+     */
     private final ControlPublishers controlPublishers;
 
-    /** Socket wrapper that can receive control messages */
+    /**
+     * Socket wrapper that can receive control messages
+     */
     private final ControlSubscriber controlSubscriber;
 
-    /** Receive poller for control messages */
+    /**
+     * Receive poller for control messages
+     */
     private final ControlMsgsPoller rcvPoller;
 
-    /** Handler for security requests */
+    /**
+     * Handler for security requests
+     */
     private final SecurityRequestsRcvHandler securityRequestsRcvHandler;
 
-    /** Requester to perform security requests, process the responses and store the security information */
+    /**
+     * Requester to perform security requests, process the responses and store the security information
+     */
     private final SecurityRequester securityRequester;
 
-    /** Lock for the class */
+    /**
+     * Lock for the class
+     */
     private final Object lock = new Object();
 
-    /** True if it has been closed */
+    /**
+     * True if it has been closed
+     */
     private boolean isClosed = false;
 
 
@@ -47,8 +62,7 @@ public class ControlMsgsManager implements Closeable, IAutodiscInstanceListener
      *
      * @param vegaContext the context of the instance
      */
-    public ControlMsgsManager(final VegaContext vegaContext)
-    {
+    public ControlMsgsManager(final VegaContext vegaContext) {
         this.vegaContext = vegaContext;
 
         this.controlPublishers = new ControlPublishers(this.vegaContext);
@@ -71,10 +85,8 @@ public class ControlMsgsManager implements Closeable, IAutodiscInstanceListener
     }
 
     @Override
-    public void close()
-    {
-        synchronized (this.lock)
-        {
+    public void close() {
+        synchronized (this.lock) {
             // Unsubscribe from instances information
             this.vegaContext.getAutodiscoveryManager().unsubscribeFromInstances(this);
 
@@ -97,14 +109,11 @@ public class ControlMsgsManager implements Closeable, IAutodiscInstanceListener
     }
 
     @Override
-    public void onNewAutoDiscInstanceInfo(final AutoDiscInstanceInfo info)
-    {
+    public void onNewAutoDiscInstanceInfo(final AutoDiscInstanceInfo info) {
         log.debug("New autodisc inscance info event received {}", info);
 
-        synchronized (this.lock)
-        {
-            if (this.isClosed)
-            {
+        synchronized (this.lock) {
+            if (this.isClosed) {
                 return;
             }
 
@@ -113,14 +122,11 @@ public class ControlMsgsManager implements Closeable, IAutodiscInstanceListener
     }
 
     @Override
-    public void onTimedOutAutoDiscInstanceInfo(final AutoDiscInstanceInfo info)
-    {
+    public void onTimedOutAutoDiscInstanceInfo(final AutoDiscInstanceInfo info) {
         log.debug("New timed out autodisc instance info event received {}", info);
 
-        synchronized (this.lock)
-        {
-            if (this.isClosed)
-            {
+        synchronized (this.lock) {
+            if (this.isClosed) {
                 return;
             }
 
@@ -130,10 +136,10 @@ public class ControlMsgsManager implements Closeable, IAutodiscInstanceListener
 
     /**
      * Create the aeron control subscriber that will listen for control messages
+     *
      * @return the created subscriber
      */
-    private ControlSubscriber createControlSubscriber()
-    {
+    private ControlSubscriber createControlSubscriber() {
         // Create a hash for the instance id. We will use it to select a random port and stream
         final int instanceIdHash = this.vegaContext.getInstanceUniqueId().hashCode();
 
@@ -158,37 +164,37 @@ public class ControlMsgsManager implements Closeable, IAutodiscInstanceListener
 
     /**
      * Return the parameters used to create the control messages subsriber
+     *
      * @return the parameters used to create the control messages subsriber
      */
-    public ControlSubscriberParams getControlMsgsSubscriberParams()
-    {
+    public ControlSubscriberParams getControlMsgsSubscriberParams() {
         return this.controlSubscriber.getParams();
     }
 
     /**
      * Return the own notifier for secure changes on owned secure topic publishers
+     *
      * @return the own notifier for secure changes on owned secure topic publishers
      */
-    public IOwnSecPubTopicsChangesListener getOwnPubSecureChangesNotifier()
-    {
+    public IOwnSecPubTopicsChangesListener getOwnPubSecureChangesNotifier() {
         return this.securityRequestsRcvHandler;
     }
 
     /**
      * Return the the decoder for security messages
+     *
      * @return the the decoder for security messages
      */
-    public ISecuredMsgsDecoder getSecureMessagesDecoder()
-    {
+    public ISecuredMsgsDecoder getSecureMessagesDecoder() {
         return this.securityRequester;
     }
 
     /**
      * Return the the request notifier to obtain the security information of publisher topics
+     *
      * @return the the request notifier to obtain the security information of publisher topics
      */
-    public ISecurityRequesterNotifier getRecurityRequestsNotifier()
-    {
-         return this.securityRequester;
+    public ISecurityRequesterNotifier getRecurityRequestsNotifier() {
+        return this.securityRequester;
     }
 }

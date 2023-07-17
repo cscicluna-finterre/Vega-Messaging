@@ -4,39 +4,42 @@ import com.bbva.kyof.vega.autodiscovery.model.AutoDiscDaemonServerInfo;
 
 /**
  * Interface to implement the functionality High Availability to Unicast Discovery mechanism
- *
+ * <p>
  * For this purpose, the client will manage all the publications to all the Unicast Daemon Servers,
  * and will monitoring their status
- *
  */
-public interface IPublicationsManager
-{
+public interface IPublicationsManager {
     /**
      * Getter for PublicationsInfoArray (array with all the publications)
+     *
      * @return Array with all the PublicationsInfo
      */
     PublicationInfo[] getPublicationsInfoArray();
 
     /**
      * Method than returns a ramdom Publication for implementing Load Balance functionality
+     *
      * @return an aleatory PublicationInfo
      */
     PublicationInfo getRandomPublicationInfo();
 
     /**
      * Method to disable a publication
+     *
      * @param autoDiscDaemonServerInfo Message with the unicast daemon information to disable it
      */
     void disablePublication(AutoDiscDaemonServerInfo autoDiscDaemonServerInfo);
 
     /**
      * Method to enable a publication
+     *
      * @param autoDiscDaemonServerInfo Message with the unicast daemon information to enable it
      */
     void enablePublication(AutoDiscDaemonServerInfo autoDiscDaemonServerInfo);
 
     /**
      * Method to test if there is an enabled publication of an Unicast Discovery Daemon Server
+     *
      * @return true if it exists any enabled publication
      */
     boolean hasEnabledPublications();

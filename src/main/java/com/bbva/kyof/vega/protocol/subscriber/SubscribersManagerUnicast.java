@@ -19,41 +19,49 @@ import java.util.UUID;
 
 /**
  * Receive manager to handle unicast subscriptions. It will handle all the sockets and relations between topic subscribers.
- *
+ * <p>
  * This class is thread safe!
  */
 @Slf4j
-final class SubscribersManagerUnicast extends AbstractSubscribersManager
-{
-    /** Stores all the subscribers in the pool, given the parameters used to create them */
+final class SubscribersManagerUnicast extends AbstractSubscribersManager {
+    /**
+     * Stores all the subscribers in the pool, given the parameters used to create them
+     */
     private final Map<AeronSubscriberParams, AeronSubscriber> subscribersByParams = new HashMap<>();
 
-    /** Stores all the registered auto-discovery topic socket infos for unregisterInstanceInfo lookup
-     *  Since there is only one aeron subscriber per topic subscriber we can use the topic subscriber as key */
+    /**
+     * Stores all the registered auto-discovery topic socket infos for unregisterInstanceInfo lookup
+     * Since there is only one aeron subscriber per topic subscriber we can use the topic subscriber as key
+     */
     private final Map<UUID, AutoDiscTopicSocketInfo> registeredTopicSocketInfosByTopicId = new HashMap<>();
 
-    /** Aeron subscriber by topic subscriber, in unicast each topic subscriber has a single aeron subscriber */
+    /**
+     * Aeron subscriber by topic subscriber, in unicast each topic subscriber has a single aeron subscriber
+     */
     private final Map<TopicSubscriber, AeronSubscriber> aeronSubByTopicSub = new HashMap<>();
 
-    /** Store all the topic subscribers related to the same aeron subscriber */
+    /**
+     * Store all the topic subscribers related to the same aeron subscriber
+     */
     private final HashMapOfHashSet<AeronSubscriber, TopicSubscriber> topicSubscribersByAeronSub = new HashMapOfHashSet<>();
 
-    /** Socket wrapper that can receive responses from sent requests */
+    /**
+     * Socket wrapper that can receive responses from sent requests
+     */
     private final AeronSubscriber responsesSubscriber;
 
     /**
      * Constructor
      *
-     * @param vegaContext the context of the manager instance
-     * @param pollersManager manager that handle the pollers
+     * @param vegaContext                    the context of the manager instance
+     * @param pollersManager                 manager that handle the pollers
      * @param topicSubAndTopicPubIdRelations relationships between topic subscribers and topic publishers
-     * @param subSecurityNotifier notifier for security changes
+     * @param subSecurityNotifier            notifier for security changes
      */
     SubscribersManagerUnicast(final VegaContext vegaContext,
                               final SubscribersPollersManager pollersManager,
                               final TopicSubAndTopicPubIdRelations topicSubAndTopicPubIdRelations,
-                              final ISecurityRequesterNotifier subSecurityNotifier)
-    {
+                              final ISecurityRequesterNotifier subSecurityNotifier) {
         super(vegaContext, pollersManager, topicSubAndTopicPubIdRelations, subSecurityNotifier);
 
         // Create the receiver for unicast responses
@@ -61,8 +69,7 @@ final class SubscribersManagerUnicast extends AbstractSubscribersManager
     }
 
     @Override
-    protected void processCreatedTopicSubscriber(final TopicSubscriber topicSubscriber)
-    {
+    protected void processCreatedTopicSubscriber(final TopicSubscriber topicSubscriber) {
         // Call the parent
         super.processCreatedTopicSubscriber(topicSubscriber);
 
@@ -73,8 +80,7 @@ final class SubscribersManagerUnicast extends AbstractSubscribersManager
         AeronSubscriber aeronSubscriber = this.subscribersByParams.get(aeronSubscriberParams);
 
         // If it doesn't exists already, create a new one
-        if (aeronSubscriber == null)
-        {
+        if (aeronSubscriber == null) {
             aeronSubscriber = new AeronSubscriber(this.getVegaContext(), aeronSubscriberParams);
             this.subscribersByParams.put(aeronSubscriberParams, aeronSubscriber);
 
@@ -93,8 +99,7 @@ final class SubscribersManagerUnicast extends AbstractSubscribersManager
     }
 
     @Override
-    protected void processTopicSubscriberBeforeDestroy(final TopicSubscriber topicSubscriber)
-    {
+    protected void processTopicSubscriberBeforeDestroy(final TopicSubscriber topicSubscriber) {
         // The topic subscriber is going to be deleted, remove the aeron subscriber relation and get the aeron subscriber
         final AeronSubscriber aeronSubscriber = aeronSubByTopicSub.remove(topicSubscriber);
 
@@ -102,8 +107,7 @@ final class SubscribersManagerUnicast extends AbstractSubscribersManager
         this.topicSubscribersByAeronSub.remove(aeronSubscriber, topicSubscriber);
 
         // If there are no more topic subscribers related, we should remove the aeron sub as well
-        if (!this.topicSubscribersByAeronSub.containsKey(aeronSubscriber))
-        {
+        if (!this.topicSubscribersByAeronSub.containsKey(aeronSubscriber)) {
             // Remove from the poller
             this.getPollersManager().getPoller(topicSubscriber.getTopicConfig().getRcvPoller()).removeSubscription(aeronSubscriber);
 
@@ -117,8 +121,7 @@ final class SubscribersManagerUnicast extends AbstractSubscribersManager
     }
 
     @Override
-    public void cleanAfterClose()
-    {
+    public void cleanAfterClose() {
         // Destroy the subscriber to receive responses
         this.destroyResponsesSubscriber();
 
@@ -132,11 +135,11 @@ final class SubscribersManagerUnicast extends AbstractSubscribersManager
 
     /**
      * Given the topic subscriber it creates the aeron subscriber parameters that correspond to the topic subscriber
+     *
      * @param topicSubscriber topic subscriber to create the parameters from
      * @return the created parameters for the subscriber
      */
-    private AeronSubscriberParams createAeronSubscriberParams(final TopicSubscriber topicSubscriber)
-    {
+    private AeronSubscriberParams createAeronSubscriberParams(final TopicSubscriber topicSubscriber) {
         // Get the name of the topic
         final String topicName = topicSubscriber.getTopicName();
 
@@ -158,11 +161,11 @@ final class SubscribersManagerUnicast extends AbstractSubscribersManager
 
     /**
      * Register the information of the pair topic / socket created in auto-discovery
-     * @param topicSubscriber the topic subscriber that represent the topic
+     *
+     * @param topicSubscriber       the topic subscriber that represent the topic
      * @param aeronSubscriberParams the parameters of the AeronSubscriber that represent the socket
      */
-    private void registerTopicSocketInfoInAutodiscovery(final TopicSubscriber topicSubscriber, final AeronSubscriberParams aeronSubscriberParams)
-    {
+    private void registerTopicSocketInfoInAutodiscovery(final TopicSubscriber topicSubscriber, final AeronSubscriberParams aeronSubscriberParams) {
         final AutoDiscTopicSocketInfo autoDiscTopicSocketInfo = new AutoDiscTopicSocketInfo(
                 this.getVegaContext().getInstanceUniqueId(),
                 AutoDiscTransportType.SUB_UNI,
@@ -182,25 +185,24 @@ final class SubscribersManagerUnicast extends AbstractSubscribersManager
 
     /**
      * Unregister the information of the pair topic / socket created from auto-discovery
+     *
      * @param topicSubscriber the topic subscriber that represent the topic
      */
-    private void unRegisterTopicSocketInfoFromAutodiscovery(final TopicSubscriber topicSubscriber)
-    {
+    private void unRegisterTopicSocketInfoFromAutodiscovery(final TopicSubscriber topicSubscriber) {
         // Find the registered info, since there is only 1 per topic we can use the topic as the key
         final AutoDiscTopicSocketInfo autoDiscTopicSocketInfo = this.registeredTopicSocketInfosByTopicId.remove(topicSubscriber.getUniqueId());
 
-        if (autoDiscTopicSocketInfo != null)
-        {
+        if (autoDiscTopicSocketInfo != null) {
             this.getVegaContext().getAutodiscoveryManager().unregisterTopicSocketInfo(autoDiscTopicSocketInfo);
         }
     }
 
     /**
      * Create the aeron subscriber that will listen for responses to sent requests
+     *
      * @return the created subscriber
      */
-    private AeronSubscriber createResponsesSubscriber()
-    {
+    private AeronSubscriber createResponsesSubscriber() {
         // Create a hash for the instance id. We will use it to select a random port and stream
         final int instanceIdHash = getVegaContext().getInstanceUniqueId().hashCode();
 
@@ -233,8 +235,7 @@ final class SubscribersManagerUnicast extends AbstractSubscribersManager
     /**
      * Destroy the subscriber that handle responses to sent requests
      */
-    private void destroyResponsesSubscriber()
-    {
+    private void destroyResponsesSubscriber() {
         // Remove subscription from the poller
         this.getPollersManager().getPoller(this.getVegaContext().getInstanceConfig().getResponsesConfig().getRcvPoller()).removeSubscription(this.responsesSubscriber);
 
@@ -245,20 +246,17 @@ final class SubscribersManagerUnicast extends AbstractSubscribersManager
     /**
      * Return the parameters used to create the responses subsriber
      */
-    AeronSubscriberParams getResponsesSubscriberParams()
-    {
+    AeronSubscriberParams getResponsesSubscriberParams() {
         return this.responsesSubscriber.getParams();
     }
 
     @Override
-    public void onNewAutoDiscTopicSocketInfo(final AutoDiscTopicSocketInfo info)
-    {
+    public void onNewAutoDiscTopicSocketInfo(final AutoDiscTopicSocketInfo info) {
         log.debug("New topic socket info event received from auto-discovery {}", info);
     }
 
     @Override
-    public void onTimedOutAutoDiscTopicSocketInfo(final AutoDiscTopicSocketInfo info)
-    {
+    public void onTimedOutAutoDiscTopicSocketInfo(final AutoDiscTopicSocketInfo info) {
         log.debug("Topic socket info event timed out in auto-discovery {}", info);
     }
 }

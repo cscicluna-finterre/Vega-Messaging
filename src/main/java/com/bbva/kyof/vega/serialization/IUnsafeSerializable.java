@@ -3,8 +3,7 @@ package com.bbva.kyof.vega.serialization;
 /**
  * Interface to implement in order to allow being serialized and deserialized using {@link UnsafeBufferSerializer}
  */
-public interface IUnsafeSerializable
-{
+public interface IUnsafeSerializable {
     /**
      * Fill internal fields from the binary representation contained in the buffer
      *
@@ -21,6 +20,7 @@ public interface IUnsafeSerializable
 
     /**
      * Return the size the object would have if serialized
+     *
      * @return the serialized size of the object
      */
     int serializedSize();

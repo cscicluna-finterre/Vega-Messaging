@@ -8,36 +8,53 @@ import org.apache.commons.cli.*;
  * Parser for the command line arguments of the Daemon
  */
 @Slf4j
-class CommandLineParser
-{
-    /** Port option for the unicast connection */
-    private final Option commPortOption    = new Option("p", "port", true, "(Optional) Communications port. Default Value: " + DaemonParameters.DEFAULT_PORT);
-    /** Subnet option for the unicast connection */
-    private final Option subnetOption 	   = new Option("sn", "subnet", true, "(Optional) Subnet with format Ip/Mask. Ej: 192.168.1.0/24. By default will use the first IP4 interface");
-    /** External driver directory path */
-    private final Option externalDriverDir 	   = new Option("exdd", "driverDirectory", true, "(Optional) External driver directory path, use only if no embedded driver is used and driver is not using the default directory");
-    /** True to use an embedded aeron driver */
-    private final Option embeddedDriverOption  = new Option("ed", "embeddedDriver", false, "(Optional) Set to true to use an embedded driver");
-    /** External driver directory path */
-    private final Option embeddedDriverConfigFileOption  = new Option("edcf", "embeddedDriverConfigFile", true, "(Optional) Embedded driver configuration file");
-    /** Timeout for client adverts before considering them disconnected */
-    private final Option clientTimeoutOption  = new Option("ct", "clientTimeout", true, "(Optional) Client timeout in milliseconds. Default value: " + DaemonParameters.DEFAULT_CLIENT_TIMEOUT);
-    /** (Optional) alternative Hostname to be used for daemon to calculate alternatives ip (for virtual environment as containers) */
-    private final Option hostnameOption  = new Option("hn", "hostname", true, "(Optional) Hostname to set for daemon ");
+class CommandLineParser {
+    /**
+     * Port option for the unicast connection
+     */
+    private final Option commPortOption = new Option("p", "port", true, "(Optional) Communications port. Default Value: " + DaemonParameters.DEFAULT_PORT);
+    /**
+     * Subnet option for the unicast connection
+     */
+    private final Option subnetOption = new Option("sn", "subnet", true, "(Optional) Subnet with format Ip/Mask. Ej: 192.168.1.0/24. By default will use the first IP4 interface");
+    /**
+     * External driver directory path
+     */
+    private final Option externalDriverDir = new Option("exdd", "driverDirectory", true, "(Optional) External driver directory path, use only if no embedded driver is used and driver is not using the default directory");
+    /**
+     * True to use an embedded aeron driver
+     */
+    private final Option embeddedDriverOption = new Option("ed", "embeddedDriver", false, "(Optional) Set to true to use an embedded driver");
+    /**
+     * External driver directory path
+     */
+    private final Option embeddedDriverConfigFileOption = new Option("edcf", "embeddedDriverConfigFile", true, "(Optional) Embedded driver configuration file");
+    /**
+     * Timeout for client adverts before considering them disconnected
+     */
+    private final Option clientTimeoutOption = new Option("ct", "clientTimeout", true, "(Optional) Client timeout in milliseconds. Default value: " + DaemonParameters.DEFAULT_CLIENT_TIMEOUT);
+    /**
+     * (Optional) alternative Hostname to be used for daemon to calculate alternatives ip (for virtual environment as containers)
+     */
+    private final Option hostnameOption = new Option("hn", "hostname", true, "(Optional) Hostname to set for daemon ");
 
-    /** (Optional) use Hostname to resolve IP publication channels (for virtual environment as containers) */
-    private final Option isResolveHostname  = new Option("rhn", "resolveHostname", false, "(Optional) flag to Resolve IPs by hostname ");
+    /**
+     * (Optional) use Hostname to resolve IP publication channels (for virtual environment as containers)
+     */
+    private final Option isResolveHostname = new Option("rhn", "resolveHostname", false, "(Optional) flag to Resolve IPs by hostname ");
 
 
-    /** The command line with all the values parsed */
+    /**
+     * The command line with all the values parsed
+     */
     private CommandLine commandLine = null;
 
     /**
      * Add the common command line options to the options list, it will be used to parse the command line later
+     *
      * @param options options object to add the common options to
      */
-    private void addCommonCommandLineOptions(final Options options)
-    {
+    private void addCommonCommandLineOptions(final Options options) {
         options.addOption(this.commPortOption);
         options.addOption(this.subnetOption);
         options.addOption(this.clientTimeoutOption);
@@ -50,13 +67,12 @@ class CommandLineParser
 
     /**
      * Add the command line options including the specific parser ones, parse the command line and validate the found options
-     * @param args command line arguments
      *
+     * @param args command line arguments
      * @throws AutodiscException exception thrown if there is a problem reading or validating the command line
      */
-    DaemonParameters parseCommandLine(final String[] args) throws AutodiscException
-    {
-        log.info("Parsing command line arguments: {}", (Object)args);
+    DaemonParameters parseCommandLine(final String[] args) throws AutodiscException {
+        log.info("Parsing command line arguments: {}", (Object) args);
 
         // Create the options
         final Options commandLineOptions = new Options();
@@ -66,12 +82,9 @@ class CommandLineParser
 
         // Parse the command line
         final org.apache.commons.cli.CommandLineParser commandLineParser = new PosixParser();
-        try
-        {
+        try {
             this.commandLine = commandLineParser.parse(commandLineOptions, args);
-        }
-        catch (final ParseException e)
-        {
+        } catch (final ParseException e) {
             log.error("Error parsing command line arguments", e);
             throw new AutodiscException(e);
         }
@@ -85,8 +98,7 @@ class CommandLineParser
      *
      * @throws AutodiscException exception thrown if the validation is not correct
      */
-    private DaemonParameters parseAndValidateCommandLine() throws AutodiscException
-    {
+    private DaemonParameters parseAndValidateCommandLine() throws AutodiscException {
         final String subnetAddress = this.getCmdStringOption(this.subnetOption);
         final String externalDriverDirString = this.getCmdStringOption(this.externalDriverDir);
         final Integer port = this.getCmdIntegerOption(this.commPortOption);
@@ -98,12 +110,9 @@ class CommandLineParser
 
         DaemonParameters.AeronDriverType aeronDriverType;
 
-        if (useEmbeddedDriver)
-        {
+        if (useEmbeddedDriver) {
             aeronDriverType = DaemonParameters.AeronDriverType.EMBEDDED;
-        }
-        else
-        {
+        } else {
             aeronDriverType = DaemonParameters.AeronDriverType.EXTERNAL;
         }
 
@@ -125,11 +134,11 @@ class CommandLineParser
 
     /**
      * Return true if the given option is pressent in the command line
+     *
      * @param option the option to check
      * @return true if the option is present
      */
-    private boolean hasOption(final Option option)
-    {
+    private boolean hasOption(final Option option) {
         return commandLine.hasOption(option.getOpt());
     }
 
@@ -139,10 +148,8 @@ class CommandLineParser
      * @param option the representing option of the command line
      * @return the value of the option, exception if unsettled
      */
-    private String getCmdStringOption(final Option option)
-    {
-        if(commandLine.hasOption(option.getOpt()))
-        {
+    private String getCmdStringOption(final Option option) {
+        if (commandLine.hasOption(option.getOpt())) {
             return commandLine.getOptionValue(option.getOpt()).trim();
         }
 
@@ -155,10 +162,8 @@ class CommandLineParser
      * @param option the representing option of the command line
      * @return the value of the option, exception if unsettled
      */
-    private Integer getCmdIntegerOption(final Option option)
-    {
-        if(commandLine.hasOption(option.getOpt()))
-        {
+    private Integer getCmdIntegerOption(final Option option) {
+        if (commandLine.hasOption(option.getOpt())) {
             return Integer.parseInt(commandLine.getOptionValue(option.getOpt()).trim());
         }
 
@@ -171,10 +176,8 @@ class CommandLineParser
      * @param option the representing option of the command line
      * @return the value of the option, exception if unsettled
      */
-    private Long getCmdLongOption(final Option option)
-    {
-        if(commandLine.hasOption(option.getOpt()))
-        {
+    private Long getCmdLongOption(final Option option) {
+        if (commandLine.hasOption(option.getOpt())) {
             return Long.parseLong(commandLine.getOptionValue(option.getOpt()).trim());
         }
 

@@ -11,34 +11,43 @@ import java.util.UUID;
 
 /**
  * Unicast Daemon that acts as a central point for auto-discovery communication routing.<p>
- *
+ * <p>
  * The Daemon will create an unicast reception socket to receive messages from the clients.<p>
- *
+ * <p>
  * The client messages contains the socket where the client want's to receive the adverts from the
  * daemon. For each client the Daemon will create a socket to connect directly to the client.<p>
- *
+ * <p>
  * The threading model follows a single thread pattern with multiple actions to reduce CPU usage and simplify synchronization.
  */
 @Slf4j
-public class UnicastDaemon extends RecurrentTask
-{
-    /** Object that will handle all the publication of messages for the Daemon */
+public class UnicastDaemon extends RecurrentTask {
+    /**
+     * Object that will handle all the publication of messages for the Daemon
+     */
     private final UnicastDaemonSender daemonPublisher;
-    /** Object that will handle all the subscription of messages for the Daemon */
+    /**
+     * Object that will handle all the subscription of messages for the Daemon
+     */
     private final UnicastDaemonReceiver daemonReceiver;
-    /** Aeron instance, stored to use the same instance when publishers are created for clients */
+    /**
+     * Aeron instance, stored to use the same instance when publishers are created for clients
+     */
     private final Aeron aeron;
-    /** Embedded media driver, null if the daemon is using an stand alone media driver */
+    /**
+     * Embedded media driver, null if the daemon is using an stand alone media driver
+     */
     private final EmbeddedMediaDriver embeddedMediaDriver;
-    /** UUID for the UnicastDaemon to identification with the clients */
+    /**
+     * UUID for the UnicastDaemon to identification with the clients
+     */
     private final UUID uuid = UUID.randomUUID();
 
     /**
      * Create a unicast daemon for the given parameters
+     *
      * @param parameters parameters for the daemon
      */
-    public UnicastDaemon(final DaemonParameters parameters)
-    {
+    public UnicastDaemon(final DaemonParameters parameters) {
         // Use sleep idle between iterations since the daemon should latency should not be critical
         super(new SleepingMillisIdleStrategy(1));
 
@@ -48,16 +57,12 @@ public class UnicastDaemon extends RecurrentTask
         final Aeron.Context aeronContext = new Aeron.Context();
 
         // Start the embedded daemon if required
-        if (parameters.getAeronDriverType() == DaemonParameters.AeronDriverType.EMBEDDED)
-        {
+        if (parameters.getAeronDriverType() == DaemonParameters.AeronDriverType.EMBEDDED) {
             this.embeddedMediaDriver = new EmbeddedMediaDriver(parameters.getEmbeddedDriverConfigFile(), AeronDriverType.EMBEDDED);
             aeronContext.aeronDirectoryName(this.embeddedMediaDriver.getDriverDirectoryName());
-        }
-        else
-        {
+        } else {
             // Set external driver directory if settled
-            if (parameters.getExternalDriverDir() != null)
-            {
+            if (parameters.getExternalDriverDir() != null) {
                 aeronContext.aeronDirectoryName(parameters.getExternalDriverDir());
             }
 
@@ -73,15 +78,13 @@ public class UnicastDaemon extends RecurrentTask
     }
 
     @Override
-    public int action()
-    {
+    public int action() {
         // Poll for new messages and check for client timeouts
         return this.daemonReceiver.pollForNewMessages() + this.daemonReceiver.checkNextClientTimeout();
     }
 
     @Override
-    public void cleanUp()
-    {
+    public void cleanUp() {
         log.info("Stopping publishers and receivers and cleaning up");
 
         // Close sender and receiver
@@ -92,8 +95,7 @@ public class UnicastDaemon extends RecurrentTask
         this.aeron.close();
 
         // Stop the embedded media driver if required
-        if (this.embeddedMediaDriver != null)
-        {
+        if (this.embeddedMediaDriver != null) {
             this.embeddedMediaDriver.close();
         }
     }

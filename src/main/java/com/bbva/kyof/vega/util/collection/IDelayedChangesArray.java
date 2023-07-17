@@ -4,13 +4,12 @@ package com.bbva.kyof.vega.util.collection;
  * Interface for an collection that allows to handle changes in the collection in "delayed mode".
  * <p>
  * Changes on the collection will only be applied when "applyPendingChanges" is called.
- *
+ * <p>
  * It should be called by the same thread that will process the internal collection.
  *
  * @param <T> The type of the array stored elements
  */
-public interface IDelayedChangesArray<T>
-{
+public interface IDelayedChangesArray<T> {
     /**
      * @return the internal collection representation. It can be used for iteration considering the "numElements" currently in the collection.
      * <p>
@@ -19,7 +18,9 @@ public interface IDelayedChangesArray<T>
      */
     T[] getInternalArray();
 
-    /** @return the number of elements that are currently in the internal collection */
+    /**
+     * @return the number of elements that are currently in the internal collection
+     */
     int getNumElements();
 
     /**

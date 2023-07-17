@@ -1,36 +1,40 @@
 package com.bbva.kyof.vega.msg;
 
 import com.bbva.kyof.vega.serialization.UnsafeBufferSerializer;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Represents a security response message.
- *
+ * <p>
  * It also contains methods to sign and serialize to binary, to read from binary and to verify the signature.
- *
+ * <p>
  * This class creates internal byte arrays to handle the serialized / deserialised code and being able to sing and verify the
  * signatures.
- *
+ * <p>
  * Always create 1 per publisher or subscriber and reuse to prevent excessive memory allocation.
- *
+ * <p>
  * The class is not thread safe!
  */
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class MsgSecurityResp extends AbstractMsgSecurity
-{
-    /** Encoded session key */
-    @Getter @Setter private byte[] encodedSessionKey = new byte[0];
+public class MsgSecurityResp extends AbstractMsgSecurity {
+    /**
+     * Encoded session key
+     */
+    @Getter
+    @Setter
+    private byte[] encodedSessionKey = new byte[0];
 
     @Override
-    protected void readAdditionalFields(final UnsafeBufferSerializer buffer)
-    {
+    protected void readAdditionalFields(final UnsafeBufferSerializer buffer) {
         // Read the size of the encoded session key
         final int encodedSessionKeySize = buffer.readInt();
 
         // If the internal byte array for they key don't have the right size, create it again
-        if (this.encodedSessionKey.length != encodedSessionKeySize)
-        {
+        if (this.encodedSessionKey.length != encodedSessionKeySize) {
             this.encodedSessionKey = new byte[encodedSessionKeySize];
         }
 
@@ -39,8 +43,7 @@ public class MsgSecurityResp extends AbstractMsgSecurity
     }
 
     @Override
-    protected void writeAdditionalFields(final UnsafeBufferSerializer buffer)
-    {
+    protected void writeAdditionalFields(final UnsafeBufferSerializer buffer) {
         buffer.writeInt(this.encodedSessionKey.length); // Write the length of the encoded session key
         buffer.writeBytes(this.encodedSessionKey, 0, this.encodedSessionKey.length);
     }

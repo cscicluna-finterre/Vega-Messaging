@@ -10,14 +10,13 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 02/08/16.
  */
-public class BaseRcvMessageTest
-{
+public class BaseRcvMessageTest {
     @Test
-    public void tryGettersSettersAndPromote()
-    {
+    public void tryGettersSettersAndPromote() {
         // Create the message
         final UUID instanceId = UUID.randomUUID();
-        final BaseRcvMessage baseRcvMessage = new BaseRcvMessage() {};
+        final BaseRcvMessage baseRcvMessage = new BaseRcvMessage() {
+        };
         final ByteBuffer bytebufferContentes = ByteBuffer.allocate(1024);
         final UnsafeBuffer unsafeContents = new UnsafeBuffer(bytebufferContentes);
         baseRcvMessage.setTopicName("TopicName");
@@ -34,7 +33,8 @@ public class BaseRcvMessageTest
         Assert.assertEquals(baseRcvMessage.getContents(), unsafeContents);
 
         // Promote the message and try again
-        final BaseRcvMessage promotedMessage = new BaseRcvMessage() {};
+        final BaseRcvMessage promotedMessage = new BaseRcvMessage() {
+        };
         baseRcvMessage.promote(promotedMessage);
 
         Assert.assertEquals(promotedMessage.getTopicName(), "TopicName");
@@ -46,22 +46,23 @@ public class BaseRcvMessageTest
     }
 
     @Test
-    public void getContentAsByteBufferOrArray()
-    {
+    public void getContentAsByteBufferOrArray() {
         final ByteBuffer byteBuffer = ByteBuffer.allocate(128);
         final UnsafeBuffer unsafeContents = new UnsafeBuffer(byteBuffer);
 
         unsafeContents.putInt(4, 128);
         unsafeContents.putInt(8, 256);
 
-        final BaseRcvMessage baseRcvMessage = new BaseRcvMessage() {};
+        final BaseRcvMessage baseRcvMessage = new BaseRcvMessage() {
+        };
 
         baseRcvMessage.setUnsafeBufferContent(unsafeContents);
         baseRcvMessage.setContentLength(8);
         baseRcvMessage.setContentOffset(4);
 
         // Promote the message
-        final BaseRcvMessage promotedMessage = new BaseRcvMessage() {};
+        final BaseRcvMessage promotedMessage = new BaseRcvMessage() {
+        };
         baseRcvMessage.promote(promotedMessage);
 
         Assert.assertTrue(promotedMessage.getContents().getInt(0) == 128);

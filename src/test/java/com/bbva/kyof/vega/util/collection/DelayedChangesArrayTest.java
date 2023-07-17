@@ -7,23 +7,29 @@ import org.junit.Test;
 
 /**
  * Class created to test {@link DelayedChangesArray}
- *
+ * <p>
  * Created by XE52727 on 04/07/2016.
  */
-public class DelayedChangesArrayTest
-{
-    /** First element of collection */
+public class DelayedChangesArrayTest {
+    /**
+     * First element of collection
+     */
     private static final String FIRST_ELEMENT = "1";
-    /** Second element of collection */
+    /**
+     * Second element of collection
+     */
     private static final String SECOND_ELEMENT = "2";
-    /** Third element of collection */
+    /**
+     * Third element of collection
+     */
     private static final String THIRD_ELEMENT = "3";
-    /** Instance of collection */
+    /**
+     * Instance of collection
+     */
     private IDelayedChangesArray<String> delayedChangesArray;
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         // Create the collection
         this.delayedChangesArray = new DelayedChangesArray<>(String.class);
 
@@ -38,15 +44,13 @@ public class DelayedChangesArrayTest
     }
 
     @After
-    public void tearDown() throws Exception
-    {
+    public void tearDown() throws Exception {
         // Clear instance
         this.delayedChangesArray.clear();
     }
 
     @Test
-    public void testAddRemoveElements() throws Exception
-    {
+    public void testAddRemoveElements() throws Exception {
         // Until changes are applied there should be no elements
         Assert.assertEquals(this.delayedChangesArray.getNumElements(), 0);
 
@@ -89,8 +93,7 @@ public class DelayedChangesArrayTest
     }
 
     @Test
-    public void testAddRemoveTwice() throws Exception
-    {
+    public void testAddRemoveTwice() throws Exception {
         // Apply the changes
         this.delayedChangesArray.applyPendingChanges();
 
@@ -99,13 +102,12 @@ public class DelayedChangesArrayTest
         Assert.assertFalse(repeatedAddition);
 
         // Remove non existing element and check
-        final boolean nonExistingRemoval =this.delayedChangesArray.removeElement("other");
+        final boolean nonExistingRemoval = this.delayedChangesArray.removeElement("other");
         Assert.assertFalse(nonExistingRemoval);
     }
 
     @Test
-    public void testClearList() throws Exception
-    {
+    public void testClearList() throws Exception {
         // Apply the changes
         this.delayedChangesArray.applyPendingChanges();
 
@@ -115,8 +117,7 @@ public class DelayedChangesArrayTest
     }
 
     @Test
-    public void testForceGrowContentsWith1Element() throws Exception
-    {
+    public void testForceGrowContentsWith1Element() throws Exception {
         // Initial size 1, DEFAULT_GROW_FACTOR = 1.75f , adding 1 element should end with 2 elements in the internal array
         IDelayedChangesArray<Integer> delayedChangesArray = new DelayedChangesArray<>(Integer.class, 1);
 
@@ -130,13 +131,11 @@ public class DelayedChangesArrayTest
     }
 
     @Test
-    public void testForceGrowContents() throws Exception
-    {
+    public void testForceGrowContents() throws Exception {
         // Initial size 10, grow factor 2, adding 30 elements should end with 40 elements in the internal array
         IDelayedChangesArray<Integer> delayedChangesArray = new DelayedChangesArray<>(Integer.class, 10, 2);
 
-        for (int i = 0; i < 30; i++)
-        {
+        for (int i = 0; i < 30; i++) {
             delayedChangesArray.addElement(i);
         }
 

@@ -20,22 +20,19 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class TopicSubscriberTest
-{
+public class TopicSubscriberTest {
     final TopicTemplateConfig config = new TopicTemplateConfig();
     private final TopicSubscriber topicSubscriber = new TopicSubscriber("topic1", config);
 
     @Test
-    public void testBasicGetSet()
-    {
+    public void testBasicGetSet() {
         // Test basic getters
         Assert.assertEquals(topicSubscriber.getTopicName(), "topic1");
         Assert.assertEquals(topicSubscriber.getTopicConfig(), config);
     }
 
     @Test
-    public void testAddRemoveSubscribers()
-    {
+    public void testAddRemoveSubscribers() {
         // Test basic getters
         Assert.assertEquals(topicSubscriber.getTopicName(), "topic1");
         Assert.assertEquals(topicSubscriber.getTopicConfig(), config);
@@ -64,8 +61,7 @@ public class TopicSubscriberTest
     }
 
     @Test
-    public void testAddRemoveListeners()
-    {
+    public void testAddRemoveListeners() {
         assertTrue(topicSubscriber.hasNoListeners());
 
         final Listener listener1 = new Listener();
@@ -88,8 +84,7 @@ public class TopicSubscriberTest
     }
 
     @Test
-    public void testClose()
-    {
+    public void testClose() {
         // Test add/remove aeron subscriber
         final AeronSubscriber aeronSubscriber = EasyMock.createNiceMock(AeronSubscriber.class);
         EasyMock.replay(aeronSubscriber);
@@ -105,8 +100,7 @@ public class TopicSubscriberTest
     }
 
     @Test
-    public void testReceiveMessages()
-    {
+    public void testReceiveMessages() {
         final Listener normalListener = new Listener();
         final Listener patternListener1 = new Listener();
         final Listener patternListener2 = new Listener();
@@ -143,20 +137,19 @@ public class TopicSubscriberTest
         assertEquals(1, patternListener1.requestsReceived);
         assertEquals(1, patternListener2.msgsReceived);
         assertEquals(1, patternListener2.requestsReceived);
-        
+
         //Check sequence number
         Assert.assertEquals(normalListener.msgSequenceNumber, testMsg.getSequenceNumber());
         Assert.assertEquals(normalListener.requestSequenceNumber, testRequest.getSequenceNumber());
         Assert.assertEquals(patternListener1.msgSequenceNumber, testMsg.getSequenceNumber());
         Assert.assertEquals(patternListener1.requestSequenceNumber, testRequest.getSequenceNumber());
         Assert.assertEquals(patternListener2.msgSequenceNumber, testMsg.getSequenceNumber());
-        Assert.assertEquals(patternListener2.requestSequenceNumber,testRequest.getSequenceNumber());
+        Assert.assertEquals(patternListener2.requestSequenceNumber, testRequest.getSequenceNumber());
 
     }
 
     @Test
-    public void testSequenceNumberMap()
-    {
+    public void testSequenceNumberMap() {
         final long msgSequenceNumber = new Random().nextLong();
         final UUID topicPublisherId = UUID.randomUUID();
 
@@ -175,15 +168,13 @@ public class TopicSubscriberTest
         Assert.assertNull(topicSubscriber.getExpectedSeqNumByTopicPubId().get(topicPublisherId));
     }
 
-    private long getAeronSubsCount()
-    {
+    private long getAeronSubsCount() {
         final AtomicLong count = new AtomicLong();
         topicSubscriber.runForEachRelatedAeronSubscriber((sub) -> count.getAndIncrement());
         return count.get();
     }
 
-    private class Listener implements ITopicSubListener
-    {
+    private class Listener implements ITopicSubListener {
         int msgsReceived = 0;
         int requestsReceived = 0;
 
@@ -193,29 +184,25 @@ public class TopicSubscriberTest
         long msgsLost = 0;
 
         @Override
-        public void onMessageReceived(IRcvMessage receivedMessage)
-        {
+        public void onMessageReceived(IRcvMessage receivedMessage) {
             this.msgsReceived++;
-            this.msgSequenceNumber = ((RcvMessage)receivedMessage).getSequenceNumber();
+            this.msgSequenceNumber = ((RcvMessage) receivedMessage).getSequenceNumber();
         }
 
         @Override
-        public void onRequestReceived(IRcvRequest receivedRequest)
-        {
+        public void onRequestReceived(IRcvRequest receivedRequest) {
             this.requestsReceived++;
-            this.requestSequenceNumber = ((RcvRequest)receivedRequest).getSequenceNumber();
+            this.requestSequenceNumber = ((RcvRequest) receivedRequest).getSequenceNumber();
         }
 
         @Override
-        public void onMessageLost(final IMsgLostReport lostReport)
-        {
+        public void onMessageLost(final IMsgLostReport lostReport) {
             this.msgsLost = this.msgsLost + lostReport.getNumberLostMessages();
         }
     }
 
     @Test
-    public void testReceiveMessagesWithDuplicates()
-    {
+    public void testReceiveMessagesWithDuplicates() {
         final Listener normalListener = new Listener();
         final Listener patternListener1 = new Listener();
         final Listener patternListener2 = new Listener();
@@ -262,12 +249,11 @@ public class TopicSubscriberTest
         Assert.assertEquals(patternListener1.msgSequenceNumber, testMsg.getSequenceNumber());
         Assert.assertEquals(patternListener1.requestSequenceNumber, testRequest.getSequenceNumber());
         Assert.assertEquals(patternListener2.msgSequenceNumber, testMsg.getSequenceNumber());
-        Assert.assertEquals(patternListener2.requestSequenceNumber,testRequest.getSequenceNumber());
+        Assert.assertEquals(patternListener2.requestSequenceNumber, testRequest.getSequenceNumber());
     }
 
     @Test
-    public void testReceiveMessagesWithGap()
-    {
+    public void testReceiveMessagesWithGap() {
         final Listener normalListener = new Listener();
         final Listener patternListener1 = new Listener();
         final Listener patternListener2 = new Listener();
@@ -322,7 +308,7 @@ public class TopicSubscriberTest
         Assert.assertEquals(patternListener1.msgSequenceNumber, testMsg.getSequenceNumber());
         Assert.assertEquals(patternListener1.requestSequenceNumber, testRequest.getSequenceNumber());
         Assert.assertEquals(patternListener2.msgSequenceNumber, testMsg.getSequenceNumber());
-        Assert.assertEquals(patternListener2.requestSequenceNumber,testRequest.getSequenceNumber());
+        Assert.assertEquals(patternListener2.requestSequenceNumber, testRequest.getSequenceNumber());
 
         //Check loss repots (6 gaps of 10 messages / requests)
         Assert.assertEquals(normalListener.msgsLost, 60);

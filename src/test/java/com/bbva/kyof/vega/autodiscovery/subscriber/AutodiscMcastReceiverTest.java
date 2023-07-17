@@ -20,11 +20,9 @@ import java.util.UUID;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Aeron.class)
-public class AutodiscMcastReceiverTest implements IAutodiscGlobalEventListener
-{
+public class AutodiscMcastReceiverTest implements IAutodiscGlobalEventListener {
     @Test
-    public void testCreatePublication() throws Exception
-    {
+    public void testCreatePublication() throws Exception {
         final Aeron aeron = PowerMock.createNiceMock(Aeron.class);
         final Subscription subscription = EasyMock.createNiceMock(Subscription.class);
         EasyMock.expect(aeron.addSubscription(EasyMock.anyObject(), EasyMock.anyInt())).andReturn(subscription).anyTimes();
@@ -39,14 +37,12 @@ public class AutodiscMcastReceiverTest implements IAutodiscGlobalEventListener
     }
 
     @Override
-    public void onNewInstanceInfo(AutoDiscInstanceInfo info)
-    {
+    public void onNewInstanceInfo(AutoDiscInstanceInfo info) {
 
     }
 
     @Override
-    public void onNewTopicInfo(AutoDiscTopicInfo info)
-    {
+    public void onNewTopicInfo(AutoDiscTopicInfo info) {
 
     }
 }

@@ -8,16 +8,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class helps to manage the relationships between topic subscribers and topic publishers.<p>
- *
+ * <p>
  * The idea is to store for each topic publisher id, the related topic subscriber if it exists and also for each topic
  * subscriber store the set of topic publishers ids that are related to it.<p>
- *
+ * <p>
  * The topic publishers can be local or remote from other instances.<p>
- *
+ * <p>
  * This class is thread safe
  */
-class TopicSubAndTopicPubIdRelations
-{
+class TopicSubAndTopicPubIdRelations {
     /**
      * Store the topic subscribers by the topic publisher id that publish on the same topic name. <p>
      */
@@ -28,21 +27,21 @@ class TopicSubAndTopicPubIdRelations
      */
     private final HashMapOfHashSet<UUID, UUID> topicPubsByTopicSubId = new HashMapOfHashSet<>();
 
-    /** Lock for instance synchronization */
+    /**
+     * Lock for instance synchronization
+     */
     private final Object lock = new Object();
 
     /**
      * Add a relationshipt between a topic publisher id and a topic subscriber. Both should share the topic name.
-     *
+     * <p>
      * The topic publisher can be local or remote.
      *
-     * @param topicPubId the topic publisher id
+     * @param topicPubId      the topic publisher id
      * @param topicSubscriber the topic subscriber
      */
-    void addTopicPubRelation(final UUID topicPubId, final TopicSubscriber topicSubscriber)
-    {
-        synchronized (this.lock)
-        {
+    void addTopicPubRelation(final UUID topicPubId, final TopicSubscriber topicSubscriber) {
+        synchronized (this.lock) {
             this.topicSubsByTopicPubId.put(topicPubId, topicSubscriber);
             this.topicPubsByTopicSubId.put(topicSubscriber.getUniqueId(), topicPubId);
         }
@@ -50,16 +49,14 @@ class TopicSubAndTopicPubIdRelations
 
     /**
      * Remove the relationshipt between a topic publisher id and a topic subscriber. Both should share the topic name.
-     *
+     * <p>
      * The topic publisher can be local or remote.
      *
-     * @param topicPubId the topic publisher id
+     * @param topicPubId      the topic publisher id
      * @param topicSubscriber the topic subscriber
      */
-    void removeTopicPubRelation(final UUID topicPubId, final TopicSubscriber topicSubscriber)
-    {
-        synchronized (this.lock)
-        {
+    void removeTopicPubRelation(final UUID topicPubId, final TopicSubscriber topicSubscriber) {
+        synchronized (this.lock) {
             this.topicSubsByTopicPubId.remove(topicPubId);
             this.topicPubsByTopicSubId.remove(topicSubscriber.getUniqueId(), topicPubId);
             topicSubscriber.onTopicPublisherRemoved(topicPubId);
@@ -71,10 +68,8 @@ class TopicSubAndTopicPubIdRelations
      *
      * @param topicSubscriber the topic subscriber to remove
      */
-    void removeTopicSubscriber(final TopicSubscriber topicSubscriber)
-    {
-        synchronized (this.lock)
-        {
+    void removeTopicSubscriber(final TopicSubscriber topicSubscriber) {
+        synchronized (this.lock) {
             this.topicPubsByTopicSubId.removeAndConsumeIfKeyEquals(topicSubscriber.getUniqueId(), this.topicSubsByTopicPubId::remove);
         }
     }
@@ -82,10 +77,8 @@ class TopicSubAndTopicPubIdRelations
     /**
      * Clear all internal information
      */
-    public void clear()
-    {
-        synchronized (this.lock)
-        {
+    public void clear() {
+        synchronized (this.lock) {
             this.topicPubsByTopicSubId.clear();
             this.topicSubsByTopicPubId.clear();
         }
@@ -93,11 +86,11 @@ class TopicSubAndTopicPubIdRelations
 
     /**
      * Return the topic subscriber that is related to the given topic publisher id if any
+     *
      * @param topicPublisherId the topic publisher id to look for
      * @return the topic subscriber that matches, null in none
      */
-    TopicSubscriber getTopicSubscriberForTopicPublisherId(final UUID topicPublisherId)
-    {
+    TopicSubscriber getTopicSubscriberForTopicPublisherId(final UUID topicPublisherId) {
         return this.topicSubsByTopicPubId.get(topicPublisherId);
     }
 }

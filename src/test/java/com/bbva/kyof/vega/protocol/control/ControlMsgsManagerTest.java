@@ -31,8 +31,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 11/11/2016.
  */
-public class ControlMsgsManagerTest
-{
+public class ControlMsgsManagerTest {
     private static final String KEYS_DIR_PATH = CommandLineParserTest.class.getClassLoader().getResource("keys").getPath();
 
     private static MediaDriver MEDIA_DRIVER;
@@ -51,8 +50,7 @@ public class ControlMsgsManagerTest
     private static AutoDiscInstanceInfo INSTANCE2_INFO;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         // Create a media driver
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
@@ -127,8 +125,7 @@ public class ControlMsgsManagerTest
                 TestConstants.EMPTY_HOSTNAME);
     }
 
-    private static void initializeSecurity() throws VegaException
-    {
+    private static void initializeSecurity() throws VegaException {
         final SecurityParams securityParams1 = SecurityParams.builder().keySecurityType(KeySecurityType.PLAIN_KEY_FILE).privateKeyDirPath(KEYS_DIR_PATH).
                 publicKeysDirPath(KEYS_DIR_PATH).securityId(11111).build();
         final SecurityParams securityParams2 = SecurityParams.builder().keySecurityType(KeySecurityType.PLAIN_KEY_FILE).privateKeyDirPath(KEYS_DIR_PATH).
@@ -140,8 +137,7 @@ public class ControlMsgsManagerTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         CONTRL_MSGS_MNG_1.close();
         CONTRL_MSGS_MNG_2.close();
 
@@ -154,8 +150,7 @@ public class ControlMsgsManagerTest
     }
 
     @Test
-    public void testWhenNoConnections() throws Exception
-    {
+    public void testWhenNoConnections() throws Exception {
         CONTRL_MSGS_MNG_1.getRecurityRequestsNotifier().addedPubForSubTopic(PUB_TOPIC_1_INFO, SUB_TOPIC1_ID, SUB_TOPIC1_SEC_CONFIG);
 
         // It should start trying to get the topic information, but nothing should happen
@@ -184,14 +179,12 @@ public class ControlMsgsManagerTest
         Assert.assertNull(this.findDecoder(CONTRL_MSGS_MNG_1, PUB_TOPIC_1_INFO.getUniqueId()));
     }
 
-    private AESCrypto findDecoder(ControlMsgsManager manager, UUID pubTopicId)
-    {
+    private AESCrypto findDecoder(ControlMsgsManager manager, UUID pubTopicId) {
         return manager.getSecureMessagesDecoder().getAesCryptoForSecPub(pubTopicId);
     }
 
     @Test
-    public void testBothWorking() throws Exception
-    {
+    public void testBothWorking() throws Exception {
         // First connect both managers with the new instance info adverts
         CONTRL_MSGS_MNG_1.onNewAutoDiscInstanceInfo(INSTANCE2_INFO);
         CONTRL_MSGS_MNG_2.onNewAutoDiscInstanceInfo(INSTANCE1_INFO);
@@ -218,8 +211,7 @@ public class ControlMsgsManagerTest
     }
 
     @Test
-    public void testNoPermissions() throws Exception
-    {
+    public void testNoPermissions() throws Exception {
         // First connect both managers with the new instance info adverts
         CONTRL_MSGS_MNG_1.onNewAutoDiscInstanceInfo(INSTANCE2_INFO);
         CONTRL_MSGS_MNG_2.onNewAutoDiscInstanceInfo(INSTANCE1_INFO);

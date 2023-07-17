@@ -25,8 +25,7 @@ import java.nio.ByteBuffer;
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class SendManagerTest
-{
+public class SendManagerTest {
     private static MediaDriver MEDIA_DRIVER;
     private static Aeron AERON;
     private static SubnetAddress SUBNET_ADDRESS;
@@ -36,8 +35,7 @@ public class SendManagerTest
     PublishersManagerUnicast publisherManager;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         final Aeron.Context ctx1 = new Aeron.Context();
@@ -58,47 +56,40 @@ public class SendManagerTest
         Thread.sleep(1000);
     }
 
-    private static GlobalConfiguration loadConfiguration() throws VegaException
-    {
+    private static GlobalConfiguration loadConfiguration() throws VegaException {
         /** File containing the configuration */
         String validConfigFile = ConfigReaderTest.class.getClassLoader().getResource("config/sendManagerTestConfig.xml").getPath();
         return ConfigReader.readConfiguration(validConfigFile);
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Test(expected = VegaException.class)
-    public void testCreateTopicPublisherWithNoConfig() throws Exception
-    {
+    public void testCreateTopicPublisherWithNoConfig() throws Exception {
         final IOwnSecPubTopicsChangesListener listener = EasyMock.createNiceMock(IOwnSecPubTopicsChangesListener.class);
         EasyMock.replay(listener);
 
-        try(final SendManager sendManager = new SendManager(VEGA_CONTEXT, listener))
-        {
+        try (final SendManager sendManager = new SendManager(VEGA_CONTEXT, listener)) {
             sendManager.createTopicPublisher("dTopic");
         }
     }
 
     @Test(expected = VegaException.class)
-    public void testDestroyTopicPublisherWithNoConfig() throws Exception
-    {
+    public void testDestroyTopicPublisherWithNoConfig() throws Exception {
         final IOwnSecPubTopicsChangesListener listener = EasyMock.createNiceMock(IOwnSecPubTopicsChangesListener.class);
         EasyMock.replay(listener);
 
-        try(final SendManager sendManager = new SendManager(VEGA_CONTEXT, listener))
-        {
+        try (final SendManager sendManager = new SendManager(VEGA_CONTEXT, listener)) {
             sendManager.destroyTopicPublisher("dTopic");
         }
     }
 
     @Test
-    public void testCreateTopicPublishers() throws Exception
-    {
+    public void testCreateTopicPublishers() throws Exception {
         final IOwnSecPubTopicsChangesListener listener = EasyMock.createNiceMock(IOwnSecPubTopicsChangesListener.class);
         EasyMock.replay(listener);
 
@@ -124,8 +115,7 @@ public class SendManagerTest
     }
 
     @Test
-    public void testDestroyTopicPublishers() throws Exception
-    {
+    public void testDestroyTopicPublishers() throws Exception {
         final IOwnSecPubTopicsChangesListener listener = EasyMock.createNiceMock(IOwnSecPubTopicsChangesListener.class);
         EasyMock.replay(listener);
 
@@ -155,8 +145,7 @@ public class SendManagerTest
         sendManager.close();
     }
 
-    private void sendMessageAndCheckArrival(ITopicPublisher topicPublisher, SimpleReceiver simpleReceiver, boolean shouldArrive) throws InterruptedException
-    {
+    private void sendMessageAndCheckArrival(ITopicPublisher topicPublisher, SimpleReceiver simpleReceiver, boolean shouldArrive) throws InterruptedException {
         final UnsafeBuffer buffer = new UnsafeBuffer(ByteBuffer.allocate(128));
         buffer.putInt(0, 128);
 
@@ -164,12 +153,9 @@ public class SendManagerTest
         Thread.sleep(100);
         simpleReceiver.pollReceivedMessage();
 
-        if (shouldArrive)
-        {
+        if (shouldArrive) {
             Assert.assertTrue((simpleReceiver.getReusableReceivedMsg().getTopicPublisherId() != null));
-        }
-        else
-        {
+        } else {
             Assert.assertTrue((simpleReceiver.getReusableReceivedMsg().getTopicPublisherId() == null));
         }
 

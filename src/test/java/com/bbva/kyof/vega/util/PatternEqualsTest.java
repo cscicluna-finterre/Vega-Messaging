@@ -6,11 +6,9 @@ import org.junit.Test;
 /**
  * Created by cnebrera on 29/07/16.
  */
-public class PatternEqualsTest
-{
+public class PatternEqualsTest {
     @Test
-    public void matches() throws Exception
-    {
+    public void matches() throws Exception {
         final PatternEquals pattern1 = new PatternEquals("a*.a");
         final PatternEquals pattern2 = new PatternEquals("b*.a");
         final PatternEquals pattern3 = new PatternEquals("a*.a");

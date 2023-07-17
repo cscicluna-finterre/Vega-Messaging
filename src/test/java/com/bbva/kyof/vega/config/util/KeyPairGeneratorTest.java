@@ -17,8 +17,7 @@ import java.lang.reflect.Constructor;
 /**
  * Created by cnebrera on 10/10/2016.
  */
-public class KeyPairGeneratorTest
-{
+public class KeyPairGeneratorTest {
     private static final String KEYS_DIR = "keys";
     private static final String DEST_DIR = "keygentest";
 
@@ -28,16 +27,14 @@ public class KeyPairGeneratorTest
     private String destPath;
 
     @Test
-    public void testConstructor() throws Exception
-    {
+    public void testConstructor() throws Exception {
         Constructor<?>[] cons = KeyPairGenerator.class.getDeclaredConstructors();
         cons[0].setAccessible(true);
         cons[0].newInstance((Object[]) null);
     }
 
     @Before
-    public void before()
-    {
+    public void before() {
         // Get the paths, prepare directories and delete old files
         // Path to the testing key files
         final String keysPath = KeyPairGeneratorTest.class.getClassLoader().getResource(KEYS_DIR).getPath();
@@ -47,8 +44,7 @@ public class KeyPairGeneratorTest
 
         // Create the directory if it doesn't exists
         final File destPathFile = new File(destPath);
-        if (!destPathFile.exists())
-        {
+        if (!destPathFile.exists()) {
             destPathFile.mkdirs();
         }
 
@@ -63,63 +59,53 @@ public class KeyPairGeneratorTest
         final File encryptPrivKeyFile = new File(encryptPrivKeyPath);
         final File encryptPubKeyFile = new File(encryptPubKeyPath);
 
-        if (privKeyFile.exists())
-        {
+        if (privKeyFile.exists()) {
             privKeyFile.delete();
         }
-        if (pubKeyFile.exists())
-        {
+        if (pubKeyFile.exists()) {
             pubKeyFile.delete();
         }
-        if (encryptPrivKeyFile.exists())
-        {
+        if (encryptPrivKeyFile.exists()) {
             encryptPrivKeyFile.delete();
         }
-        if (encryptPubKeyFile.exists())
-        {
+        if (encryptPubKeyFile.exists()) {
             encryptPubKeyFile.delete();
         }
     }
 
     @Test
-    public void generateKeyPair() throws Exception
-    {
+    public void generateKeyPair() throws Exception {
         // Call main to generate the key pair
         KeyPairGenerator.main(new String[]{"PLAIN", Long.toString(APP_SECURITY_ID), destPath});
         this.loadAndVerifyGenFiles(APP_SECURITY_ID, false);
     }
 
     @Test
-    public void generateEncryptedKeyPair() throws Exception
-    {
+    public void generateEncryptedKeyPair() throws Exception {
         // Call main to generate the key pair
         KeyPairGenerator.main(new String[]{"ENCRYPTED", Long.toString(ENCRYPTED_APP_SECURITY_ID), destPath, TestConstants.PRIVATE_KEY_PASSWORD_HEX});
         this.loadAndVerifyGenFiles(ENCRYPTED_APP_SECURITY_ID, true);
     }
 
     @Test(expected = VegaException.class)
-    public void testMainWrongParams() throws VegaException, IOException
-    {
+    public void testMainWrongParams() throws VegaException, IOException {
         final String[] args = new String[]{Long.toString(APP_SECURITY_ID)};
         KeyPairGenerator.main(args);
     }
 
     @Test(expected = VegaException.class)
-    public void testMainWrongParams2() throws VegaException, IOException
-    {
+    public void testMainWrongParams2() throws VegaException, IOException {
         final String[] args2 = new String[]{Long.toString(APP_SECURITY_ID), "PLAIN", destPath};
         KeyPairGenerator.main(args2);
     }
 
     @Test(expected = VegaException.class)
-    public void testMainWrongParams3() throws VegaException, IOException
-    {
+    public void testMainWrongParams3() throws VegaException, IOException {
         final String[] args2 = new String[]{"HELLO", "HELLO"};
         KeyPairGenerator.main(args2);
     }
 
-    private void loadAndVerifyGenFiles(final long applicationId, final boolean isEncrypted) throws VegaException
-    {
+    private void loadAndVerifyGenFiles(final long applicationId, final boolean isEncrypted) throws VegaException {
         // Now try to load the generated public key
         final PublicKeyConfig pubConfig = PublicKeyConfigReader.readConfiguration(destPath, applicationId);
         final PrivateKeyConfig privateConfig = PrivateKeyConfigReader.readConfiguration(destPath, applicationId);

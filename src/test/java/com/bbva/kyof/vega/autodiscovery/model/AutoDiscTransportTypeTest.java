@@ -6,11 +6,9 @@ import org.junit.Test;
 /**
  * Created by cnebrera on 02/08/16.
  */
-public class AutoDiscTransportTypeTest
-{
+public class AutoDiscTransportTypeTest {
     @Test
-    public void valueOf()
-    {
+    public void valueOf() {
         Assert.assertEquals(AutoDiscTransportType.valueOf("PUB_IPC"), AutoDiscTransportType.PUB_IPC);
         Assert.assertEquals(AutoDiscTransportType.valueOf("PUB_MUL"), AutoDiscTransportType.PUB_MUL);
         Assert.assertEquals(AutoDiscTransportType.valueOf("PUB_UNI"), AutoDiscTransportType.PUB_UNI);
@@ -20,8 +18,7 @@ public class AutoDiscTransportTypeTest
     }
 
     @Test
-    public void isPubSub()
-    {
+    public void isPubSub() {
         Assert.assertTrue(AutoDiscTransportType.PUB_IPC.isPublisher());
         Assert.assertTrue(AutoDiscTransportType.PUB_MUL.isPublisher());
         Assert.assertTrue(AutoDiscTransportType.PUB_UNI.isPublisher());
@@ -38,14 +35,13 @@ public class AutoDiscTransportTypeTest
     }
 
     @Test
-    public void fromByteTest()
-    {
+    public void fromByteTest() {
         Assert.assertEquals(AutoDiscTransportType.fromByte(AutoDiscTransportType.PUB_IPC.getByteValue()), AutoDiscTransportType.PUB_IPC);
         Assert.assertEquals(AutoDiscTransportType.fromByte(AutoDiscTransportType.PUB_MUL.getByteValue()), AutoDiscTransportType.PUB_MUL);
         Assert.assertEquals(AutoDiscTransportType.fromByte(AutoDiscTransportType.PUB_UNI.getByteValue()), AutoDiscTransportType.PUB_UNI);
         Assert.assertEquals(AutoDiscTransportType.fromByte(AutoDiscTransportType.SUB_IPC.getByteValue()), AutoDiscTransportType.SUB_IPC);
         Assert.assertEquals(AutoDiscTransportType.fromByte(AutoDiscTransportType.SUB_MUL.getByteValue()), AutoDiscTransportType.SUB_MUL);
         Assert.assertEquals(AutoDiscTransportType.fromByte(AutoDiscTransportType.SUB_UNI.getByteValue()), AutoDiscTransportType.SUB_UNI);
-        Assert.assertNull(AutoDiscTransportType.fromByte((byte)55));
+        Assert.assertNull(AutoDiscTransportType.fromByte((byte) 55));
     }
 }

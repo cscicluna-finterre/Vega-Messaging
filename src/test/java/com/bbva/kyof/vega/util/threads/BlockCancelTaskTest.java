@@ -11,33 +11,27 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by cnebrera on 05/10/2016.
  */
-public class BlockCancelTaskTest
-{
+public class BlockCancelTaskTest {
     private Timer timer;
 
     @Before
-    public void before()
-    {
+    public void before() {
         this.timer = new Timer("TestTimer");
     }
 
     @After
-    public void after()
-    {
+    public void after() {
         this.timer.cancel();
         this.timer.purge();
     }
 
     @Test
-    public void testRunAndCancel() throws Exception
-    {
+    public void testRunAndCancel() throws Exception {
         final AtomicInteger actionsRun = new AtomicInteger(0);
 
-        final BlockCancelTask task = new BlockCancelTask()
-        {
+        final BlockCancelTask task = new BlockCancelTask() {
             @Override
-            public void action()
-            {
+            public void action() {
                 actionsRun.getAndIncrement();
             }
         };

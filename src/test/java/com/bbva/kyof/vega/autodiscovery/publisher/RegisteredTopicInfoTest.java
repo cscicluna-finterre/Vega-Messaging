@@ -10,11 +10,9 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 02/08/16.
  */
-public class RegisteredTopicInfoTest
-{
+public class RegisteredTopicInfoTest {
     @Test
-    public void getInfoEqualsAndHashCode()
-    {
+    public void getInfoEqualsAndHashCode() {
         final UUID instanceId = UUID.randomUUID();
 
         final AutoDiscTopicInfo topicInfo = new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic");

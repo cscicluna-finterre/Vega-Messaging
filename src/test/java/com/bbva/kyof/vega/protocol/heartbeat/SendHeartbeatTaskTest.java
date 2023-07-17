@@ -15,8 +15,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 05/10/2016.
  */
-public class SendHeartbeatTaskTest
-{
+public class SendHeartbeatTaskTest {
     private Timer timer;
     final UUID app1Id = UUID.randomUUID();
     final RcvResponse responseApp1 = new RcvResponse();
@@ -24,23 +23,20 @@ public class SendHeartbeatTaskTest
     final RcvResponse responseApp2 = new RcvResponse();
 
     @Before
-    public void before()
-    {
+    public void before() {
         this.timer = new Timer("TestTimer");
         responseApp1.setInstanceId(app1Id);
         responseApp2.setInstanceId(app2Id);
     }
 
     @After
-    public void after()
-    {
+    public void after() {
         this.timer.cancel();
         this.timer.purge();
     }
 
     @Test
-    public void testHeartbeatController() throws Exception
-    {
+    public void testHeartbeatController() throws Exception {
         final Sender sender = new Sender();
         final ClientConnectionListener listener = new ClientConnectionListener();
         final SendHeartbeatTask task = new SendHeartbeatTask("topic", HeartbeatParameters.builder().build(), sender, listener);
@@ -74,50 +70,39 @@ public class SendHeartbeatTaskTest
         task.onRequestTimeout(null);
     }
 
-    enum Behaviour
-    {
+    enum Behaviour {
         APP1,
         APP2,
         NONE
     }
 
-    private class Sender implements IHeartbeatSender
-    {
+    private class Sender implements IHeartbeatSender {
         public volatile Behaviour behaviour = Behaviour.APP1;
 
         @Override
-        public void sendHeartbeat(IResponseListener responseListener, long timeout)
-        {
+        public void sendHeartbeat(IResponseListener responseListener, long timeout) {
             // Simulate a response
-            if (behaviour == Behaviour.APP1)
-            {
+            if (behaviour == Behaviour.APP1) {
                 responseListener.onResponseReceived(null, responseApp1);
-            }
-            else if (behaviour == Behaviour.APP2)
-            {
+            } else if (behaviour == Behaviour.APP2) {
                 responseListener.onResponseReceived(null, responseApp2);
-            }
-            else
-            {
+            } else {
                 // Do nothing
             }
         }
     }
 
-    private class ClientConnectionListener implements IClientConnectionListener
-    {
+    private class ClientConnectionListener implements IClientConnectionListener {
         final Set<UUID> clients = new HashSet<>();
 
         @Override
-        public void onClientConnected(String topicName, UUID clientInstanceId)
-        {
+        public void onClientConnected(String topicName, UUID clientInstanceId) {
             clients.add(clientInstanceId);
             Assert.assertEquals(topicName, "topic");
         }
 
         @Override
-        public void onClientDisconnected(String topicName, UUID clientInstanceId)
-        {
+        public void onClientDisconnected(String topicName, UUID clientInstanceId) {
             clients.remove(clientInstanceId);
             Assert.assertEquals(topicName, "topic");
         }

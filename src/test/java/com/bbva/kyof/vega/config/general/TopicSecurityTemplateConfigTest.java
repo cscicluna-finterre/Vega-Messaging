@@ -11,67 +11,58 @@ import java.util.Set;
 /**
  * Created by cnebrera on 14/10/2016.
  */
-public class TopicSecurityTemplateConfigTest
-{
+public class TopicSecurityTemplateConfigTest {
     private static Set<Integer> PUB_SEC_IDS = new HashSet<>();
     private static Set<Integer> SUB_SEC_IDS = new HashSet<>();
 
     @BeforeClass
-    public static void beforeClass()
-    {
+    public static void beforeClass() {
         PUB_SEC_IDS.add(11111);
         SUB_SEC_IDS.add(22222);
     }
 
     @Test
-    public void emptyConstructor() throws Exception
-    {
+    public void emptyConstructor() throws Exception {
         new TopicSecurityTemplateConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void validateMissingName() throws Exception
-    {
+    public void validateMissingName() throws Exception {
         // Should fail, it is missing the name
         final TopicSecurityTemplateConfig invalidConfig = TopicSecurityTemplateConfig.builder().build();
         invalidConfig.completeAndValidateConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void validateMissingPubIds() throws Exception
-    {
+    public void validateMissingPubIds() throws Exception {
         // Should fail, it is missing the transport type
         final TopicSecurityTemplateConfig invalidConfig = TopicSecurityTemplateConfig.builder().name("aname").build();
         invalidConfig.completeAndValidateConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void validateEmptyPubIds() throws Exception
-    {
+    public void validateEmptyPubIds() throws Exception {
         // Should fail, it is missing the transport type
         final TopicSecurityTemplateConfig invalidConfig = TopicSecurityTemplateConfig.builder().name("aname").pubSecIds(new HashSet<>()).build();
         invalidConfig.completeAndValidateConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void validateMissingSubIds() throws Exception
-    {
+    public void validateMissingSubIds() throws Exception {
         // Should fail, it is missing the transport type
         final TopicSecurityTemplateConfig invalidConfig = TopicSecurityTemplateConfig.builder().name("aname").pubSecIds(PUB_SEC_IDS).build();
         invalidConfig.completeAndValidateConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void validateEmptySubIds() throws Exception
-    {
+    public void validateEmptySubIds() throws Exception {
         // Should fail, it is missing the transport type
         final TopicSecurityTemplateConfig invalidConfig = TopicSecurityTemplateConfig.builder().name("aname").pubSecIds(PUB_SEC_IDS).subSecIds(new HashSet<>()).build();
         invalidConfig.completeAndValidateConfig();
     }
 
     @Test
-    public void testAllParamsOk() throws Exception
-    {
+    public void testAllParamsOk() throws Exception {
         // Should fail, it is missing the transport type
         final TopicSecurityTemplateConfig validConfig = TopicSecurityTemplateConfig.builder().
                 name("aname").

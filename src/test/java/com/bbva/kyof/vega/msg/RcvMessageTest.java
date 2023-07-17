@@ -10,11 +10,9 @@ import java.util.UUID;
 /**
  * Test the class VegaRcvMessageTest
  */
-public class RcvMessageTest
-{
+public class RcvMessageTest {
     @Test
-    public void tryGettersSettersAndPromote()
-    {
+    public void tryGettersSettersAndPromote() {
         // Create the message
         final UUID instanceId = UUID.randomUUID();
         final UUID publisherId = UUID.randomUUID();

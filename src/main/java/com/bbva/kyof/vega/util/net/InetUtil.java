@@ -12,55 +12,54 @@ import java.util.stream.Collectors;
  * Utility class to obtain network addresses and perform subnet filters
  */
 @Slf4j
-public final class InetUtil
-{
-    /** Stores all the ip4, non loopback, up interface addresses */
+public final class InetUtil {
+    /**
+     * Stores all the ip4, non loopback, up interface addresses
+     */
     private static List<InterfaceAddress> interfaceAddresses = null;
 
-    /** Lock to access the static stored interface addresses */
+    /**
+     * Lock to access the static stored interface addresses
+     */
     private static final Object STORED_ADDRESSES_LOCK = new Object();
 
-    /** Private constructor to avoid utility class instantiation */
-    private InetUtil()
-    {
+    /**
+     * Private constructor to avoid utility class instantiation
+     */
+    private InetUtil() {
         // Nothing to do here
     }
 
     /**
      * Return the Inet4Address corresponding to the given ip addres in format "192.168.0.1".
+     *
      * @param ipString the Ip address
      * @return the Inet4Address
      */
-    public static Inet4Address getInetAddressFromString(final String ipString)
-    {
+    public static Inet4Address getInetAddressFromString(final String ipString) {
         final InetAddress result;
-        try
-        {
+        try {
             result = InetAddress.getByName(ipString);
-        }
-        catch (final UnknownHostException e)
-        {
+        } catch (final UnknownHostException e) {
             throw new IllegalArgumentException("The provided address is not a valid ip", e);
         }
 
-        if (!(result instanceof Inet4Address))
-        {
+        if (!(result instanceof Inet4Address)) {
             throw new IllegalArgumentException("The provided address is not a valid ip4 address");
         }
 
-        return (Inet4Address)result;
+        return (Inet4Address) result;
     }
 
     /**
      * Converts a given address to int
+     *
      * @param address to convert
      * @return the converted address
      */
-    public static int convertIpAddressToInt(final InetAddress address)
-    {
+    public static int convertIpAddressToInt(final InetAddress address) {
         int result = 0;
-        for (int i = 0; i < address.getAddress().length; i++)
-        {
+        for (int i = 0; i < address.getAddress().length; i++) {
             result <<= 8;
             result |= address.getAddress()[i] & 0xff;
         }
@@ -69,11 +68,11 @@ public final class InetUtil
 
     /**
      * Converts a given address in the form 255.255.255.255 to int
+     *
      * @param address the address to convert
      * @return the converted address
      */
-    public static int convertIpAddressToInt(final String address)
-    {
+    public static int convertIpAddressToInt(final String address) {
         // Convert to InetAddress
         final InetAddress inetAddress = InetUtil.getInetAddressFromString(address);
 
@@ -82,52 +81,44 @@ public final class InetUtil
 
     /**
      * Converts a given int address into an InetAddress
+     *
      * @param address to convert
      * @return the converted address
      */
-    public static InetAddress convertIntToInetAddress(final int address)
-    {
-        final byte[] addressInBytes =  new byte[] {
-                (byte)((address >>> 24) & 0xff),
-                (byte)((address >>> 16) & 0xff),
-                (byte)((address >>>  8) & 0xff),
-                (byte)(address & 0xff)
+    public static InetAddress convertIntToInetAddress(final int address) {
+        final byte[] addressInBytes = new byte[]{
+                (byte) ((address >>> 24) & 0xff),
+                (byte) ((address >>> 16) & 0xff),
+                (byte) ((address >>> 8) & 0xff),
+                (byte) (address & 0xff)
         };
 
-        try
-        {
+        try {
             return InetAddress.getByAddress(addressInBytes);
-        }
-        catch (final UnknownHostException e)
-        {
+        } catch (final UnknownHostException e) {
             throw new IllegalArgumentException(e);
         }
     }
 
     /**
      * Converts a given int address into an String address
+     *
      * @param address to convert
      * @return the converted address in 255.255.255.255 format
      */
-    public static String convertIntToIpAddress(final int address)
-    {
+    public static String convertIntToIpAddress(final int address) {
         return InetUtil.convertIntToInetAddress(address).getHostAddress();
     }
 
     /**
-     *
      * @param ipAddress given IP address
      * @return true if the given IP address is a valid ip4 multicast address
      */
-    public static boolean isValidMulticastAddress(final String ipAddress)
-    {
-        try
-        {
+    public static boolean isValidMulticastAddress(final String ipAddress) {
+        try {
             final InetAddress address = InetAddress.getByName(ipAddress);
             return address instanceof Inet4Address && address.isMulticastAddress();
-        }
-        catch (final UnknownHostException e)
-        {
+        } catch (final UnknownHostException e) {
             log.error("Unexpected exception checking valid multicast address", e);
             return false;
         }
@@ -140,15 +131,11 @@ public final class InetUtil
      * @param ipAddress to test
      * @return true if the given IP address is a valid ip4 unicast address
      */
-    public static boolean isValidUnicastAddress(final String ipAddress)
-    {
-        try
-        {
+    public static boolean isValidUnicastAddress(final String ipAddress) {
+        try {
             final InetAddress address = InetAddress.getByName(ipAddress);
             return address instanceof Inet4Address && !address.isMulticastAddress();
-        }
-        catch (final UnknownHostException e)
-        {
+        } catch (final UnknownHostException e) {
             log.error("Unexpected exception checking valid unicast address", e);
             return false;
         }
@@ -160,8 +147,7 @@ public final class InetUtil
      * @param port port to test
      * @return true if the port is a valid port number
      */
-    public static boolean isValidPortNumber(final int port)
-    {
+    public static boolean isValidPortNumber(final int port) {
         return port > 0 && port < 65536;
     }
 
@@ -170,12 +156,9 @@ public final class InetUtil
      *
      * @return the list of addresses. It can be empty if no interface is valid or there has been a problem.
      */
-    public static List<InterfaceAddress> getAllInterfaceAddresses()
-    {
-        synchronized (STORED_ADDRESSES_LOCK)
-        {
-            if (interfaceAddresses == null)
-            {
+    public static List<InterfaceAddress> getAllInterfaceAddresses() {
+        synchronized (STORED_ADDRESSES_LOCK) {
+            if (interfaceAddresses == null) {
                 interfaceAddresses = InetUtil.findAllInterfaceAddresses();
             }
 
@@ -188,28 +171,24 @@ public final class InetUtil
      *
      * @return the default interface found. Null if no interface or if there has been an error.
      */
-    public static InterfaceAddress getDefaultInterfaceAddress()
-    {
+    public static InterfaceAddress getDefaultInterfaceAddress() {
         final List<InterfaceAddress> allAddresses = InetUtil.getAllInterfaceAddresses();
 
-        if (allAddresses.isEmpty())
-        {
+        if (allAddresses.isEmpty()) {
             return null;
-        }
-        else
-        {
+        } else {
             return allAddresses.get(0);
         }
     }
 
-    /** @return a created SubnetAddress using the default interface address. Return null if there is no default */
-    public static SubnetAddress getDefaultSubnet()
-    {
+    /**
+     * @return a created SubnetAddress using the default interface address. Return null if there is no default
+     */
+    public static SubnetAddress getDefaultSubnet() {
         // Find the default address
         final InterfaceAddress defaultAddress = InetUtil.getDefaultInterfaceAddress();
 
-        if (defaultAddress == null)
-        {
+        if (defaultAddress == null) {
             return null;
         }
 
@@ -224,12 +203,9 @@ public final class InetUtil
      * @param subnetAddress subnet address
      * @return the first interface address that matches the given subnet, null if none match
      */
-    public static InterfaceAddress findFirstInterfaceAddressForSubnet(final SubnetAddress subnetAddress)
-    {
-        for (InterfaceAddress interfaceAddress : InetUtil.getAllInterfaceAddresses())
-        {
-            if (subnetAddress.checkIfMatch(interfaceAddress.getAddress()))
-            {
+    public static InterfaceAddress findFirstInterfaceAddressForSubnet(final SubnetAddress subnetAddress) {
+        for (InterfaceAddress interfaceAddress : InetUtil.getAllInterfaceAddresses()) {
+            if (subnetAddress.checkIfMatch(interfaceAddress.getAddress())) {
                 return interfaceAddress;
             }
         }
@@ -244,16 +220,12 @@ public final class InetUtil
      * @param subnetAddress subnet address
      * @return the subnet address with full mask of the interface that match the subnet
      */
-    public static SubnetAddress validateSubnetAndConvertToFullMask(final SubnetAddress subnetAddress)
-    {
+    public static SubnetAddress validateSubnetAndConvertToFullMask(final SubnetAddress subnetAddress) {
         final InterfaceAddress matchInterface = InetUtil.findFirstInterfaceAddressForSubnet(subnetAddress);
 
-        if (matchInterface == null)
-        {
+        if (matchInterface == null) {
             return null;
-        }
-        else
-        {
+        } else {
             return new SubnetAddress(matchInterface.getAddress().getHostAddress(), SubnetAddress.FULL_MASK);
         }
     }
@@ -262,12 +234,11 @@ public final class InetUtil
      * Given an IP, this method try to resolve the Hostname address by this IP.
      * If IP is null or empty or there is any error resolving ip, it will return an empty hostname.
      *
-     * @param ipAddress  Alternative hostname to be used to resolve ip.
+     * @param ipAddress Alternative hostname to be used to resolve ip.
      * @return A valid ip to use into client discovery information.
      * @since 3.0.0
      */
-    public static String getHostnameByIpAddress(final String ipAddress)
-    {
+    public static String getHostnameByIpAddress(final String ipAddress) {
         InetAddress inetAddress = getInetAddressByName(ipAddress);
         return inetAddress == null ? "" : inetAddress.getHostName();
     }
@@ -281,8 +252,7 @@ public final class InetUtil
      * @return A valid ip to use into client discovery information.
      * @since 3.0.0
      */
-    public static int getIpAddressAsIntByHostnameOrDefault(final String hostname, final int defaultIp)
-    {
+    public static int getIpAddressAsIntByHostnameOrDefault(final String hostname, final int defaultIp) {
         InetAddress inetAddress = getInetAddressByName(hostname);
         return inetAddress == null ? defaultIp : InetUtil.convertIpAddressToInt(inetAddress.getHostAddress());
     }
@@ -294,19 +264,14 @@ public final class InetUtil
      * @return InetAddress of the hostname or null if there is any error.
      * * @since 3.0.0
      */
-    private static InetAddress getInetAddressByName(final String name)
-    {
-        if(name == null || name.isEmpty())
-        {
+    private static InetAddress getInetAddressByName(final String name) {
+        if (name == null || name.isEmpty()) {
             return null;
         }
 
-        try
-        {
+        try {
             return InetAddress.getByName(name);
-        }
-        catch (final UnknownHostException e)
-        {
+        } catch (final UnknownHostException e) {
             log.warn("UnknownHostException resolving hostname: {}", name);
             return null;
         }
@@ -317,25 +282,21 @@ public final class InetUtil
      *
      * @return all interface address that matches the given subnet
      */
-    private static List<InterfaceAddress> findAllInterfaceAddresses()
-    {
+    private static List<InterfaceAddress> findAllInterfaceAddresses() {
         // Result with all the found inet addresses, it may end empty
         final List<InterfaceAddress> result = new LinkedList<>();
 
-        try
-        {
+        try {
             // Stream all the network interfaces
             Collections.list(NetworkInterface.getNetworkInterfaces()).stream().
                     // Sort by interface index
-                    sorted((interface1, interface2) -> Integer.valueOf(interface1.getIndex()).compareTo(interface2.getIndex())).
+                            sorted((interface1, interface2) -> Integer.valueOf(interface1.getIndex()).compareTo(interface2.getIndex())).
                     // Filter only valid interface addresses (active and not lookup)
-                    filter(InetUtil::isInterfaceValidAndUp).
+                            filter(InetUtil::isInterfaceValidAndUp).
                     // Get all addresses in the interfaces that are ip4
-                    forEach(networkInterface -> result.addAll(
+                            forEach(networkInterface -> result.addAll(
                             filterIp4Addresses(networkInterface)));
-        }
-        catch (final SocketException e)
-        {
+        } catch (final SocketException e) {
             log.error("Unexpected exception accessing network interfaces information", e);
 
             // Clear in order to return an empty list
@@ -350,8 +311,7 @@ public final class InetUtil
      *
      * @param networkInterface the network interface containing the addresses to check
      */
-    private static List<InterfaceAddress> filterIp4Addresses(final NetworkInterface networkInterface)
-    {
+    private static List<InterfaceAddress> filterIp4Addresses(final NetworkInterface networkInterface) {
         return networkInterface.getInterfaceAddresses().stream().
                 filter(address -> address.getAddress() instanceof Inet4Address).collect(Collectors.toList());
     }
@@ -359,14 +319,10 @@ public final class InetUtil
     /**
      * Return true if the interface is not loopback and is up
      */
-    private static boolean isInterfaceValidAndUp(final NetworkInterface networkInterface)
-    {
-        try
-        {
+    private static boolean isInterfaceValidAndUp(final NetworkInterface networkInterface) {
+        try {
             return !networkInterface.isLoopback() && networkInterface.isUp();
-        }
-        catch (final SocketException e)
-        {
+        } catch (final SocketException e) {
             log.warn("Unexpected exception checking interface availability", e);
             return false;
         }

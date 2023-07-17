@@ -1,17 +1,14 @@
 package com.bbva.kyof.vega.config.general;
 
-import com.bbva.kyof.vega.config.general.TransportMediaType;
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
  * Created by cnebrera on 01/08/16.
  */
-public class TransportMediaTypeTest
-{
+public class TransportMediaTypeTest {
     @Test
-    public void valueAndFromValue() throws Exception
-    {
+    public void valueAndFromValue() throws Exception {
         Assert.assertEquals(TransportMediaType.UNICAST.value(), "UNICAST");
         Assert.assertEquals(TransportMediaType.MULTICAST.value(), "MULTICAST");
         Assert.assertEquals(TransportMediaType.IPC.value(), "IPC");

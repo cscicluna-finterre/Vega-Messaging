@@ -10,11 +10,9 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 02/08/16.
  */
-public class AutoDiscTopicInfoTest
-{
+public class AutoDiscTopicInfoTest {
     @Test
-    public void fromBinaryToBinary()
-    {
+    public void fromBinaryToBinary() {
         // Create the header
         final UUID uniqueId = UUID.randomUUID();
 
@@ -60,8 +58,7 @@ public class AutoDiscTopicInfoTest
     }
 
     @Test
-    public void fromBinaryToBinaryWithSecurityId()
-    {
+    public void fromBinaryToBinaryWithSecurityId() {
         // Create the header
         final UUID instanceId = UUID.randomUUID();
         final UUID uniqueId = UUID.randomUUID();

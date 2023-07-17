@@ -18,32 +18,37 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class handles the dynamically created response publishers for the library instances that joins the cluster
- *
+ * <p>
  * Only the access to the response publishers by id is thread safe!
  */
 @Slf4j
-class ResponsePublishersManager implements Closeable
-{
-    /** Store all the aeron response publishers by the params used to create them */
+class ResponsePublishersManager implements Closeable {
+    /**
+     * Store all the aeron response publishers by the params used to create them
+     */
     private final Map<AeronPublisherParams, AeronPublisher> responsePublishersByParams = new HashMap<>();
 
-    /** Store all the response publishers by the instance id of the application they respond to */
+    /**
+     * Store all the response publishers by the instance id of the application they respond to
+     */
     private final Map<UUID, AeronPublisher> responsePublishersByInstanceId = new ConcurrentHashMap<>();
 
-    /** Store all the instance ids that are related to the same aeron publisher */
+    /**
+     * Store all the instance ids that are related to the same aeron publisher
+     */
     private final HashMapOfHashSet<AeronPublisher, UUID> instanceIdsPerResponsePub = new HashMapOfHashSet<>();
 
-    /** Vega instance context */
+    /**
+     * Vega instance context
+     */
     private final VegaContext vegaContext;
 
-    ResponsePublishersManager(final VegaContext vegaContext)
-    {
+    ResponsePublishersManager(final VegaContext vegaContext) {
         this.vegaContext = vegaContext;
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         // Destroy all response publishers
         this.responsePublishersByInstanceId.values().forEach(AeronPublisher::close);
 
@@ -54,29 +59,26 @@ class ResponsePublishersManager implements Closeable
 
     /**
      * Return the response publisher associated to the given library instance id
-     *
+     * <p>
      * This call is thread-safe
      *
      * @param instanceId the library unique instance id
      * @return the associated publisher, null if none
      */
-    AeronPublisher getResponsePublisherForInstance(final UUID instanceId)
-    {
+    AeronPublisher getResponsePublisherForInstance(final UUID instanceId) {
         return this.responsePublishersByInstanceId.get(instanceId);
     }
 
     /**
      * Called then there is a new autodiscovery instance info event.
-     *
+     * <p>
      * It will create a new response publisher for the new found instance or reuse an existing one
      *
      * @param info the information event
      */
-    void onNewAutoDiscInstanceInfo(final AutoDiscInstanceInfo info)
-    {
+    void onNewAutoDiscInstanceInfo(final AutoDiscInstanceInfo info) {
         // If there is already a response publisher for the instance, ignore, it may happen if there are duplicated events
-        if (this.responsePublishersByInstanceId.containsKey(info.getUniqueId()))
-        {
+        if (this.responsePublishersByInstanceId.containsKey(info.getUniqueId())) {
             return;
         }
 
@@ -85,14 +87,11 @@ class ResponsePublishersManager implements Closeable
 
         // Check if there is already a response publisher with that parameters
         AeronPublisher responsePublisher = this.responsePublishersByParams.get(params);
-        if (responsePublisher == null)
-        {
+        if (responsePublisher == null) {
             log.info("Creating new response publisher for new encountered instance {}", info);
             responsePublisher = new AeronPublisher(this.vegaContext, params);
             this.responsePublishersByParams.put(params, responsePublisher);
-        }
-        else
-        {
+        } else {
             log.info("Reusing existing response publisher for new instance {}", info);
         }
 
@@ -103,19 +102,17 @@ class ResponsePublishersManager implements Closeable
 
     /**
      * Called then there is a new timed out instance info event.
-     *
+     * <p>
      * It will detroy the associated response publisher if there are no more instances associated to it
      *
      * @param info the information event
      */
-    void onTimedOutAutoDiscInstanceInfo(final AutoDiscInstanceInfo info)
-    {
+    void onTimedOutAutoDiscInstanceInfo(final AutoDiscInstanceInfo info) {
         // Find the response publisher for the instance
         final AeronPublisher responsePublisher = this.responsePublishersByInstanceId.remove(info.getUniqueId());
 
         // It may not be there if is a duplicated event or was called after closed
-        if (responsePublisher == null)
-        {
+        if (responsePublisher == null) {
             return;
         }
 
@@ -123,12 +120,9 @@ class ResponsePublishersManager implements Closeable
         this.instanceIdsPerResponsePub.remove(responsePublisher, info.getUniqueId());
 
         // If the reponse publisher has no more instances related we should close it
-        if (this.instanceIdsPerResponsePub.containsKey(responsePublisher))
-        {
+        if (this.instanceIdsPerResponsePub.containsKey(responsePublisher)) {
             log.info("Response publisher still has related instances, won't be closed {}", info);
-        }
-        else
-        {
+        } else {
             log.info("Closing response publisher for new timed out instance {}", info);
 
             responsePublisher.close();
@@ -138,21 +132,19 @@ class ResponsePublishersManager implements Closeable
 
     /**
      * Return the number of stored distinct instances info
-     *
+     * <p>
      * Added for testing purposes
      */
-    long getNumRemoteInstancesInfo()
-    {
+    long getNumRemoteInstancesInfo() {
         return this.responsePublishersByInstanceId.size();
     }
 
     /**
      * Return the number response publishers created
-     *
+     * <p>
      * Added for testing purposes
      */
-    long getNumResponsePublishers()
-    {
+    long getNumResponsePublishers() {
         return this.responsePublishersByInstanceId.values().stream().distinct().count();
     }
 
@@ -163,14 +155,12 @@ class ResponsePublishersManager implements Closeable
      * @param info AutoDiscInstanceInfo of counterpart
      * @return a well-formed AeronPublisherParams for Response publishers
      */
-    private AeronPublisherParams createResponseAeronPublisherParams(AutoDiscInstanceInfo info)
-    {
+    private AeronPublisherParams createResponseAeronPublisherParams(AutoDiscInstanceInfo info) {
         //check the ip to use, by default informed ip
         final ResponsesConfig myResponseConfig = vegaContext.getInstanceConfig().getResponsesConfig();
 
         int addressIp = info.getResponseTransportIp();
-        if(myResponseConfig.getIsResolveHostname() && !myResponseConfig.getHostname().equals(info.getResponseTransportHostname()))
-        {
+        if (myResponseConfig.getIsResolveHostname() && !myResponseConfig.getHostname().equals(info.getResponseTransportHostname())) {
             addressIp = InetUtil.getIpAddressAsIntByHostnameOrDefault(info.getResponseTransportHostname(), info.getResponseTransportIp());
             log.trace("ResponsePublisher address ip obtained by hostname: [{}] from [{}]", addressIp, info);
         }

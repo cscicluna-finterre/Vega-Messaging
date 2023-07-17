@@ -4,12 +4,7 @@ import com.bbva.kyof.vega.config.general.GlobalConfiguration;
 import com.bbva.kyof.vega.config.general.IdleStrategyType;
 import com.bbva.kyof.vega.config.general.RcvPollerConfig;
 import com.bbva.kyof.vega.config.general.TransportMediaType;
-import com.bbva.kyof.vega.msg.IRcvMessage;
-import com.bbva.kyof.vega.msg.MsgReqHeader;
-import com.bbva.kyof.vega.msg.MsgType;
-import com.bbva.kyof.vega.msg.RcvMessage;
-import com.bbva.kyof.vega.msg.RcvRequest;
-import com.bbva.kyof.vega.msg.RcvResponse;
+import com.bbva.kyof.vega.msg.*;
 import com.bbva.kyof.vega.protocol.common.VegaContext;
 import com.bbva.kyof.vega.protocol.publisher.AeronPublisher;
 import com.bbva.kyof.vega.protocol.publisher.AeronPublisherParams;
@@ -26,19 +21,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class SubcribersPollerTest
-{
+public class SubcribersPollerTest {
     private static MediaDriver MEDIA_DRIVER;
     private static Aeron AERON;
     private static SubnetAddress SUBNET_ADDRESS;
@@ -51,8 +40,7 @@ public class SubcribersPollerTest
     private static AeronPublisher UCAST_PUBLISHER;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         final Aeron.Context ctx1 = new Aeron.Context();
@@ -88,8 +76,7 @@ public class SubcribersPollerTest
     }
 
     @AfterClass
-    public static void afterClass()
-    {
+    public static void afterClass() {
         IPC_SUBSCRIBER.close();
         MCAST_SUBSCRIBER.close();
         UCAST_SUBSCRIBER.close();
@@ -101,8 +88,7 @@ public class SubcribersPollerTest
     }
 
     @Test
-    public void createPollerWithNoSubscribers() throws Exception
-    {
+    public void createPollerWithNoSubscribers() throws Exception {
         // Create the config
         RcvPollerConfig config = RcvPollerConfig.builder().name("PollerName").idleStrategyType(IdleStrategyType.BACK_OFF).build();
         config.completeAndValidateConfig();
@@ -118,8 +104,7 @@ public class SubcribersPollerTest
     }
 
     @Test
-    public void createPollerAndPoll() throws Exception
-    {
+    public void createPollerAndPoll() throws Exception {
         // Create the config
         RcvPollerConfig config = RcvPollerConfig.builder().name("PollerName").idleStrategyType(IdleStrategyType.BACK_OFF).build();
         config.completeAndValidateConfig();
@@ -257,8 +242,7 @@ public class SubcribersPollerTest
     }
 
     @Test
-    public void pollMessagesOfMultipleSizesAndAssemble() throws Exception
-    {
+    public void pollMessagesOfMultipleSizesAndAssemble() throws Exception {
         // 1 Mega byte message size
         final int MAX_MSG_SIZE = 2 * 1024 * 1024;
 
@@ -267,8 +251,7 @@ public class SubcribersPollerTest
 
         // Create some random messages of different sizes
         final List<byte[]> randomMessages = new LinkedList<>();
-        for (int size = 1; size < MAX_MSG_SIZE; size = size * 2)
-        {
+        for (int size = 1; size < MAX_MSG_SIZE; size = size * 2) {
             final byte[] msg = new byte[size];
             rnd.nextBytes(msg);
             randomMessages.add(msg);
@@ -302,8 +285,7 @@ public class SubcribersPollerTest
         Assert.assertEquals(listener.rcvMessages.size(), randomMessages.size());
 
         // Check the contents
-        for (int i = 0; i < randomMessages.size(); i++)
-        {
+        for (int i = 0; i < randomMessages.size(); i++) {
             final IRcvMessage receivedMsg = listener.getRcvMessages().get(i);
 
             // Check length
@@ -321,8 +303,7 @@ public class SubcribersPollerTest
         poller.close();
     }
 
-    private static class Listener implements ISubscribersPollerListener
-    {
+    private static class Listener implements ISubscribersPollerListener {
         @Getter
         final Set<Integer> rcvMessagesContents = new HashSet<>();
         @Getter
@@ -343,71 +324,60 @@ public class SubcribersPollerTest
         final Set<UUID> rcvRespIds = new HashSet<>();
 
         @Override
-        public void onDataMsgReceived(RcvMessage msg)
-        {
+        public void onDataMsgReceived(RcvMessage msg) {
             rcvMessagesContents.add(msg.getContents().getInt(msg.getContentOffset()));
 
             rcvMessagesSecuences.add(msg.getSequenceNumber());
         }
 
         @Override
-        public void onEncryptedDataMsgReceived(RcvMessage msg)
-        {
+        public void onEncryptedDataMsgReceived(RcvMessage msg) {
             rcvEncryptedMessagesCount.getAndIncrement();
         }
 
         @Override
-        public void onDataRequestMsgReceived(RcvRequest request)
-        {
+        public void onDataRequestMsgReceived(RcvRequest request) {
             rcvRequestsByContentValue.add(request.getContents().getInt(request.getContentOffset()));
             rcvRequestsBySeqNumber.add(request.getSequenceNumber());
             rcvRequestIds.add(request.getRequestId());
         }
 
         @Override
-        public void onDataResponseMsgReceived(RcvResponse response)
-        {
+        public void onDataResponseMsgReceived(RcvResponse response) {
             rcvResponses.add(response.getContents().getInt(response.getContentOffset()));
             rcvRequestIds.add(response.getOriginalRequestId());
         }
 
         @Override
-        public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader)
-        {
+        public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader) {
             rcvHeartbeatRequestIds.add(heartbeatReqMsgHeader.getRequestId());
         }
     }
 
-    private static class SimpleListener implements ISubscribersPollerListener
-    {
+    private static class SimpleListener implements ISubscribersPollerListener {
         @Getter
         final List<IRcvMessage> rcvMessages = new LinkedList<>();
 
         @Override
-        public void onDataMsgReceived(RcvMessage msg)
-        {
+        public void onDataMsgReceived(RcvMessage msg) {
             rcvMessages.add(msg.promote());
         }
 
         @Override
-        public void onEncryptedDataMsgReceived(RcvMessage msg)
-        {
+        public void onEncryptedDataMsgReceived(RcvMessage msg) {
 
         }
 
         @Override
-        public void onDataRequestMsgReceived(RcvRequest request)
-        {
+        public void onDataRequestMsgReceived(RcvRequest request) {
         }
 
         @Override
-        public void onDataResponseMsgReceived(RcvResponse response)
-        {
+        public void onDataResponseMsgReceived(RcvResponse response) {
         }
 
         @Override
-        public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader)
-        {
+        public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader) {
 
         }
     }

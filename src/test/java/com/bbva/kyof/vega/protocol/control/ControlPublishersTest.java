@@ -20,8 +20,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 11/11/2016.
  */
-public class ControlPublishersTest
-{
+public class ControlPublishersTest {
     private static MediaDriver MEDIA_DRIVER;
     private static Aeron AERON;
     private static SubnetAddress SUBNET_ADDRESS;
@@ -29,8 +28,7 @@ public class ControlPublishersTest
     private static VegaContext VEGA_CONTEXT;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         final Aeron.Context ctx1 = new Aeron.Context();
@@ -53,15 +51,13 @@ public class ControlPublishersTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Test
-    public void testAddRemove()
-    {
+    public void testAddRemove() {
         final ControlPublishers controlPublishers = new ControlPublishers(VEGA_CONTEXT);
 
         // Notify about a new instance
@@ -145,8 +141,7 @@ public class ControlPublishersTest
     }
 
     @Test
-    public void testClose()
-    {
+    public void testClose() {
         final ControlPublishers controlPublishers = new ControlPublishers(VEGA_CONTEXT);
 
         // Create 3 instances

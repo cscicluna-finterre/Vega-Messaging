@@ -12,13 +12,11 @@ import java.util.Random;
 /**
  * Created by cnebrera on 15/11/2016.
  */
-public class AesTopicMsgEncoderTest
-{
+public class AesTopicMsgEncoderTest {
 
 
     @Test
-    public void encryptDecrypt() throws Exception
-    {
+    public void encryptDecrypt() throws Exception {
         final AesTopicMsgEncoder msgEncoder = new AesTopicMsgEncoder();
         AESCrypto aesDecoder = new AESCrypto(msgEncoder.getAESKey());
 
@@ -30,8 +28,7 @@ public class AesTopicMsgEncoderTest
         testWithMsgSize(msgEncoder, aesDecoder, rnd, 2048);
     }
 
-    private void testWithMsgSize(AesTopicMsgEncoder msgEncoder, AESCrypto aesDecoder, Random rnd, int msgSize) throws VegaException
-    {
+    private void testWithMsgSize(AesTopicMsgEncoder msgEncoder, AESCrypto aesDecoder, Random rnd, int msgSize) throws VegaException {
         final byte[] msg = new byte[msgSize];
         rnd.nextBytes(msg);
 
@@ -50,12 +47,10 @@ public class AesTopicMsgEncoderTest
         this.byteBufferEquals(msg, decodedMsg);
     }
 
-    private void byteBufferEquals(final byte[] array, final ByteBuffer buffer)
-    {
+    private void byteBufferEquals(final byte[] array, final ByteBuffer buffer) {
         Assert.assertTrue(array.length == buffer.limit());
 
-        for (int i = 0; i < buffer.limit(); i++)
-        {
+        for (int i = 0; i < buffer.limit(); i++) {
             Assert.assertEquals(array[i], buffer.get(i));
         }
     }

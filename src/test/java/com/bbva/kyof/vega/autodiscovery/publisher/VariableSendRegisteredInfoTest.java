@@ -6,11 +6,9 @@ import org.junit.Test;
 /**
  * Created by cnebrera on 09/08/16.
  */
-public class VariableSendRegisteredInfoTest
-{
+public class VariableSendRegisteredInfoTest {
     @Test
-    public void shouldSend() throws Exception
-    {
+    public void shouldSend() throws Exception {
         // Create registered info instance
         final VariableSendRegisteredInfo<Integer> registeredInfo = new VariableSendRegisteredInfo<>(128, 100, 1000, 2);
 
@@ -50,16 +48,14 @@ public class VariableSendRegisteredInfoTest
         Assert.assertTrue(sendTime >= 995 && sendTime <= 1005);
     }
 
-    private long waitForSendTime(final VariableSendRegisteredInfo<Integer> registeredInfo) throws Exception
-    {
-        while(registeredInfo.getIfShouldSendAndResetIfRequired(System.currentTimeMillis()) == null);
+    private long waitForSendTime(final VariableSendRegisteredInfo<Integer> registeredInfo) throws Exception {
+        while (registeredInfo.getIfShouldSendAndResetIfRequired(System.currentTimeMillis()) == null) ;
 
         return System.currentTimeMillis();
     }
 
     @Test
-    public void equalsAndHashCode() throws Exception
-    {
+    public void equalsAndHashCode() throws Exception {
         // Create registered info instances
         final RegisteredInfo<Integer> registeredInfo1 = new RegisteredInfo<>(128, 100);
         final RegisteredInfo<Integer> registeredInfo2 = new RegisteredInfo<>(128, 90);

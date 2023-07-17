@@ -17,13 +17,13 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class TopicPublisherIpcMcastTest
-{
+public class TopicPublisherIpcMcastTest {
     private TopicTemplateConfig topicConfig;
     private VegaContext vegaContext;
     private AsyncRequestManager asyncRequestManager;
@@ -31,8 +31,7 @@ public class TopicPublisherIpcMcastTest
     private int sentMessages;
 
     @Before
-    public void beforeTest()
-    {
+    public void beforeTest() {
         sentMessages = 0;
         sentRequests = 0;
 
@@ -44,20 +43,18 @@ public class TopicPublisherIpcMcastTest
     }
 
     @After
-    public void afterTest()
-    {
+    public void afterTest() {
         asyncRequestManager.close();
     }
 
     @Test
-    public void testSendAndClose() throws Exception
-    {
+    public void testSendAndClose() throws Exception {
         final TopicPublisherIpcMcast topicPublisher = new TopicPublisherIpcMcast("topic", topicConfig, vegaContext);
 
         // Create the Aeron publishers
         AeronPublisher publisher1 = createAeronPublisherMock(PublishResult.OK);
         topicPublisher.setAeronPublisher(publisher1);
-        
+
         // Check sequence number before sending a message
         Assert.assertEquals(0, topicPublisher.getSequenceNumber());
 
@@ -65,7 +62,7 @@ public class TopicPublisherIpcMcastTest
         UnsafeBuffer message = new UnsafeBuffer(ByteBuffer.allocate(1024));
         Assert.assertEquals(topicPublisher.sendMsg(message, 0, 1024), PublishResult.OK);
         Assert.assertEquals(1, this.sentMessages);
-        
+
         // Check sequence number after sending a message
         assertEquals(1, topicPublisher.getSequenceNumber());
 
@@ -75,7 +72,7 @@ public class TopicPublisherIpcMcastTest
         Assert.assertEquals(sentRequest.getSentResult(), PublishResult.OK);
         Assert.assertEquals(1, this.sentRequests);
         Assert.assertEquals(1, this.sentMessages);
-        
+
         // Check sequence number after sending a request
         Assert.assertEquals(2, topicPublisher.getSequenceNumber());
 
@@ -94,8 +91,7 @@ public class TopicPublisherIpcMcastTest
         count.set(0);
         topicPublisher.runForAeronPublisher((aeronPublisher) ->
         {
-            if (aeronPublisher != null)
-            {
+            if (aeronPublisher != null) {
                 count.getAndIncrement();
             }
         });
@@ -112,8 +108,7 @@ public class TopicPublisherIpcMcastTest
     }
 
     @Test
-    public void testBackPressureError()
-    {
+    public void testBackPressureError() {
         final TopicPublisherUnicast topicPublisher = new TopicPublisherUnicast("topic", topicConfig, vegaContext);
 
         // Create the Aeron publishers
@@ -131,8 +126,7 @@ public class TopicPublisherIpcMcastTest
     }
 
     @Test
-    public void testUnexpectedError()
-    {
+    public void testUnexpectedError() {
         final TopicPublisherUnicast topicPublisher = new TopicPublisherUnicast("topic", topicConfig, vegaContext);
 
         // Create the Aeron publishers
@@ -149,8 +143,7 @@ public class TopicPublisherIpcMcastTest
         assertEquals(1, this.sentRequests);
     }
 
-    private AeronPublisher createAeronPublisherMock(PublishResult pubResult)
-    {
+    private AeronPublisher createAeronPublisherMock(PublishResult pubResult) {
         AeronPublisher publisher = EasyMock.createNiceMock(AeronPublisher.class);
         EasyMock.expect(publisher.sendMessage(EasyMock.anyByte(), EasyMock.anyObject(), EasyMock.anyObject(), EasyMock.anyLong(), EasyMock.anyInt(), EasyMock.anyInt())).andAnswer(() -> this.sendMessage(pubResult)).anyTimes();
         EasyMock.expect(publisher.sendRequest(EasyMock.anyByte(), EasyMock.anyObject(), EasyMock.anyObject(), EasyMock.anyObject(), EasyMock.anyLong(), EasyMock.anyInt(), EasyMock.anyInt())).andAnswer(() -> this.sendRequest(pubResult)).anyTimes();
@@ -158,14 +151,12 @@ public class TopicPublisherIpcMcastTest
         return publisher;
     }
 
-    private PublishResult sendRequest(PublishResult pubResult)
-    {
+    private PublishResult sendRequest(PublishResult pubResult) {
         sentRequests++;
         return pubResult;
     }
 
-    private PublishResult sendMessage(PublishResult pubResult)
-    {
+    private PublishResult sendMessage(PublishResult pubResult) {
         System.out.println("Send message " + pubResult);
         sentMessages++;
         return pubResult;

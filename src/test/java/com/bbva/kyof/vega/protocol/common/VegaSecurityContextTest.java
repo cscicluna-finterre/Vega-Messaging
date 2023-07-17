@@ -12,16 +12,14 @@ import java.util.Set;
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class VegaSecurityContextTest
-{
+public class VegaSecurityContextTest {
     private static final String KEYS_DIR = SecurityParamsTest.class.getClassLoader().getResource("keys").getPath();
 
     private final Set<Integer> topicSecurityIds = new HashSet<>();
     private final Set<Integer> encryptedTopicSecurityIds = new HashSet<>();
 
     @Before
-    public void before()
-    {
+    public void before() {
         topicSecurityIds.add(11111);
         topicSecurityIds.add(22222);
         encryptedTopicSecurityIds.add(88888);
@@ -29,15 +27,13 @@ public class VegaSecurityContextTest
     }
 
     @Test
-    public void testNoSecurity() throws VegaException
-    {
+    public void testNoSecurity() throws VegaException {
         final VegaSecurityContext securityContext = new VegaSecurityContext(null, null);
         Assert.assertFalse(securityContext.hasSecurity());
     }
 
     @Test
-    public void testPlainSecurity() throws VegaException
-    {
+    public void testPlainSecurity() throws VegaException {
         final SecurityParams plainParams = SecurityParams.builder().
                 keySecurityType(KeySecurityType.PLAIN_KEY_FILE).
                 securityId(11111).
@@ -56,8 +52,7 @@ public class VegaSecurityContextTest
     }
 
     @Test
-    public void testEncryptedSecurity() throws VegaException
-    {
+    public void testEncryptedSecurity() throws VegaException {
         final SecurityParams plainParams = SecurityParams.builder().
                 keySecurityType(KeySecurityType.ENCRYPTED_KEY_FILE).
                 securityId(88888).
@@ -77,8 +72,7 @@ public class VegaSecurityContextTest
     }
 
     @Test(expected = VegaException.class)
-    public void testEncryptedSecurityWithNonEncryptedPrivKey() throws VegaException
-    {
+    public void testEncryptedSecurityWithNonEncryptedPrivKey() throws VegaException {
         final SecurityParams plainParams = SecurityParams.builder().
                 keySecurityType(KeySecurityType.ENCRYPTED_KEY_FILE).
                 securityId(11111).

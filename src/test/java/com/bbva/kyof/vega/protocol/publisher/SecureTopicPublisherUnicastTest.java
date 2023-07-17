@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,15 +19,13 @@ import java.util.Set;
 /**
  * Created by cnebrera on 15/11/2016.
  */
-public class SecureTopicPublisherUnicastTest
-{
+public class SecureTopicPublisherUnicastTest {
     private TopicTemplateConfig topicConfig;
     private TopicSecurityTemplateConfig securityTemplateConfig;
     private VegaContext vegaContext;
 
     @Before
-    public void beforeTest()
-    {
+    public void beforeTest() {
         topicConfig = TopicTemplateConfig.builder().name("name").transportType(TransportMediaType.MULTICAST).build();
         final Set<Integer> pubTopic1SecureSubs = new HashSet<>(Collections.singletonList(22222));
         final Set<Integer> pubTopic1SecurePubs = new HashSet<>(Collections.singletonList(11111));
@@ -38,8 +35,7 @@ public class SecureTopicPublisherUnicastTest
     }
 
     @Test
-    public void test() throws Exception
-    {
+    public void test() throws Exception {
         final SecureTopicPublisherUnicast topicPublisher = new SecureTopicPublisherUnicast("topic", topicConfig, vegaContext, securityTemplateConfig);
 
         // Create the Aeron publishers
@@ -58,8 +54,7 @@ public class SecureTopicPublisherUnicastTest
         topicPublisher.sendToAeron(messageBuffer, 0, 0, 4);
     }
 
-    private AeronPublisher createAeronPublisherMock()
-    {
+    private AeronPublisher createAeronPublisherMock() {
         AeronPublisher publisher = EasyMock.createNiceMock(AeronPublisher.class);
         EasyMock.replay(publisher);
         return publisher;

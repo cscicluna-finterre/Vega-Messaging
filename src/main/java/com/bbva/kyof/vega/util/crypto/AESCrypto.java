@@ -8,25 +8,36 @@ import java.util.Random;
 
 /**
  * Helper class to perform AES cryptography.
- *
+ * <p>
  * This class is not thread safe!!
  */
-public class AESCrypto
-{
-    /** Additional space for AES metadata */
+public class AESCrypto {
+    /**
+     * Additional space for AES metadata
+     */
     public static final int AES_METADATA_SPACE = 128;
 
-    /** Random value for the key generation */
+    /**
+     * Random value for the key generation
+     */
     private static final Random RND = new Random(System.currentTimeMillis());
 
-    /** Size of the AES key in bytes */
+    /**
+     * Size of the AES key in bytes
+     */
     public static final int DEFAULT_KEY_SIZE = 16;
 
-    /** The AES key that will be used to encode / decode */
+    /**
+     * The AES key that will be used to encode / decode
+     */
     private final byte[] aesKey;
-    /** The Cipher that will encode the messages */
+    /**
+     * The Cipher that will encode the messages
+     */
     private final CipherWrapper encoder;
-    /** The Cipher that will decode the messages */
+    /**
+     * The Cipher that will decode the messages
+     */
     private final CipherWrapper decoder;
 
     /**
@@ -35,8 +46,7 @@ public class AESCrypto
      * @param key the key to encode and decode
      * @throws VegaException exception thrown if there is a problem creating the internal encoding classes
      */
-    public AESCrypto(final byte[] key) throws VegaException
-    {
+    public AESCrypto(final byte[] key) throws VegaException {
         // Store the binary key
         this.aesKey = key.clone();
 
@@ -54,13 +64,11 @@ public class AESCrypto
      * @return the created instance
      * @throws VegaException exception thrown if the instance cannot be created
      */
-    public static AESCrypto createNewInstance() throws VegaException
-    {
+    public static AESCrypto createNewInstance() throws VegaException {
         // Create the random key
         final byte[] rndKey = new byte[DEFAULT_KEY_SIZE];
 
-        synchronized (RND)
-        {
+        synchronized (RND) {
             RND.nextBytes(rndKey);
         }
 
@@ -69,21 +77,21 @@ public class AESCrypto
 
     /**
      * Calculate the expected encrypted size of the message
+     *
      * @param msgToEncrypt the message to encrypt, it will consider the content from possition to limit
      * @return the size of the encrypted message
      */
-    public int expectedEncryptedSize(final ByteBuffer msgToEncrypt)
-    {
+    public int expectedEncryptedSize(final ByteBuffer msgToEncrypt) {
         return (msgToEncrypt.limit() - msgToEncrypt.position()) + AES_METADATA_SPACE;
     }
 
     /**
      * Calculate the expected encrypted size of the message
+     *
      * @param msgToEncrypt the message to encrypt
      * @return the size of the encrypted message
      */
-    public int expectedEncryptedSize(final byte[] msgToEncrypt)
-    {
+    public int expectedEncryptedSize(final byte[] msgToEncrypt) {
         return msgToEncrypt.length + AES_METADATA_SPACE;
     }
 
@@ -92,8 +100,7 @@ public class AESCrypto
      *
      * @return the AES key used by this encoder / decoder
      */
-    public byte[] getAESKey()
-    {
+    public byte[] getAESKey() {
         return this.aesKey;
     }
 
@@ -104,22 +111,20 @@ public class AESCrypto
      * @return the encoded message
      * @throws VegaException exception thrown if there is a problem encoding the message
      */
-    public byte[] encode(final byte[] msg) throws VegaException
-    {
+    public byte[] encode(final byte[] msg) throws VegaException {
         return this.encoder.runCipher(msg);
     }
 
     /**
      * Encode the given message and return the AES encoding with the key used during creation of the class
-     *
+     * <p>
      * This method is slower than using byte arrays directly
      *
-     * @param msgToEncode ByteBuffer containing the message that should be encoded
+     * @param msgToEncode  ByteBuffer containing the message that should be encoded
      * @param targetBuffer Buffer where the encoding result will be stored
      * @throws VegaException exception thrown if there is a problem encoding the message
      */
-    public void encode(final ByteBuffer msgToEncode, final ByteBuffer targetBuffer) throws VegaException
-    {
+    public void encode(final ByteBuffer msgToEncode, final ByteBuffer targetBuffer) throws VegaException {
         this.encoder.runCipher(msgToEncode, targetBuffer);
     }
 
@@ -130,22 +135,20 @@ public class AESCrypto
      * @return the decoded message
      * @throws VegaException exception thrown if there is a problem decoding the message
      */
-    public byte[] decode(final byte[] msg) throws VegaException
-    {
+    public byte[] decode(final byte[] msg) throws VegaException {
         return decoder.runCipher(msg);
     }
 
     /**
      * Decode the given message and return the AES decoding with the key used during creation of the class.
-     *
+     * <p>
      * This method is slower than using byte arrays directly
      *
-     * @param msgToDecode ByteBuffer containing the message that should be decoded
+     * @param msgToDecode  ByteBuffer containing the message that should be decoded
      * @param resultBuffer The buffer where the decoded message will be stored
      * @throws VegaException exception thrown if there is an internal problem decoding the message
      */
-    public void decode(final ByteBuffer msgToDecode, final ByteBuffer resultBuffer) throws VegaException
-    {
+    public void decode(final ByteBuffer msgToDecode, final ByteBuffer resultBuffer) throws VegaException {
         decoder.runCipher(msgToDecode, resultBuffer);
     }
 }

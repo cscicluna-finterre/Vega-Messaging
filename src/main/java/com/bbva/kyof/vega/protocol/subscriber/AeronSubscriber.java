@@ -12,34 +12,39 @@ import java.io.Closeable;
 
 /**
  * Wrapper class to encapsulate an Aeron Subscriber.
- *
+ * <p>
  * The objective of the class is to ensure thread safety, store all topics subscribers related to the aeron subscriber and perform the polling over
  * the aeron socket.
- *
+ * <p>
  * It also handles the lifecycle of the subscriber.
- *
+ * <p>
  * This class is thread safe!!
  */
 @Slf4j
-class AeronSubscriber implements Closeable
-{
-    /** Parameters of the aeron subscriber */
-    @Getter private final AeronSubscriberParams params;
+class AeronSubscriber implements Closeable {
+    /**
+     * Parameters of the aeron subscriber
+     */
+    @Getter
+    private final AeronSubscriberParams params;
 
-    /** Aeron subscription wrapped by this subscriber */
+    /**
+     * Aeron subscription wrapped by this subscriber
+     */
     private final Subscription subscription;
 
-    /** Object for instance synchronization */
+    /**
+     * Object for instance synchronization
+     */
     private final Object lock = new Object();
 
     /**
      * Create a new Aeron Subscriber
      *
      * @param vegaContext library instance context
-     * @param params parameters for the susbcriber
+     * @param params      parameters for the susbcriber
      */
-    AeronSubscriber(final VegaContext vegaContext, final AeronSubscriberParams params)
-    {
+    AeronSubscriber(final VegaContext vegaContext, final AeronSubscriberParams params) {
         this.params = params;
 
         // Create the Aeron subscriber channel
@@ -53,15 +58,13 @@ class AeronSubscriber implements Closeable
 
     /**
      * Create the subscription channel given the parameters
-     * @param params the parameters of hte usbscriber
      *
+     * @param params the parameters of hte usbscriber
      * @return the created channel String representation
      */
-    private String createSubscriptionChannel(final AeronSubscriberParams params)
-    {
+    private String createSubscriptionChannel(final AeronSubscriberParams params) {
         // Create the publication channel string
-        switch (params.getTransportType())
-        {
+        switch (params.getTransportType()) {
             case UNICAST:
                 return AeronChannelHelper.createUnicastChannelString(params.getIpAddress(), params.getPort(), params.getSubnetAddress());
             case MULTICAST:
@@ -74,12 +77,9 @@ class AeronSubscriber implements Closeable
     }
 
     @Override
-    public void close()
-    {
-        synchronized (this.lock)
-        {
-            if (this.subscription.isClosed())
-            {
+    public void close() {
+        synchronized (this.lock) {
+            if (this.subscription.isClosed()) {
                 return;
             }
 
@@ -93,16 +93,13 @@ class AeronSubscriber implements Closeable
      * Perform a reception poll
      *
      * @param fragmentHandler the fragment handler that will process the message
-     * @param maxFragments maximum number of fragments to get in the polling
+     * @param maxFragments    maximum number of fragments to get in the polling
      * @return the number of messages retrieved
      */
-    public int poll(final FragmentHandler fragmentHandler, final int maxFragments)
-    {
-        synchronized (this.lock)
-        {
+    public int poll(final FragmentHandler fragmentHandler, final int maxFragments) {
+        synchronized (this.lock) {
             // Check if closed, it may happen that a poll is performed while it is being closed or after until removed from poller
-            if (this.subscription.isClosed())
-            {
+            if (this.subscription.isClosed()) {
                 return 0;
             }
 

@@ -9,17 +9,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class create to test {@link HashMapStack}
- *
+ * <p>
  * Created by XE52727 on 13/07/2016.
  */
-public class HashMapStackTest
-{
-    /** Instance of collection */
+public class HashMapStackTest {
+    /**
+     * Instance of collection
+     */
     private HashMapStack<Integer, String> hashMapStack;
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
         // Create the collection
         this.hashMapStack = new HashMapStack<>();
 
@@ -31,23 +31,20 @@ public class HashMapStackTest
     }
 
     @After
-    public void tearDown()
-    {
+    public void tearDown() {
         // Clear instance
         this.hashMapStack.clear();
     }
 
     @Test
-    public void tesConstructors()
-    {
+    public void tesConstructors() {
         new HashMapStack<>();
         new HashMapStack<>(5);
         new HashMapStack<>(5, 2);
     }
 
     @Test
-    public void testGet()
-    {
+    public void testGet() {
         Assert.assertEquals(this.hashMapStack.get(1), "1");
         Assert.assertEquals(this.hashMapStack.get(4), "4");
         Assert.assertNull(this.hashMapStack.remove(5));
@@ -55,8 +52,7 @@ public class HashMapStackTest
     }
 
     @Test
-    public void testPutAndRemoveTwice()
-    {
+    public void testPutAndRemoveTwice() {
         Assert.assertFalse(this.hashMapStack.put(1, "1"));
         Assert.assertTrue(this.hashMapStack.put(5, "5"));
         Assert.assertEquals(this.hashMapStack.remove(5), "5");
@@ -64,8 +60,7 @@ public class HashMapStackTest
     }
 
     @Test
-    public void testGetEldestNewestValue()
-    {
+    public void testGetEldestNewestValue() {
         // Check eldest entry
         Assert.assertEquals("1", this.hashMapStack.getEldestValue());
 
@@ -74,8 +69,7 @@ public class HashMapStackTest
     }
 
     @Test
-    public void testSingleElement()
-    {
+    public void testSingleElement() {
         final HashMapStack<Integer, String> map = new HashMapStack<>();
 
         // Add a single element
@@ -98,8 +92,7 @@ public class HashMapStackTest
     }
 
     @Test
-    public void testRemoveAddAndEldestNewest()
-    {
+    public void testRemoveAddAndEldestNewest() {
         // Remove the oldest element
         this.hashMapStack.remove(1);
 
@@ -140,8 +133,7 @@ public class HashMapStackTest
     }
 
     @Test
-    public void testRemoveAndPut()
-    {
+    public void testRemoveAndPut() {
         // Remove an element, should have been moved to be the newest
         this.hashMapStack.removeAndPut(3, "3");
 
@@ -154,16 +146,14 @@ public class HashMapStackTest
     }
 
     @Test
-    public void testConsumeAll()
-    {
+    public void testConsumeAll() {
         final AtomicInteger sum = new AtomicInteger(0);
         this.hashMapStack.consumeAllValues((value) -> sum.addAndGet(Integer.valueOf(value)));
         Assert.assertEquals(sum.get(), 10);
     }
 
     @Test
-    public void testClearMap()
-    {
+    public void testClearMap() {
         // Clear instance
         this.hashMapStack.clear();
 
@@ -172,15 +162,14 @@ public class HashMapStackTest
     }
 
     @Test
-    public void testGetHashMapSize()
-    {
+    public void testGetHashMapSize() {
         HashMapStack hashMapStack = new HashMapStack<>(5);
         Assert.assertEquals(0, hashMapStack.size());
-        hashMapStack.put("1",1);
+        hashMapStack.put("1", 1);
         Assert.assertEquals(1, hashMapStack.size());
-        hashMapStack.put("2",2);
+        hashMapStack.put("2", 2);
         Assert.assertEquals(2, hashMapStack.size());
-        hashMapStack.put("10",10);
+        hashMapStack.put("10", 10);
         Assert.assertEquals(3, hashMapStack.size());
     }
 }

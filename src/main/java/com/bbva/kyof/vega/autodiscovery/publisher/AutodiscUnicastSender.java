@@ -13,13 +13,18 @@ import java.io.Closeable;
  * Implementation of auto-discovery sender handler for unicast auto-discovery type
  */
 @Slf4j
-public class AutodiscUnicastSender extends AbstractAutodiscSender implements Closeable
-{
-    /** Client info min send interval */
+public class AutodiscUnicastSender extends AbstractAutodiscSender implements Closeable {
+    /**
+     * Client info min send interval
+     */
     private static final long CLIENT_INFO_MIN_SEND_INTERVAL = 10;
-    /** Client info max send interval */
+    /**
+     * Client info max send interval
+     */
     private static final long CLIENT_INFO_MAX_SEND_INTERVAL = 500;
-    /** Client info send interval increment factor */
+    /**
+     * Client info send interval increment factor
+     */
     private static final int CLIENT_INFO_SEND_INC_FACTOR = 2;
 
     /**
@@ -29,25 +34,29 @@ public class AutodiscUnicastSender extends AbstractAutodiscSender implements Clo
      */
     private volatile VariableSendRegisteredInfo<AutoDiscDaemonClientInfo> registeredDaemonClientInfo = null;
 
-    /** Publication aeron socket used to send the messages */
+    /**
+     * Publication aeron socket used to send the messages
+     */
     private PublicationInfo publicationInfo;
 
-    /** Manager for all the publishers of unicast daemon servers*/
+    /**
+     * Manager for all the publishers of unicast daemon servers
+     */
     private final IPublicationsManager publicationsManager;
 
     /**
      * Creates a new auto-discovery unicast sender
-     * @param aeron the aeron instance
-     * @param config the configuration for autodiscovery
-     * @param daemonClientInfo the information of the daemon client with the reception socket information
+     *
+     * @param aeron                the aeron instance
+     * @param config               the configuration for autodiscovery
+     * @param daemonClientInfo     the information of the daemon client with the reception socket information
      * @param pPublicationsManager PublicationsManager instance
      */
     public AutodiscUnicastSender(
             final Aeron aeron,
             final AutoDiscoveryConfig config,
             final AutoDiscDaemonClientInfo daemonClientInfo,
-            final IPublicationsManager pPublicationsManager)
-    {
+            final IPublicationsManager pPublicationsManager) {
         super(aeron, config);
         this.registeredDaemonClientInfo = new VariableSendRegisteredInfo<>(daemonClientInfo, CLIENT_INFO_MIN_SEND_INTERVAL, CLIENT_INFO_MAX_SEND_INTERVAL, CLIENT_INFO_SEND_INC_FACTOR);
         this.publicationsManager = pPublicationsManager;
@@ -61,26 +70,23 @@ public class AutodiscUnicastSender extends AbstractAutodiscSender implements Clo
      *
      * @return the created Aeron publication
      */
-    private PublicationInfo getPublicationInfo()
-    {
+    private PublicationInfo getPublicationInfo() {
         return this.publicationsManager.getRandomPublicationInfo();
     }
 
     @Override
-    public Publication getPublication(){
+    public Publication getPublication() {
         //If the actual selected publicationInfo is null or it becomes disable,
         // and does exists another publication enabled, change it
         // It it does not exists another enabled, maintains the old disabled one
         // (to maintain the old environment)
-        if( (this.publicationInfo == null || !this.publicationInfo.getEnabled()) &&
-                this.publicationsManager.hasEnabledPublications() )
-        {
+        if ((this.publicationInfo == null || !this.publicationInfo.getEnabled()) &&
+                this.publicationsManager.hasEnabledPublications()) {
             this.publicationInfo = publicationsManager.getRandomPublicationInfo();
         }
 
         //If the publicationInfo is not null, return the publication
-        if(this.publicationInfo != null)
-        {
+        if (this.publicationInfo != null) {
             return this.publicationInfo.getPublication();
         }
 
@@ -89,8 +95,7 @@ public class AutodiscUnicastSender extends AbstractAutodiscSender implements Clo
     }
 
     @Override
-    public int sendNextTopicAdverts()
-    {
+    public int sendNextTopicAdverts() {
         // Get the daemon client info it if should be sent
         final AutoDiscDaemonClientInfo daemonClientInfo = this.registeredDaemonClientInfo.getIfShouldSendAndResetIfRequired(System.currentTimeMillis());
 
@@ -102,12 +107,10 @@ public class AutodiscUnicastSender extends AbstractAutodiscSender implements Clo
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         log.info("Closing auto discovery sender: publications");
 
-        for(int i = 0; i < this.publicationsManager.getPublicationsInfoArray().length; i++)
-        {
+        for (int i = 0; i < this.publicationsManager.getPublicationsInfoArray().length; i++) {
             this.publicationsManager.getPublicationsInfoArray()[i].getPublication().close();
         }
         super.close();

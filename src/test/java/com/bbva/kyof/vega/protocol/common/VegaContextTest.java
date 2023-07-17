@@ -23,15 +23,13 @@ import java.util.Set;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Aeron.class)
-@PowerMockIgnore({ "javax.xml.*", "org.xml.sax.*", "org.w3c.*", "javax.crypto.*" })
-public class VegaContextTest
-{
+@PowerMockIgnore({"javax.xml.*", "org.xml.sax.*", "org.w3c.*", "javax.crypto.*"})
+public class VegaContextTest {
     private static final String KEYS_DIR = SecurityParamsTest.class.getClassLoader().getResource("keys").getPath();
     private VegaContext vegaContext;
 
     @Before
-    public void before()
-    {
+    public void before() {
         final Aeron aeron = PowerMock.createNiceMock(Aeron.class);
         PowerMock.replayAll(aeron);
 
@@ -53,8 +51,7 @@ public class VegaContextTest
     }
 
     @Test
-    public void testConstructorGettersAndSetters()
-    {
+    public void testConstructorGettersAndSetters() {
         // Now set the missing parameters
         IAutodiscManager autoDiscManager = PowerMock.createNiceMock(AutodiscManager.class);
         AsyncRequestManager reqManager = PowerMock.createNiceMock(AsyncRequestManager.class);
@@ -68,14 +65,12 @@ public class VegaContextTest
     }
 
     @Test
-    public void testStopHeartbeatsTimer()
-    {
+    public void testStopHeartbeatsTimer() {
         vegaContext.stopHeartsbeatTimer();
     }
 
     @Test
-    public void testInitializeSecurity() throws VegaException
-    {
+    public void testInitializeSecurity() throws VegaException {
         final SecurityParams plainParams = SecurityParams.builder().keySecurityType(KeySecurityType.PLAIN_KEY_FILE).securityId(11111).privateKeyDirPath(KEYS_DIR).publicKeysDirPath(KEYS_DIR).build();
         plainParams.validateParams();
 

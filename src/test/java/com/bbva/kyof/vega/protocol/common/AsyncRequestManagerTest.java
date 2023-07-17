@@ -11,23 +11,20 @@ import java.util.*;
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class AsyncRequestManagerTest
-{
+public class AsyncRequestManagerTest {
     AsyncRequestManager requestManager;
     UUID instanceId;
     List<SentRequest> requests;
 
     @Before
-    public void before()
-    {
+    public void before() {
         requests = new LinkedList<>();
         instanceId = UUID.randomUUID();
         requestManager = new AsyncRequestManager(instanceId);
     }
 
     @Test
-    public void action() throws Exception
-    {
+    public void action() throws Exception {
         requestManager.close();
 
         // Make sure that after closing all requests have expired
@@ -35,8 +32,7 @@ public class AsyncRequestManagerTest
     }
 
     @Test
-    public void addRequestAndWaitForTimeout() throws Exception
-    {
+    public void addRequestAndWaitForTimeout() throws Exception {
         final Listener listener = new Listener();
 
         SentRequest sentRequest = new SentRequest("topic", 100, listener, new Random());
@@ -57,8 +53,7 @@ public class AsyncRequestManagerTest
     }
 
     @Test
-    public void closeRequestAndWaitForTimeout() throws Exception
-    {
+    public void closeRequestAndWaitForTimeout() throws Exception {
         final Listener listener = new Listener();
 
         SentRequest sentRequest = new SentRequest("topic", 100, listener, new Random());
@@ -76,8 +71,7 @@ public class AsyncRequestManagerTest
     }
 
     @Test
-    public void extendExpirationTime() throws Exception
-    {
+    public void extendExpirationTime() throws Exception {
         final Listener listener = new Listener();
 
         SentRequest sentRequest = new SentRequest("topic", 100, listener, new Random());
@@ -103,8 +97,7 @@ public class AsyncRequestManagerTest
     }
 
     @Test
-    public void responseReceived() throws Exception
-    {
+    public void responseReceived() throws Exception {
         final Listener listener = new Listener();
 
         SentRequest sentRequest = new SentRequest("topic", 100, listener, new Random());
@@ -133,8 +126,7 @@ public class AsyncRequestManagerTest
     }
 
     @Test
-    public void responseReceivedAndClose() throws Exception
-    {
+    public void responseReceivedAndClose() throws Exception {
         final Listener listener = new Listener();
 
         SentRequest sentRequest = new SentRequest("topic", 100, listener, new Random());
@@ -164,8 +156,7 @@ public class AsyncRequestManagerTest
     }
 
     @Test
-    public void responseReceivedAfterClose() throws Exception
-    {
+    public void responseReceivedAfterClose() throws Exception {
         final Listener listener = new Listener();
 
         SentRequest sentRequest = new SentRequest("topic", 100, listener, new Random());
@@ -197,8 +188,7 @@ public class AsyncRequestManagerTest
     }
 
     @Test
-    public void wrongResponseReceived() throws Exception
-    {
+    public void wrongResponseReceived() throws Exception {
         final Listener listener = new Listener();
 
         requestManager.addNewRequest(new SentRequest("topic", 100, listener, new Random()));
@@ -207,29 +197,28 @@ public class AsyncRequestManagerTest
     }
 
     @Test
-    public void closeRequestsAfterClosingManager() throws Exception
-    {
+    public void closeRequestsAfterClosingManager() throws Exception {
         final Listener listener = new Listener();
 
         SentRequest sentRequest = new SentRequest("topic", 100, listener, new Random());
         requestManager.addNewRequest(sentRequest);
     }
 
-    class Listener implements IResponseListener
-    {
-        @Getter final Set<UUID> timedOutRequests = new HashSet<>();
-        @Getter final Set<UUID> responseReceivedRequests = new HashSet<>();
-        @Getter final Set<UUID> receivedResponses = new HashSet<>();
+    class Listener implements IResponseListener {
+        @Getter
+        final Set<UUID> timedOutRequests = new HashSet<>();
+        @Getter
+        final Set<UUID> responseReceivedRequests = new HashSet<>();
+        @Getter
+        final Set<UUID> receivedResponses = new HashSet<>();
 
         @Override
-        public void onRequestTimeout(ISentRequest originalSentRequest)
-        {
+        public void onRequestTimeout(ISentRequest originalSentRequest) {
             timedOutRequests.add(originalSentRequest.getRequestId());
         }
 
         @Override
-        public void onResponseReceived(ISentRequest originalSentRequest, IRcvResponse response)
-        {
+        public void onResponseReceived(ISentRequest originalSentRequest, IRcvResponse response) {
             responseReceivedRequests.add(originalSentRequest.getRequestId());
             receivedResponses.add(response.getOriginalRequestId());
         }

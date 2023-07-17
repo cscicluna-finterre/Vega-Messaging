@@ -12,9 +12,10 @@ import com.bbva.kyof.vega.autodiscovery.subscriber.IAutodiscTopicSubListener;
  * Interface implemented by the auto discovery manager that contains all method to interact with the
  * auto-discovery process.
  */
-public interface IAutodiscManager
-{
-    /** Start the auto-discovery process */
+public interface IAutodiscManager {
+    /**
+     * Start the auto-discovery process
+     */
     void start();
 
     /**
@@ -79,28 +80,28 @@ public interface IAutodiscManager
     /**
      * Subscribe to receive topic adverts for the given topic and transport type
      *
-     * @param topicName name of the topic to subscribeToSubscribers to
+     * @param topicName     name of the topic to subscribeToSubscribers to
      * @param transportType transport type and direction
-     * @param listener listener that will receive the notifications of adverts related to the subscribed topic
+     * @param listener      listener that will receive the notifications of adverts related to the subscribed topic
      */
     void subscribeToTopic(String topicName, AutoDiscTransportType transportType, IAutodiscTopicSubListener listener);
 
     /**
      * Unsubscribe from topic adverts for the given topic and transport type
      *
-     * @param topicName name of the topic to unsubscribeFromSubscribers from
+     * @param topicName     name of the topic to unsubscribeFromSubscribers from
      * @param transportType transport type and direction
-     * @param listener listener that was receiving the adverts of the subcribed topic
+     * @param listener      listener that was receiving the adverts of the subcribed topic
      */
     void unsubscribeFromTopic(String topicName, AutoDiscTransportType transportType, IAutodiscTopicSubListener listener);
 
     /**
      * Add a listener to receive events related to added or removed publisher topic names on the domain.
-     *
+     * <p>
      * It will be triggered by topic name, not topic info, by grouping the information of all topic infos with the same name
      *
      * @param topicPattern the java string pattern to check the topic name against
-     * @param listener the listener for events triggered due to the pattern
+     * @param listener     the listener for events triggered due to the pattern
      */
     void subscribeToPubTopicPattern(String topicPattern, IAutodiscPubTopicPatternListener listener);
 

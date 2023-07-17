@@ -6,11 +6,9 @@ import org.junit.Test;
 /**
  * Created by cnebrera on 05/10/2016.
  */
-public class HeartbeatParametersTest
-{
+public class HeartbeatParametersTest {
     @Test
-    public void testGettersSettersDefault()
-    {
+    public void testGettersSettersDefault() {
         final HeartbeatParameters parameters = HeartbeatParameters.builder().build();
 
         // Check the default parameters
@@ -22,8 +20,7 @@ public class HeartbeatParametersTest
     }
 
     @Test
-    public void testGettersSetters()
-    {
+    public void testGettersSetters() {
         final HeartbeatParameters parameters = HeartbeatParameters.builder().heartbeatRate(100).heartbeatTimeout(20).maxClientConnChecks(5).build();
 
         // Check the default parameters

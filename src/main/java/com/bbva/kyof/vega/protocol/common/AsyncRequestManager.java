@@ -12,17 +12,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class manages the asynchronous requests in the framework
- *
+ * <p>
  * The purpose of this class is to control the active requests, timeouts, and memory usage.
- *
+ * <p>
  * A background thread that is always active will handle the closing of expired requests.
  */
-public class AsyncRequestManager extends RecurrentTask
-{
-    /** List of requests that has timeouts */
+public class AsyncRequestManager extends RecurrentTask {
+    /**
+     * List of requests that has timeouts
+     */
     private final ConcurrentMap<UUID, SentRequest> sentRequestsById = new ConcurrentHashMap<>();
 
-    /** Stores the number of actions performed in the current iteration */
+    /**
+     * Stores the number of actions performed in the current iteration
+     */
     private final AtomicInteger numActionsInIteration = new AtomicInteger(0);
 
     /**
@@ -30,31 +33,25 @@ public class AsyncRequestManager extends RecurrentTask
      *
      * @param instanceId unique ID of the library instance
      */
-    public AsyncRequestManager(final UUID instanceId)
-    {
+    public AsyncRequestManager(final UUID instanceId) {
         // 1 millisecond of idle strategy, request timeout is not considered part of the critical path
         super(new SleepingMillisIdleStrategy(1));
         this.start("AsyncRequestManager_" + instanceId);
     }
 
     @Override
-    public int action()
-    {
+    public int action() {
         this.numActionsInIteration.set(0);
 
         // Check expiration for each active sent request
         this.sentRequestsById.forEach((id, request) ->
         {
             // Check should stop to avoid processing new requests if stopping
-            if (!this.shouldStop())
-            {
-                if (request.isClosed())
-                {
+            if (!this.shouldStop()) {
+                if (request.isClosed()) {
                     this.sentRequestsById.remove(request.getRequestId());
                     this.numActionsInIteration.getAndIncrement();
-                }
-                else if (request.hasExpired())
-                {
+                } else if (request.hasExpired()) {
                     this.sentRequestsById.remove(request.getRequestId());
                     request.onRequestTimeout();
                     this.numActionsInIteration.getAndIncrement();
@@ -66,8 +63,7 @@ public class AsyncRequestManager extends RecurrentTask
     }
 
     @Override
-    public void cleanUp()
-    {
+    public void cleanUp() {
         // Close all pending requests
         this.sentRequestsById.values().forEach(SentRequest::closeRequest);
         this.sentRequestsById.clear();
@@ -75,24 +71,23 @@ public class AsyncRequestManager extends RecurrentTask
 
     /**
      * Add a new request into the manager
+     *
      * @param request the request to add
      */
-    public void addNewRequest(final SentRequest request)
-    {
+    public void addNewRequest(final SentRequest request) {
         this.sentRequestsById.put(request.getRequestId(), request);
     }
 
     /**
      * Process a received response, it will look for a request that match the response in the internal map
+     *
      * @param response the response to process
      */
-    public void processResponse(final RcvResponse response)
-    {
+    public void processResponse(final RcvResponse response) {
         // Find the request for the received response
         final SentRequest sentRequest = this.sentRequestsById.get(response.getOriginalRequestId());
 
-        if (sentRequest != null)
-        {
+        if (sentRequest != null) {
             // Set the topic name
             response.setTopicName(sentRequest.getTopicName());
             // Notify the listener

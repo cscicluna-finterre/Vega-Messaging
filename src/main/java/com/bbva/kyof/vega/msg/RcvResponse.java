@@ -7,17 +7,19 @@ import java.util.UUID;
 
 /**
  * Represent a received response message
- *
+ * <p>
  * This class is not thread safe!
  */
-public class RcvResponse extends BaseRcvMessage implements IRcvResponse
-{
-    /** Original request id that has triggered the response */
-    @Getter @Setter private UUID originalRequestId;
+public class RcvResponse extends BaseRcvMessage implements IRcvResponse {
+    /**
+     * Original request id that has triggered the response
+     */
+    @Getter
+    @Setter
+    private UUID originalRequestId;
 
     @Override
-    public IRcvResponse promote()
-    {
+    public IRcvResponse promote() {
         RcvResponse promotedResponse = new RcvResponse();
         super.promote(promotedResponse);
 

@@ -10,19 +10,19 @@ import java.util.UUID;
 /**
  * Interface for the manager. The manager is the main class of the library
  */
-public interface IVegaInstance extends Closeable
-{
+public interface IVegaInstance extends Closeable {
     /**
      * Return the instance id of this instance
+     *
      * @return the instance id of this instance
      */
     UUID getInstanceId();
 
     /**
      * Create a new publisher to sendMsg messages into a topic
-     *
+     * <p>
      * It is not possible to create 2 publishers for the same topic unless the publisher is destroyed first.
-     *
+     * <p>
      * Each publisher instance is associated to an unique given topic.
      *
      * @param topic The topic to publish into.
@@ -39,14 +39,14 @@ public interface IVegaInstance extends Closeable
      */
     void destroyPublisher(final String topic) throws VegaException;
 
-    
+
     /**
      * Subscribes to the given topic in order to get messages from it.
-     * 
+     * <p>
      * You cannot subscribeToSubscribers to a topic twice.
-     * 
-     * @param topicName   Topic name to subscribeToSubscribers to.
-     * @param listener    The Listener where the user wants to receive the messages.
+     *
+     * @param topicName Topic name to subscribeToSubscribers to.
+     * @param listener  The Listener where the user wants to receive the messages.
      * @throws VegaException exception thrown if there is a problem or if it is already subscribed
      */
     void subscribeToTopic(final String topicName, final ITopicSubListener listener) throws VegaException;
@@ -61,17 +61,16 @@ public interface IVegaInstance extends Closeable
 
     /**
      * Subscribes to topics that match the given pattern in order to get messages from it.
-     *
+     * <p>
      * It will also trigger notifications on topics created by the same instance. <p>
-     *
+     * <p>
      * Important! If a topic match a normal subscription and pattern subscription or even multiple pattern subscriptions and
      * they share the listener, the event will be received on the listener multiple times, once per subscription. <p>
-     *
+     * <p>
      * Important! Messages will only be received for configured topics that match the pattern.
      *
      * @param topicPattern the topic pattern in Java pattern format
-     * @param listener The listener where the user wants to receive the messages.
-     *
+     * @param listener     The listener where the user wants to receive the messages.
      * @throws VegaException exception thrown if there is a problem or if it is already subscribed tot he pattern
      */
     void subscribeToPattern(final String topicPattern, final ITopicSubListener listener) throws VegaException;

@@ -25,8 +25,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 04/08/16.
  */
-public class AbstractSnifferReceiverTest
-{
+public class AbstractSnifferReceiverTest {
     private final static SubnetAddress SUBNET = InetUtil.getDefaultSubnet();
 
     private final ByteBuffer sendBuffer = ByteBuffer.allocate(1024);
@@ -43,8 +42,7 @@ public class AbstractSnifferReceiverTest
 
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         final Aeron.Context ctx = new Aeron.Context();
@@ -68,23 +66,20 @@ public class AbstractSnifferReceiverTest
     }
 
     @AfterClass
-    public static void afterClass()
-    {
+    public static void afterClass() {
         PUBLICATION.close();
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
 
     }
 
 
     @Test
-    public void testInstance() throws InterruptedException
-    {
+    public void testInstance() throws InterruptedException {
         final AutoDiscInstanceInfo instanceInfo = new AutoDiscInstanceInfo("instance1", UUID.randomUUID(), 12, 23, 55, TestConstants.EMPTY_HOSTNAME, 12, 23, 56, TestConstants.EMPTY_HOSTNAME);
 
         this.sendMessage(MsgType.AUTO_DISC_INSTANCE, instanceInfo);
@@ -100,8 +95,7 @@ public class AbstractSnifferReceiverTest
     }
 
     @Test
-    public void testTopics() throws InterruptedException
-    {
+    public void testTopics() throws InterruptedException {
         final AutoDiscTopicInfo topicInfo = new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic");
         this.sendMessage(MsgType.AUTO_DISC_TOPIC, topicInfo);
 
@@ -116,8 +110,7 @@ public class AbstractSnifferReceiverTest
     }
 
     @Test
-    public void testTopicSockets() throws InterruptedException
-    {
+    public void testTopicSockets() throws InterruptedException {
         final AutoDiscTopicSocketInfo topicSocketInfo = new AutoDiscTopicSocketInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 4,
                 TestConstants.EMPTY_HOSTNAME);
         this.sendMessage(MsgType.AUTO_DISC_TOPIC_SOCKET, topicSocketInfo);
@@ -133,13 +126,11 @@ public class AbstractSnifferReceiverTest
     }
 
 
-    private void sendMessage(final byte msgType, final IUnsafeSerializable serializable)
-    {
+    private void sendMessage(final byte msgType, final IUnsafeSerializable serializable) {
         this.sendMessage(msgType, serializable, false);
     }
 
-    private void sendMessage(final byte msgType, final IUnsafeSerializable serializable, boolean wrongVersion)
-    {
+    private void sendMessage(final byte msgType, final IUnsafeSerializable serializable, boolean wrongVersion) {
         // Prepare the send buffer
         this.sendBuffer.clear();
         this.sendBufferSerializer.wrap(this.sendBuffer);
@@ -147,12 +138,9 @@ public class AbstractSnifferReceiverTest
         // Set msg type and write the base header
         BaseHeader baseHeader;
 
-        if (wrongVersion)
-        {
+        if (wrongVersion) {
             baseHeader = new BaseHeader(msgType, Version.toIntegerRepresentation((byte) 55, (byte) 3, (byte) 1));
-        }
-        else
-        {
+        } else {
             baseHeader = new BaseHeader(msgType, Version.LOCAL_VERSION);
         }
 
@@ -166,8 +154,7 @@ public class AbstractSnifferReceiverTest
         PUBLICATION.offer(this.sendBufferSerializer.getInternalBuffer(), 0, this.sendBufferSerializer.getOffset());
     }
 
-    static class SnifferListener implements ISnifferListener
-    {
+    static class SnifferListener implements ISnifferListener {
         AutoDiscInstanceInfo receivedInstanceInfo;
         AutoDiscTopicInfo receivedTopicInfo;
         AutoDiscTopicSocketInfo receivedTopicSocketInfo;
@@ -175,8 +162,7 @@ public class AbstractSnifferReceiverTest
         AutoDiscTopicSocketInfo timedTopicSocketMsg;
         AutoDiscInstanceInfo timedOutInstanceMsg;
 
-        public void reset()
-        {
+        public void reset() {
             receivedInstanceInfo = null;
             receivedTopicInfo = null;
             receivedTopicSocketInfo = null;
@@ -185,38 +171,32 @@ public class AbstractSnifferReceiverTest
             timedOutInstanceMsg = null;
         }
 
-        public void onNewAutoDiscTopicInfo(AutoDiscTopicInfo info)
-        {
+        public void onNewAutoDiscTopicInfo(AutoDiscTopicInfo info) {
             this.receivedTopicInfo = info;
         }
 
         @Override
-        public void onTimedOutAutoDiscTopicInfo(AutoDiscTopicInfo info)
-        {
+        public void onTimedOutAutoDiscTopicInfo(AutoDiscTopicInfo info) {
             this.timedTopicMsg = info;
         }
 
         @Override
-        public void onNewAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info)
-        {
+        public void onNewAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info) {
             this.receivedTopicSocketInfo = info;
         }
 
         @Override
-        public void onTimedOutAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info)
-        {
+        public void onTimedOutAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info) {
             this.timedTopicSocketMsg = info;
         }
 
         @Override
-        public void onNewAutoDiscInstanceInfo(AutoDiscInstanceInfo info)
-        {
+        public void onNewAutoDiscInstanceInfo(AutoDiscInstanceInfo info) {
             this.receivedInstanceInfo = info;
         }
 
         @Override
-        public void onTimedOutAutoDiscInstanceInfo(AutoDiscInstanceInfo info)
-        {
+        public void onTimedOutAutoDiscInstanceInfo(AutoDiscInstanceInfo info) {
             this.timedOutInstanceMsg = info;
         }
 

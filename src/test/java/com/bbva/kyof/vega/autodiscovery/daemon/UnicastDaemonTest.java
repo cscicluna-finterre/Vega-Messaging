@@ -15,8 +15,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 05/08/16.
  */
-public class UnicastDaemonTest
-{
+public class UnicastDaemonTest {
     private final static SubnetAddress SUBNET = InetUtil.getDefaultSubnet();
     private final static String IP = SUBNET.getIpAddres().getHostAddress();
 
@@ -34,8 +33,7 @@ public class UnicastDaemonTest
     private UnicastDaemonClientSimulator clientSimulator3;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         // Create the daemon with an embedded media driver
         final DaemonParameters daemonParameters = DaemonParameters.builder().
                 subnet(SUBNET.toString()).
@@ -56,16 +54,14 @@ public class UnicastDaemonTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         DAEMON.close();
         CLIENTS_AERON.close();
         CloseHelper.quietClose(CLIENTS_MEDIA_DRIVER);
     }
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         // Create 3 clients, 2 sharing the channel and stream
         this.clientSimulator1 = new UnicastDaemonClientSimulator(CLIENTS_AERON, IP, PORT_CLIENT_1, PORT_DAEMON, CLIENTS_STREAM_ID, SUBNET);
         this.clientSimulator1.start("ClientSimulator1");
@@ -80,8 +76,7 @@ public class UnicastDaemonTest
     }
 
     @After
-    public void tearDown() throws Exception
-    {
+    public void tearDown() throws Exception {
         // Stop the clients
         clientSimulator1.close();
         clientSimulator2.close();
@@ -89,8 +84,7 @@ public class UnicastDaemonTest
     }
 
     @Test
-    public void onMultipleAutoDiscDaemonClientInfo() throws Exception
-    {
+    public void onMultipleAutoDiscDaemonClientInfo() throws Exception {
         // Create a message to forward and send it, the client should not receive it yet
         final AutoDiscTopicInfo topicInfoMsg = new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic");
 

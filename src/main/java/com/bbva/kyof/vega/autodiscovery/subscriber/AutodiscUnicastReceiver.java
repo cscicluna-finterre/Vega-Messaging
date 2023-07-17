@@ -18,44 +18,47 @@ import java.util.UUID;
 
 /**
  * Auto-Discovery implementation for unicast.<p>
- *
+ * <p>
  * The Aeron Subscription channel is created using the StreamID and Port Range provided in the configuration.
  * A hash of the instance id is performed and used to calculate the stream and the port of the range to use. <p>
- *
+ * <p>
  * The class is not thread-safe!
  */
 @Slf4j
-public class AutodiscUnicastReceiver extends AbstractAutodiscReceiver implements Closeable
-{
+public class AutodiscUnicastReceiver extends AbstractAutodiscReceiver implements Closeable {
     /**
      * PublicationsManager that manages all the publications to the
      * unicast daemon servers.
      */
     private final IPublicationsManager publicationsManager;
 
-    /** Store the information of this unicast daemon client. The information contains the socket it uses to get messages from the Daemon. <p>
+    /**
+     * Store the information of this unicast daemon client. The information contains the socket it uses to get messages from the Daemon. <p>
      * Since the socket is created int he subscriber and the publisher needs to send this information to the daemon we store it here when the actual
-     * socket is created with the socket information .*/
-    @Getter private AutoDiscDaemonClientInfo daemonClientInfo;
+     * socket is created with the socket information .
+     */
+    @Getter
+    private AutoDiscDaemonClientInfo daemonClientInfo;
 
-    /** Store the queue with all the active instance information adverts */
+    /**
+     * Store the queue with all the active instance information adverts
+     */
     private final ActiveAdvertsQueue<AutoDiscDaemonServerInfo> autoDiscDaemonServerInfoActiveAdvertsQueue;
 
     /**
      * Create a new autodiscovery unicast subscriber handler
      *
-     * @param instanceId unique id of the library instance the subscriber belongs to
-     * @param aeron the Aeron instance
-     * @param config the configuration of auto-discovery
+     * @param instanceId               unique id of the library instance the subscriber belongs to
+     * @param aeron                    the Aeron instance
+     * @param config                   the configuration of auto-discovery
      * @param autodiscoverySubListener the listener that will receive events of new created or timed out adverts
-     * @param pPublicationsManager PublicationsManager instance
+     * @param pPublicationsManager     PublicationsManager instance
      */
     public AutodiscUnicastReceiver(final UUID instanceId,
                                    final Aeron aeron,
                                    final AutoDiscoveryConfig config,
                                    final IAutodiscGlobalEventListener autodiscoverySubListener,
-                                   final IPublicationsManager pPublicationsManager)
-    {
+                                   final IPublicationsManager pPublicationsManager) {
         super(instanceId, aeron, config, autodiscoverySubListener);
         this.publicationsManager = pPublicationsManager;
 
@@ -75,8 +78,7 @@ public class AutodiscUnicastReceiver extends AbstractAutodiscReceiver implements
     }
 
     @Override
-    public Subscription createSubscription(final UUID instanceId, final Aeron aeron, final AutoDiscoveryConfig config)
-    {
+    public Subscription createSubscription(final UUID instanceId, final Aeron aeron, final AutoDiscoveryConfig config) {
         // Create a hash for the instance id. We will use it to select a random port and stream
         final int instanceIdHash = instanceId.hashCode();
 
@@ -102,11 +104,9 @@ public class AutodiscUnicastReceiver extends AbstractAutodiscReceiver implements
     }
 
     @Override
-    protected boolean processAutoDiscDaemonServerInfoMsg(final AutoDiscDaemonServerInfo autoDiscDaemonServerInfo)
-    {
+    protected boolean processAutoDiscDaemonServerInfoMsg(final AutoDiscDaemonServerInfo autoDiscDaemonServerInfo) {
         // Add or update, if false is an update and there is nothing else to do
-        if (!autoDiscDaemonServerInfoActiveAdvertsQueue.addOrUpdateAdvert(autoDiscDaemonServerInfo))
-        {
+        if (!autoDiscDaemonServerInfoActiveAdvertsQueue.addOrUpdateAdvert(autoDiscDaemonServerInfo)) {
             //The buffer was not consumed, so return false
             return false;
         }
@@ -122,11 +122,9 @@ public class AutodiscUnicastReceiver extends AbstractAutodiscReceiver implements
     }
 
     @Override
-    protected int checkAutoDiscDaemonServerInfoTimeouts()
-    {
+    protected int checkAutoDiscDaemonServerInfoTimeouts() {
         final AutoDiscDaemonServerInfo autoDiscDaemonServerInfo = this.autoDiscDaemonServerInfoActiveAdvertsQueue.returnNextTimedOutElement();
-        if (autoDiscDaemonServerInfo != null)
-        {
+        if (autoDiscDaemonServerInfo != null) {
             // Disable the timeout publication
             publicationsManager.disablePublication(autoDiscDaemonServerInfo);
             return 1;
@@ -135,8 +133,7 @@ public class AutodiscUnicastReceiver extends AbstractAutodiscReceiver implements
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         log.info("Closing auto discovery unicast receiver manager");
         // Clear internal queues
         this.autoDiscDaemonServerInfoActiveAdvertsQueue.clear();

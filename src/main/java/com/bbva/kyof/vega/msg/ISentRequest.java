@@ -4,21 +4,26 @@ import java.util.UUID;
 
 /**
  * Interface that represent a request that has been sent.<p>
- *
+ * <p>
  * The request will be automatically closed when it expires however is a good practice to perform a manual close if no
  * more responses are expected.<p>
- *
+ * <p>
  * No more responses for the request will be processed once the request has been closed.
  */
-public interface ISentRequest
-{
-    /** @return the result of the request send */
+public interface ISentRequest {
+    /**
+     * @return the result of the request send
+     */
     PublishResult getSentResult();
 
-    /** @return the unique ID of the sent request */
+    /**
+     * @return the unique ID of the sent request
+     */
     UUID getRequestId();
 
-    /** @return  true if the request has already expired */
+    /**
+     * @return true if the request has already expired
+     */
     boolean hasExpired();
 
     /**
@@ -28,12 +33,18 @@ public interface ISentRequest
      */
     void resetExpiration(long timeout);
 
-    /** Close the request, freeing the memory and preventing new responses from being processed */
+    /**
+     * Close the request, freeing the memory and preventing new responses from being processed
+     */
     void closeRequest();
 
-    /** @return True if the sent request has been already closed either by the user or due to expiration */
+    /**
+     * @return True if the sent request has been already closed either by the user or due to expiration
+     */
     boolean isClosed();
 
-    /** @return the number of responses received for this request */
+    /**
+     * @return the number of responses received for this request
+     */
     int getNumberOfResponses();
 }

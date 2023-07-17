@@ -22,8 +22,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class TopicPublisherUnicastTest
-{
+public class TopicPublisherUnicastTest {
     private TopicTemplateConfig topicConfig;
     private VegaContext vegaContext;
     private AsyncRequestManager asyncRequestManager;
@@ -31,8 +30,7 @@ public class TopicPublisherUnicastTest
     private int sentMessages;
 
     @Before
-    public void beforeTest()
-    {
+    public void beforeTest() {
         sentMessages = 0;
         sentRequests = 0;
 
@@ -44,14 +42,12 @@ public class TopicPublisherUnicastTest
     }
 
     @After
-    public void afterTest()
-    {
+    public void afterTest() {
         asyncRequestManager.close();
     }
 
     @Test
-    public void testSendAndClose() throws Exception
-    {
+    public void testSendAndClose() throws Exception {
         final TopicPublisherUnicast topicPublisher = new TopicPublisherUnicast("topic", topicConfig, vegaContext);
 
         // Create the Aeron publishers
@@ -61,7 +57,7 @@ public class TopicPublisherUnicastTest
         topicPublisher.addAeronPublisher(publisher1);
         topicPublisher.addAeronPublisher(publisher2);
         topicPublisher.addAeronPublisher(publisher3);
-        
+
         // Check sequence number before sending the messages
         Assert.assertEquals(0, topicPublisher.getSequenceNumber());
 
@@ -74,12 +70,12 @@ public class TopicPublisherUnicastTest
         Assert.assertEquals(1, topicPublisher.getSequenceNumber());
 
         // Send a request, should habe been sent 3 times and result is OK since all internal publishers have give OK
-        message =  new UnsafeBuffer(ByteBuffer.allocate(1024));
+        message = new UnsafeBuffer(ByteBuffer.allocate(1024));
         SentRequest sentRequest = topicPublisher.sendRequest(message, 0, 1024, 100L, null);
         Assert.assertEquals(sentRequest.getSentResult(), PublishResult.OK);
         Assert.assertEquals(3, this.sentRequests);
         Assert.assertEquals(3, this.sentMessages);
-        
+
         // Check sequence number after sending the request
         Assert.assertEquals(2, topicPublisher.getSequenceNumber());
 
@@ -101,8 +97,7 @@ public class TopicPublisherUnicastTest
     }
 
     @Test
-    public void testBackPressureError()
-    {
+    public void testBackPressureError() {
         final TopicPublisherUnicast topicPublisher = new TopicPublisherUnicast("topic", topicConfig, vegaContext);
 
         // Create the Aeron publishers
@@ -124,8 +119,7 @@ public class TopicPublisherUnicastTest
     }
 
     @Test
-    public void testUnexpectedError()
-    {
+    public void testUnexpectedError() {
         final TopicPublisherUnicast topicPublisher = new TopicPublisherUnicast("topic", topicConfig, vegaContext);
 
         // Create the Aeron publishers
@@ -152,8 +146,7 @@ public class TopicPublisherUnicastTest
         assertEquals(4, this.sentMessages);
     }
 
-    private AeronPublisher createAeronPublisherMock(PublishResult pubResult)
-    {
+    private AeronPublisher createAeronPublisherMock(PublishResult pubResult) {
         AeronPublisher publisher = EasyMock.createNiceMock(AeronPublisher.class);
         EasyMock.expect(publisher.sendMessage(EasyMock.anyByte(), EasyMock.anyObject(), EasyMock.anyObject(), EasyMock.anyLong(), EasyMock.anyInt(), EasyMock.anyInt())).andAnswer(() -> this.sendMessage(pubResult)).anyTimes();
         EasyMock.expect(publisher.sendRequest(EasyMock.anyByte(), EasyMock.anyObject(), EasyMock.anyObject(), EasyMock.anyObject(), EasyMock.anyLong(), EasyMock.anyInt(), EasyMock.anyInt())).andAnswer(() -> this.sendRequest(pubResult)).anyTimes();
@@ -161,14 +154,12 @@ public class TopicPublisherUnicastTest
         return publisher;
     }
 
-    private PublishResult sendRequest(PublishResult pubResult)
-    {
+    private PublishResult sendRequest(PublishResult pubResult) {
         sentRequests++;
         return pubResult;
     }
 
-    private PublishResult sendMessage(PublishResult pubResult)
-    {
+    private PublishResult sendMessage(PublishResult pubResult) {
         System.out.println("Send message " + pubResult);
         sentMessages++;
         return pubResult;

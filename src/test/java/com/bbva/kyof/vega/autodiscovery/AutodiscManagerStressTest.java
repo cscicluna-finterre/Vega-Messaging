@@ -26,18 +26,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Stress the auto discovery manager
  */
 @Slf4j
-public class AutodiscManagerStressTest
-{
+public class AutodiscManagerStressTest {
     private final static SubnetAddress SUBNET = InetUtil.getDefaultSubnet();
     private final static String IP = SUBNET.getIpAddres().getHostAddress();
 
@@ -63,8 +58,7 @@ public class AutodiscManagerStressTest
     private static Level ORIG_LOG_LEVEL;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         final UUID instanceId1 = UUID.randomUUID();
         final UUID instanceId2 = UUID.randomUUID();
 
@@ -75,8 +69,7 @@ public class AutodiscManagerStressTest
 
         // Init TOPICS info
         log.info("Creating {} TOPICS, topic sockets info", NUM_TOPICS);
-        for (int i = 0; i < NUM_TOPICS; i++)
-        {
+        for (int i = 0; i < NUM_TOPICS; i++) {
             TOPICS_INFO_1[i] = new AutoDiscTopicInfo(instanceId1, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic" + i);
             TOPIC_SOCKETS_INFO_1[i] = new AutoDiscTopicSocketInfo(instanceId1, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), TOPICS_INFO_1[i].getTopicName(), TOPICS_INFO_1[i].getUniqueId(), 34,
                     36, 33, TestConstants.EMPTY_HOSTNAME);
@@ -113,8 +106,7 @@ public class AutodiscManagerStressTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         // Stop daemon and managers
         DAEMON.close();
         AERON.close();
@@ -127,8 +119,7 @@ public class AutodiscManagerStressTest
     }
 
     @Test
-    public void testMcastSubscribeToTopic() throws Exception
-    {
+    public void testMcastSubscribeToTopic() throws Exception {
         final AutodiscManager manager1 = this.createMulticastManager(AERON);
         final AutodiscManager manager2 = this.createMulticastManager(AERON2);
 
@@ -138,8 +129,7 @@ public class AutodiscManagerStressTest
     }
 
     @Test
-    public void testUcastSubscribeToTopic() throws Exception
-    {
+    public void testUcastSubscribeToTopic() throws Exception {
         final AutodiscManager manager1 = this.createUnicastManager(AERON);
         final AutodiscManager manager2 = this.createUnicastManager(AERON2);
 
@@ -148,8 +138,7 @@ public class AutodiscManagerStressTest
         manager1.close();
     }
 
-    private void runStressTest(final AutodiscManager manager1, final AutodiscManager manager2) throws Exception
-    {
+    private void runStressTest(final AutodiscManager manager1, final AutodiscManager manager2) throws Exception {
         // Start the managers and give it some time to be "discovered", it is really only required in unicast
         manager1.start();
         manager2.start();
@@ -176,9 +165,9 @@ public class AutodiscManagerStressTest
 
         // Check the final status
         log.info("Manager 1, registered TOPICS {}, subscribed TOPICS {}, in auto-discovery {}",
-            listener.getRegisteredTopics().size(),
-            listener.getSubscribedTopics().size(),
-            listener.getActiveTopicsInAutodisc().size());
+                listener.getRegisteredTopics().size(),
+                listener.getSubscribedTopics().size(),
+                listener.getActiveTopicsInAutodisc().size());
 
         log.info("Manager 1, registered TOPICS sockets {}, subscribed TOPICS {}, in auto-discovery {}",
                 listener.getRegisteredTopicSockets().size(),
@@ -202,48 +191,38 @@ public class AutodiscManagerStressTest
         checkResults(listener2, listener);
     }
 
-    private void checkResults(Listener listener, Listener listener2)
-    {
+    private void checkResults(Listener listener, Listener listener2) {
         // Check that all registered TOPICS that are subscribed are in autodiscovery
-        for (final AutoDiscTopicInfo topicInfo : listener.getRegisteredTopics())
-        {
-            if (listener.getSubscribedTopics().contains(topicInfo.getTopicName()))
-            {
+        for (final AutoDiscTopicInfo topicInfo : listener.getRegisteredTopics()) {
+            if (listener.getSubscribedTopics().contains(topicInfo.getTopicName())) {
                 Assert.assertTrue(listener.getActiveTopicsInAutodisc().contains(topicInfo));
             }
 
-            if (listener2.getSubscribedTopics().contains(topicInfo.getTopicName()))
-            {
+            if (listener2.getSubscribedTopics().contains(topicInfo.getTopicName())) {
                 Assert.assertTrue(listener2.getActiveTopicsInAutodisc().contains(topicInfo));
             }
         }
 
-        for (final AutoDiscTopicSocketInfo topicSocketInfo : listener.getRegisteredTopicSockets())
-        {
-            if (listener.getSubscribedTopics().contains(topicSocketInfo.getTopicName()))
-            {
+        for (final AutoDiscTopicSocketInfo topicSocketInfo : listener.getRegisteredTopicSockets()) {
+            if (listener.getSubscribedTopics().contains(topicSocketInfo.getTopicName())) {
                 Assert.assertTrue(listener.getActiveTopicSocketsInAutoDisc().contains(topicSocketInfo));
             }
 
-            if (listener2.getSubscribedTopics().contains(topicSocketInfo.getTopicName()))
-            {
+            if (listener2.getSubscribedTopics().contains(topicSocketInfo.getTopicName())) {
                 Assert.assertTrue(listener2.getActiveTopicSocketsInAutoDisc().contains(topicSocketInfo));
             }
         }
     }
 
-    private void performRandomOperations(AutodiscManager manager1, AutoDiscTopicInfo[] topicsInfo, AutoDiscTopicSocketInfo[] topicSocketsInfo, Listener listener)
-    {
+    private void performRandomOperations(AutodiscManager manager1, AutoDiscTopicInfo[] topicsInfo, AutoDiscTopicSocketInfo[] topicSocketsInfo, Listener listener) {
         // Perform random operations for some time every millisecond
         final Random rnd = new Random(System.nanoTime());
         final long startTime = System.currentTimeMillis();
-        while ((System.currentTimeMillis() - startTime) < STRESS_TEST_TIME)
-        {
+        while ((System.currentTimeMillis() - startTime) < STRESS_TEST_TIME) {
             final int operation = rnd.nextInt(6);
             final int topicNum = rnd.nextInt(NUM_TOPICS);
 
-            switch (operation)
-            {
+            switch (operation) {
                 case 0:
                     manager1.subscribeToTopic(topicsInfo[topicNum].getTopicName(), AutoDiscTransportType.PUB_IPC, listener);
                     listener.addSubscribedTopic(topicsInfo[topicNum].getTopicName());
@@ -270,19 +249,15 @@ public class AutodiscManagerStressTest
                     break;
             }
 
-            try
-            {
+            try {
                 Thread.sleep(1);
-            }
-            catch (InterruptedException e)
-            {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private AutodiscManager createMulticastManager(final Aeron aeron) throws VegaException
-    {
+    private AutodiscManager createMulticastManager(final Aeron aeron) throws VegaException {
         // Create multicast autodiscovery manager
         AutoDiscoveryConfig multicastConfig = AutoDiscoveryConfig.builder().
                 autoDiscoType(AutoDiscoType.MULTICAST).
@@ -293,36 +268,37 @@ public class AutodiscManagerStressTest
         return new AutodiscManager(aeron, multicastConfig, UUID.randomUUID());
     }
 
-    private AutodiscManager createUnicastManager(final Aeron aeron) throws VegaException
-    {
+    private AutodiscManager createUnicastManager(final Aeron aeron) throws VegaException {
         // Create unicast autodiscovery manager
-        UnicastInfo unicastInfo = new UnicastInfo(IP,PORT_UNICAST_DAEMON);
+        UnicastInfo unicastInfo = new UnicastInfo(IP, PORT_UNICAST_DAEMON);
         AutoDiscoveryConfig unicastConfig = AutoDiscoveryConfig.builder().
                 autoDiscoType(AutoDiscoType.UNICAST_DAEMON).
                 refreshInterval(100L).
                 timeout(5000L).
-                unicastInfoArray(Collections.singletonList(new UnicastInfo(IP,PORT_UNICAST_DAEMON))).
+                unicastInfoArray(Collections.singletonList(new UnicastInfo(IP, PORT_UNICAST_DAEMON))).
                 build();
         unicastConfig.completeAndValidateConfig();
 
         return new AutodiscManager(aeron, unicastConfig, UUID.randomUUID());
     }
 
-    static class Listener implements IAutodiscTopicSubListener
-    {
-        @Getter final Set<AutoDiscTopicInfo> registeredTopics = new HashSet<>();
-        @Getter final Set<AutoDiscTopicSocketInfo> registeredTopicSockets = new HashSet<>();
-        @Getter final Set<String> subscribedTopics = new HashSet<>();
-        @Getter final Set<AutoDiscTopicInfo> activeTopicsInAutodisc = new HashSet<>();
-        @Getter final Set<AutoDiscTopicSocketInfo> activeTopicSocketsInAutoDisc = new HashSet<>();
+    static class Listener implements IAutodiscTopicSubListener {
+        @Getter
+        final Set<AutoDiscTopicInfo> registeredTopics = new HashSet<>();
+        @Getter
+        final Set<AutoDiscTopicSocketInfo> registeredTopicSockets = new HashSet<>();
+        @Getter
+        final Set<String> subscribedTopics = new HashSet<>();
+        @Getter
+        final Set<AutoDiscTopicInfo> activeTopicsInAutodisc = new HashSet<>();
+        @Getter
+        final Set<AutoDiscTopicSocketInfo> activeTopicSocketsInAutoDisc = new HashSet<>();
 
-        synchronized public void addSubscribedTopic(final String topic)
-        {
+        synchronized public void addSubscribedTopic(final String topic) {
             subscribedTopics.add(topic);
         }
 
-        synchronized public void removeSubscribedTopic(final String topic)
-        {
+        synchronized public void removeSubscribedTopic(final String topic) {
             subscribedTopics.remove(topic);
 
             // Remove active topic and topic socket information
@@ -330,58 +306,46 @@ public class AutodiscManagerStressTest
             activeTopicSocketsInAutoDisc.removeIf(topicInfo -> topicInfo.getTopicName().equals(topic));
         }
 
-        synchronized public void registerTopicInfo(final AutoDiscTopicInfo topic)
-        {
+        synchronized public void registerTopicInfo(final AutoDiscTopicInfo topic) {
             registeredTopics.add(topic);
         }
 
-        synchronized public void unregisterTopicInfo(final AutoDiscTopicInfo topic)
-        {
+        synchronized public void unregisterTopicInfo(final AutoDiscTopicInfo topic) {
             registeredTopics.remove(topic);
         }
 
-        synchronized public void registerTopicSocketInfo(final AutoDiscTopicSocketInfo topic)
-        {
+        synchronized public void registerTopicSocketInfo(final AutoDiscTopicSocketInfo topic) {
             registeredTopicSockets.add(topic);
         }
 
-        synchronized public void unregisterTopicSocketInfo(final AutoDiscTopicSocketInfo topic)
-        {
+        synchronized public void unregisterTopicSocketInfo(final AutoDiscTopicSocketInfo topic) {
             registeredTopicSockets.remove(topic);
         }
 
         @Override
-        synchronized public void onNewAutoDiscTopicInfo(AutoDiscTopicInfo info)
-        {
-            if (this.subscribedTopics.contains(info.getTopicName()))
-            {
+        synchronized public void onNewAutoDiscTopicInfo(AutoDiscTopicInfo info) {
+            if (this.subscribedTopics.contains(info.getTopicName())) {
                 this.activeTopicsInAutodisc.add(info);
             }
         }
 
         @Override
-        synchronized public void onTimedOutAutoDiscTopicInfo(AutoDiscTopicInfo info)
-        {
-            if (this.subscribedTopics.contains(info.getTopicName()))
-            {
+        synchronized public void onTimedOutAutoDiscTopicInfo(AutoDiscTopicInfo info) {
+            if (this.subscribedTopics.contains(info.getTopicName())) {
                 this.activeTopicsInAutodisc.remove(info);
             }
         }
 
         @Override
-        synchronized public void onNewAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info)
-        {
-            if (this.subscribedTopics.contains(info.getTopicName()))
-            {
+        synchronized public void onNewAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info) {
+            if (this.subscribedTopics.contains(info.getTopicName())) {
                 this.activeTopicSocketsInAutoDisc.add(info);
             }
         }
 
         @Override
-        synchronized public void onTimedOutAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info)
-        {
-            if (this.subscribedTopics.contains(info.getTopicName()))
-            {
+        synchronized public void onTimedOutAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info) {
+            if (this.subscribedTopics.contains(info.getTopicName())) {
                 this.activeTopicSocketsInAutoDisc.remove(info);
             }
         }

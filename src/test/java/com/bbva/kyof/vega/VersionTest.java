@@ -8,22 +8,20 @@ import java.lang.reflect.Constructor;
 /**
  * {@link Version} class test
  */
-public class VersionTest
-{
+public class VersionTest {
     @Test
-    public void testIntegerRep()
-    {
+    public void testIntegerRep() {
         // Create 3 versions
-        final int version = Version.toIntegerRepresentation((byte)34, (byte)45, (byte)67);
-        final int compatibleVersion = Version.toIntegerRepresentation((byte)34, (byte)50, (byte)32);
-        final int incompatibleVersion = Version.toIntegerRepresentation((byte)36, (byte)45, (byte)67);
+        final int version = Version.toIntegerRepresentation((byte) 34, (byte) 45, (byte) 67);
+        final int compatibleVersion = Version.toIntegerRepresentation((byte) 34, (byte) 50, (byte) 32);
+        final int incompatibleVersion = Version.toIntegerRepresentation((byte) 36, (byte) 45, (byte) 67);
 
-        final int localVersionCompatible = Version.toIntegerRepresentation((byte)3, (byte)0, (byte)0);
+        final int localVersionCompatible = Version.toIntegerRepresentation((byte) 3, (byte) 0, (byte) 0);
 
         // Check the independent values
-        Assert.assertEquals(Version.getMayorFromIntRepresentation(version), (byte)34);
-        Assert.assertEquals(Version.getMinorFromIntRepresentation(version), (byte)45);
-        Assert.assertEquals(Version.getPatchFromIntRepresentation(version), (byte)67);
+        Assert.assertEquals(Version.getMayorFromIntRepresentation(version), (byte) 34);
+        Assert.assertEquals(Version.getMinorFromIntRepresentation(version), (byte) 45);
+        Assert.assertEquals(Version.getPatchFromIntRepresentation(version), (byte) 67);
 
         // Check compatibility
         Assert.assertTrue(Version.areCompatible(version, compatibleVersion));
@@ -38,8 +36,7 @@ public class VersionTest
     }
 
     @Test
-    public void testConstructor() throws Exception
-    {
+    public void testConstructor() throws Exception {
         Constructor<?>[] cons = Version.class.getDeclaredConstructors();
         cons[0].setAccessible(true);
         cons[0].newInstance((Object[]) null);

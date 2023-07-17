@@ -1,11 +1,11 @@
 package com.bbva.kyof.vega.autodiscovery.sniffer;
 
 import com.bbva.kyof.vega.Version;
+import com.bbva.kyof.vega.autodiscovery.advert.ActiveAdvertsQueue;
+import com.bbva.kyof.vega.autodiscovery.advert.ActiveTopicAdvertsQueue;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscInstanceInfo;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicInfo;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicSocketInfo;
-import com.bbva.kyof.vega.autodiscovery.advert.ActiveAdvertsQueue;
-import com.bbva.kyof.vega.autodiscovery.advert.ActiveTopicAdvertsQueue;
 import com.bbva.kyof.vega.msg.BaseHeader;
 import com.bbva.kyof.vega.msg.MsgType;
 import com.bbva.kyof.vega.serialization.UnsafeBufferSerializer;
@@ -20,19 +20,18 @@ import java.util.UUID;
 
 /**
  * Abstract class that is the base of specific implementations of the subscription functionality for sniffer.
- *
+ * <p>
  * The class handles all subscription related features. The information received for subscribed elements is stored when
  * there is a new element with a time out. When there is a timeout the active advert stored is removed and a notification
  * is sent.
- *
+ * <p>
  * This class notifies the listener when there is new autodiscovery information or a timeout.
  * It could be InstanceInfo, TopicInfo or SocketInfo and their corresponding timeouts.
- *
+ * <p>
  * The class is not thread-safe!
  */
 @Slf4j
-public abstract class AbstractSnifferReceiver implements Closeable
-{
+public abstract class AbstractSnifferReceiver implements Closeable {
     /**
      * Subscription connection with Aeron to receive auto-discovery messages
      */
@@ -94,8 +93,7 @@ public abstract class AbstractSnifferReceiver implements Closeable
     AbstractSnifferReceiver(final UUID instanceId,
                             final Aeron aeron,
                             final SnifferParameters parameters,
-                            final ISnifferListener snifferListener)
-    {
+                            final ISnifferListener snifferListener) {
         // Create the queues with the timeout of the configuration
         this.instanceInfoActiveAdvertsQueue = new ActiveAdvertsQueue<>(parameters.getTimeout());
         this.topicInfoActiveAdvertsQueue = new ActiveTopicAdvertsQueue<>(parameters.getTimeout());
@@ -118,8 +116,7 @@ public abstract class AbstractSnifferReceiver implements Closeable
     public abstract Subscription createSubscription(UUID instanceId, Aeron aeron, SnifferParameters parameters, ISnifferListener snifferListener);
 
     @Override
-    public void close()
-    {
+    public void close() {
         log.info("Closing auto discovery sniffer receiver");
 
         // Close subscription
@@ -136,8 +133,7 @@ public abstract class AbstractSnifferReceiver implements Closeable
      *
      * @return the number of messages received
      */
-    int pollNextMessage()
-    {
+    int pollNextMessage() {
         return this.subscription.poll(this::processSubscriptionRcvMsg, 1);
     }
 
@@ -153,8 +149,7 @@ public abstract class AbstractSnifferReceiver implements Closeable
      *
      * @return the number of time outs processed
      */
-    int checkNextTimeout()
-    {
+    int checkNextTimeout() {
         // Store the number of timed out elements
         int numTimeOuts = checkTopicInfoTimeouts();
         numTimeOuts += checkTopicSocketInfoTimeouts();
@@ -167,11 +162,9 @@ public abstract class AbstractSnifferReceiver implements Closeable
      *
      * @return the number of timeouts
      */
-    private int checkInstanceInfoTimeouts()
-    {
+    private int checkInstanceInfoTimeouts() {
         final AutoDiscInstanceInfo timedOutInstanceInfo = this.instanceInfoActiveAdvertsQueue.returnNextTimedOutElement();
-        if (timedOutInstanceInfo != null)
-        {
+        if (timedOutInstanceInfo != null) {
             // Notify about the new removal to all listeners
             this.snifferListener.onTimedOutAutoDiscInstanceInfo(timedOutInstanceInfo);
             return 1;
@@ -184,12 +177,10 @@ public abstract class AbstractSnifferReceiver implements Closeable
      *
      * @return the number of timeouts
      */
-    private int checkTopicSocketInfoTimeouts()
-    {
+    private int checkTopicSocketInfoTimeouts() {
         // Check timeout in topic-socket info
         final AutoDiscTopicSocketInfo timedOutTopicSocketInfo = this.topicSocketActiveAdvertsQueue.returnNextTimedOutElement();
-        if (timedOutTopicSocketInfo != null)
-        {
+        if (timedOutTopicSocketInfo != null) {
             // Notify to the subscribed
             this.snifferListener.onTimedOutAutoDiscTopicSocketInfo(timedOutTopicSocketInfo);
             return 1;
@@ -202,12 +193,10 @@ public abstract class AbstractSnifferReceiver implements Closeable
      *
      * @return the number of timeouts
      */
-    private int checkTopicInfoTimeouts()
-    {
+    private int checkTopicInfoTimeouts() {
         // Check timeout in topic infos
         final AutoDiscTopicInfo timedOutTopicInfo = this.topicInfoActiveAdvertsQueue.returnNextTimedOutElement();
-        if (timedOutTopicInfo != null)
-        {
+        if (timedOutTopicInfo != null) {
             this.snifferListener.onTimedOutAutoDiscTopicInfo(timedOutTopicInfo);
 
             return 1;
@@ -224,10 +213,8 @@ public abstract class AbstractSnifferReceiver implements Closeable
      * @param length      the length of the message in the buffer
      * @param aeronHeader the header of the Aeron message
      */
-    private void processSubscriptionRcvMsg(final DirectBuffer buffer, final int offset, final int length, final Header aeronHeader)
-    {
-        try
-        {
+    private void processSubscriptionRcvMsg(final DirectBuffer buffer, final int offset, final int length, final Header aeronHeader) {
+        try {
             // Wrap the buffer into the serializer
             this.bufferSerializer.wrap(buffer, offset, length);
 
@@ -235,15 +222,13 @@ public abstract class AbstractSnifferReceiver implements Closeable
             this.reusableBaseHeader.fromBinary(this.bufferSerializer);
 
             // Check the version
-            if (!this.reusableBaseHeader.isVersionCompatible())
-            {
+            if (!this.reusableBaseHeader.isVersionCompatible()) {
                 log.warn("Autodiscovery message received from incompatible library version [{}]", Version.toStringRep(this.reusableBaseHeader.getVersion()));
                 return;
             }
 
             // Check the message type and process
-            switch (this.reusableBaseHeader.getMsgType())
-            {
+            switch (this.reusableBaseHeader.getMsgType()) {
                 case MsgType.AUTO_DISC_TOPIC:
                     this.onReceivedTopicInfoMsg();
                     break;
@@ -257,9 +242,7 @@ public abstract class AbstractSnifferReceiver implements Closeable
                     log.warn("Wrong message type [{}] received on autodiscovery", this.reusableBaseHeader.getMsgType());
                     break;
             }
-        }
-        catch (final RuntimeException e)
-        {
+        } catch (final RuntimeException e) {
             log.error("Unexpected error processing received autodiscovery message", e);
         }
     }
@@ -267,19 +250,16 @@ public abstract class AbstractSnifferReceiver implements Closeable
     /**
      * Process a received message with information about a pair of topic-socket
      */
-    private void onReceivedTopicSocketInfoMsg()
-    {
+    private void onReceivedTopicSocketInfoMsg() {
         // Deserialize the message
         this.topicSocketInfo.fromBinary(this.bufferSerializer);
 
-        if (log.isTraceEnabled())
-        {
+        if (log.isTraceEnabled()) {
             log.trace("Processing received topic socket pair info message [{}]", this.topicSocketInfo);
         }
 
         // Add or update, if false is an update and there is nothing else to do
-        if (!this.topicSocketActiveAdvertsQueue.addOrUpdateAdvert(this.topicSocketInfo))
-        {
+        if (!this.topicSocketActiveAdvertsQueue.addOrUpdateAdvert(this.topicSocketInfo)) {
             return;
         }
 
@@ -293,19 +273,16 @@ public abstract class AbstractSnifferReceiver implements Closeable
     /**
      * Process a received message with information about a topic publisher or subscriber
      */
-    private void onReceivedTopicInfoMsg()
-    {
+    private void onReceivedTopicInfoMsg() {
         // Deserialize the message
         this.topicInfo.fromBinary(this.bufferSerializer);
 
-        if (log.isTraceEnabled())
-        {
+        if (log.isTraceEnabled()) {
             log.trace("Processing received topic socket info message [{}]", this.topicInfo);
         }
 
         // Add or update, if is just an update there is nothing else to do
-        if (!this.topicInfoActiveAdvertsQueue.addOrUpdateAdvert(this.topicInfo))
-        {
+        if (!this.topicInfoActiveAdvertsQueue.addOrUpdateAdvert(this.topicInfo)) {
             return;
         }
 
@@ -319,19 +296,16 @@ public abstract class AbstractSnifferReceiver implements Closeable
     /**
      * Process a received message with information about a library instance
      */
-    private void onReceivedInstanceInfoMsg()
-    {
+    private void onReceivedInstanceInfoMsg() {
         // Deserialize the message
         this.instanceInfo.fromBinary(this.bufferSerializer);
 
-        if (log.isTraceEnabled())
-        {
+        if (log.isTraceEnabled()) {
             log.trace("SNIFFER: Processing received instance info message [{}]", this.instanceInfo);
         }
 
         // If is an update, there is nothing else to do
-        if (!this.instanceInfoActiveAdvertsQueue.addOrUpdateAdvert(this.instanceInfo))
-        {
+        if (!this.instanceInfoActiveAdvertsQueue.addOrUpdateAdvert(this.instanceInfo)) {
             return;
         }
 

@@ -22,16 +22,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class AeronSubscriberTest
-{
+public class AeronSubscriberTest {
     private static MediaDriver MEDIA_DRIVER;
     private static Aeron AERON;
     private static SubnetAddress SUBNET_ADDRESS;
     private static VegaContext VEGA_CONTEXT;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         final Aeron.Context ctx1 = new Aeron.Context();
@@ -46,15 +44,13 @@ public class AeronSubscriberTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Test
-    public void testCreateSubscriptionAndGetMessage() throws Exception
-    {
+    public void testCreateSubscriptionAndGetMessage() throws Exception {
         final int mcastIp = InetUtil.convertIpAddressToInt("224.1.1.1");
         final int ucastIp = InetUtil.convertIpAddressToInt(SUBNET_ADDRESS.getIpAddres().getHostAddress());
 

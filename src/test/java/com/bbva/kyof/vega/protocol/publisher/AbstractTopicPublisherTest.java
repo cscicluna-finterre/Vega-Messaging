@@ -25,15 +25,13 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class AbstractTopicPublisherTest
-{
+public class AbstractTopicPublisherTest {
     private TopicTemplateConfig topicConfig;
     private VegaContext vegaContext;
     private AsyncRequestManager asyncRequestManager;
 
     @Before
-    public void beforeTest()
-    {
+    public void beforeTest() {
         topicConfig = TopicTemplateConfig.builder().name("name").transportType(TransportMediaType.UNICAST).build();
         vegaContext = new VegaContext(null, null);
 
@@ -42,20 +40,18 @@ public class AbstractTopicPublisherTest
     }
 
     @After
-    public void afterTest()
-    {
+    public void afterTest() {
         asyncRequestManager.close();
     }
 
     @Test
-    public void testSendAndClose() throws Exception
-    {
+    public void testSendAndClose() throws Exception {
         final TopicPublisherImpl topicPubImpl = new TopicPublisherImpl("topic", topicConfig, vegaContext);
 
         // Test get topic name and topic config
         Assert.assertEquals(topicPubImpl.getTopicName(), "topic");
         Assert.assertSame(topicPubImpl.getTopicConfig(), topicConfig);
-        
+
         // Test sequence number
         Assert.assertEquals(0, topicPubImpl.getSequenceNumber());
 
@@ -63,7 +59,7 @@ public class AbstractTopicPublisherTest
         UnsafeBuffer sendBuffer = new UnsafeBuffer(ByteBuffer.allocate(128));
         Assert.assertEquals(topicPubImpl.sendMsg(sendBuffer, 0, 128), PublishResult.OK);
         Assert.assertSame(topicPubImpl.getSendMessageBufferRef(), sendBuffer);
-        
+
         // Test sequence number after sending message
         Assert.assertEquals(1, topicPubImpl.getSequenceNumber());
 
@@ -72,7 +68,7 @@ public class AbstractTopicPublisherTest
         SentRequest sentRequest = topicPubImpl.sendRequest(sendBuffer, 0, 128, 100L, null);
         Assert.assertEquals(sentRequest.getSentResult(), PublishResult.OK);
         Assert.assertFalse(sentRequest.isClosed());
-        
+
         // Test sequence number after sending request
         Assert.assertEquals(2, topicPubImpl.getSequenceNumber());
 
@@ -100,8 +96,7 @@ public class AbstractTopicPublisherTest
     }
 
     @Test
-    public void testActivateHeartbeats() throws Exception
-    {
+    public void testActivateHeartbeats() throws Exception {
         final TopicPublisherImpl topicPublisherBase = new TopicPublisherImpl("topic", topicConfig, vegaContext);
         Assert.assertFalse(topicPublisherBase.isHeartbeatsActive());
 
@@ -137,12 +132,11 @@ public class AbstractTopicPublisherTest
         topicPublisherBase.deactivateHeartbeats();
     }
 
-    private class TopicPublisherImpl extends AbstractTopicPublisher implements IClientConnectionListener
-    {
+    private class TopicPublisherImpl extends AbstractTopicPublisher implements IClientConnectionListener {
         AtomicReference<DirectBuffer> sendMessageBufferRef = new AtomicReference<>();
         AtomicReference<DirectBuffer> sentRequestBufferRef = new AtomicReference<>();
         AtomicBoolean cleanedPublishers = new AtomicBoolean(false);
-        AtomicReference<Byte> lastReqTypeSent = new AtomicReference<>((byte)222);
+        AtomicReference<Byte> lastReqTypeSent = new AtomicReference<>((byte) 222);
 
         /**
          * Constructor of the class
@@ -151,68 +145,57 @@ public class AbstractTopicPublisherTest
          * @param topicConfig Topic configuration
          * @param vegaContext library instance configuration
          */
-        TopicPublisherImpl(String topicName, TopicTemplateConfig topicConfig, VegaContext vegaContext)
-        {
+        TopicPublisherImpl(String topicName, TopicTemplateConfig topicConfig, VegaContext vegaContext) {
             super(topicName, topicConfig, vegaContext);
         }
 
         @Override
-        boolean hasSecurity()
-        {
+        boolean hasSecurity() {
             return false;
         }
 
         @Override
-        public TopicSecurityTemplateConfig getTopicSecurityConfig()
-        {
+        public TopicSecurityTemplateConfig getTopicSecurityConfig() {
             return null;
         }
 
         @Override
-        protected PublishResult sendToAeron(DirectBuffer message, long sequenceNumber, int offset, int length)
-        {
+        protected PublishResult sendToAeron(DirectBuffer message, long sequenceNumber, int offset, int length) {
             sendMessageBufferRef.set(message);
             return PublishResult.OK;
         }
 
         @Override
-        protected PublishResult sendRequestToAeron(byte msgType, UUID requestId, DirectBuffer message, long sequenceNumber, int offset, int length)
-        {
+        protected PublishResult sendRequestToAeron(byte msgType, UUID requestId, DirectBuffer message, long sequenceNumber, int offset, int length) {
             lastReqTypeSent.set(msgType);
             sentRequestBufferRef.set(message);
             return PublishResult.OK;
         }
 
         @Override
-        protected void cleanAeronPublishers()
-        {
+        protected void cleanAeronPublishers() {
             cleanedPublishers.set(true);
         }
 
-        DirectBuffer getSendMessageBufferRef()
-        {
+        DirectBuffer getSendMessageBufferRef() {
             return sendMessageBufferRef.get();
         }
 
-        boolean getCleanedPublishers()
-        {
+        boolean getCleanedPublishers() {
             return cleanedPublishers.get();
         }
 
-        byte getLastReqTypeSent()
-        {
+        byte getLastReqTypeSent() {
             return lastReqTypeSent.get();
         }
 
         @Override
-        public void onClientConnected(String topicName, UUID clientInstanceId)
-        {
+        public void onClientConnected(String topicName, UUID clientInstanceId) {
 
         }
 
         @Override
-        public void onClientDisconnected(String topicName, UUID clientInstanceId)
-        {
+        public void onClientDisconnected(String topicName, UUID clientInstanceId) {
 
         }
     }

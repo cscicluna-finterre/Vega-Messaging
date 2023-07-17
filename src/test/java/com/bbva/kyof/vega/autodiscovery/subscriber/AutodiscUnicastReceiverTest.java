@@ -29,11 +29,9 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Aeron.class)
-public class AutodiscUnicastReceiverTest implements IAutodiscGlobalEventListener
-{
+public class AutodiscUnicastReceiverTest implements IAutodiscGlobalEventListener {
 
-    private AutodiscUnicastReceiver configureAutodiscUnicastReceiver(IPublicationsManager publicationsManager) throws VegaException
-    {
+    private AutodiscUnicastReceiver configureAutodiscUnicastReceiver(IPublicationsManager publicationsManager) throws VegaException {
         final Aeron aeron = PowerMock.createNiceMock(Aeron.class);
         final Subscription subscription = EasyMock.createNiceMock(Subscription.class);
         EasyMock.expect(aeron.addSubscription(EasyMock.anyObject(), EasyMock.anyInt())).andReturn(subscription).anyTimes();
@@ -43,7 +41,7 @@ public class AutodiscUnicastReceiverTest implements IAutodiscGlobalEventListener
         // Create the configuration, with 300 millis refresh interval
         final AutoDiscoveryConfig config = AutoDiscoveryConfig.builder()
                 .autoDiscoType(AutoDiscoType.UNICAST_DAEMON)
-                .unicastInfoArray(Collections.singletonList(new UnicastInfo("192.168.1.1",37000)))
+                .unicastInfoArray(Collections.singletonList(new UnicastInfo("192.168.1.1", 37000)))
                 .refreshInterval(100L).build();
         config.completeAndValidateConfig();
 
@@ -51,15 +49,13 @@ public class AutodiscUnicastReceiverTest implements IAutodiscGlobalEventListener
     }
 
     @Test
-    public void testCreatePublication() throws Exception
-    {
+    public void testCreatePublication() throws Exception {
         configureAutodiscUnicastReceiver(null);
     }
 
     @Test
     public void testProcessAutoDiscDaemonServerInfoMsg()
-            throws VegaException, NoSuchFieldException, IllegalAccessException
-    {
+            throws VegaException, NoSuchFieldException, IllegalAccessException {
         final AutoDiscDaemonServerInfo autoDiscDaemonServerInfo = EasyMock.createNiceMock(AutoDiscDaemonServerInfo.class);
 
         final IPublicationsManager publicationsManager = EasyMock.createNiceMock(IPublicationsManager.class);
@@ -68,7 +64,7 @@ public class AutodiscUnicastReceiverTest implements IAutodiscGlobalEventListener
 
         //Create the mocks for the private fields
         final ActiveAdvertsQueue<AutoDiscDaemonServerInfo> autoDiscDaemonServerInfoActiveAdvertsQueue = EasyMock.createNiceMock(ActiveAdvertsQueue.class);
-        EasyMock.expect( autoDiscDaemonServerInfoActiveAdvertsQueue.addOrUpdateAdvert(autoDiscDaemonServerInfo) )
+        EasyMock.expect(autoDiscDaemonServerInfoActiveAdvertsQueue.addOrUpdateAdvert(autoDiscDaemonServerInfo))
                 .andReturn(true).anyTimes();
 
         EasyMock.replay(autoDiscDaemonServerInfo, autoDiscDaemonServerInfoActiveAdvertsQueue, publicationsManager);
@@ -86,8 +82,7 @@ public class AutodiscUnicastReceiverTest implements IAutodiscGlobalEventListener
 
     @Test
     public void testCheckAutoDiscDaemonServerInfoTimeouts()
-            throws VegaException, NoSuchFieldException, IllegalAccessException
-    {
+            throws VegaException, NoSuchFieldException, IllegalAccessException {
         final AutoDiscDaemonServerInfo autoDiscDaemonServerInfo = EasyMock.createNiceMock(AutoDiscDaemonServerInfo.class);
 
 
@@ -97,7 +92,7 @@ public class AutodiscUnicastReceiverTest implements IAutodiscGlobalEventListener
 
         //Create the mocks for the private fields
         final ActiveAdvertsQueue<AutoDiscDaemonServerInfo> autoDiscDaemonServerInfoActiveAdvertsQueue = EasyMock.createNiceMock(ActiveAdvertsQueue.class);
-        EasyMock.expect( autoDiscDaemonServerInfoActiveAdvertsQueue.returnNextTimedOutElement() )
+        EasyMock.expect(autoDiscDaemonServerInfoActiveAdvertsQueue.returnNextTimedOutElement())
                 .andReturn(autoDiscDaemonServerInfo).anyTimes();
 
         EasyMock.replay(autoDiscDaemonServerInfo, autoDiscDaemonServerInfoActiveAdvertsQueue, publicationsManager);
@@ -114,21 +109,18 @@ public class AutodiscUnicastReceiverTest implements IAutodiscGlobalEventListener
     }
 
     @Test
-    public void testClose() throws VegaException
-    {
+    public void testClose() throws VegaException {
         AutodiscUnicastReceiver autodiscUnicastReceiver = configureAutodiscUnicastReceiver(null);
         autodiscUnicastReceiver.close();
     }
 
     @Override
-    public void onNewInstanceInfo(AutoDiscInstanceInfo info)
-    {
+    public void onNewInstanceInfo(AutoDiscInstanceInfo info) {
 
     }
 
     @Override
-    public void onNewTopicInfo(AutoDiscTopicInfo info)
-    {
+    public void onNewTopicInfo(AutoDiscTopicInfo info) {
 
     }
 }

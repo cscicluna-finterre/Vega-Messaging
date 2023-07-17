@@ -20,8 +20,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 05/08/16.
  */
-public class UnicastDaemonSenderTest
-{
+public class UnicastDaemonSenderTest {
     private static MediaDriver MEDIA_DRIVER;
     private static Aeron AERON;
     private static UnicastDaemonSender DAEMON_SENDER;
@@ -42,8 +41,7 @@ public class UnicastDaemonSenderTest
     private UnicastDaemonClientSimulator clientSimulator3;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
         final Aeron.Context ctx = new Aeron.Context();
         ctx.aeronDirectoryName(MEDIA_DRIVER.aeronDirectoryName());
@@ -61,16 +59,14 @@ public class UnicastDaemonSenderTest
     }
 
     @AfterClass
-    public static void afterClass()
-    {
+    public static void afterClass() {
         DAEMON_SENDER.close();
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
         // Create 3 clients, 2 sharing the channel and stream
         this.clientSimulator1 = new UnicastDaemonClientSimulator(AERON, IP, PORT_CLIENT_1, PORT_DAEMON, CLIENTS_STREAM_ID, SUBNET);
         this.clientSimulator1.start("ClientSimulator1");
@@ -83,8 +79,7 @@ public class UnicastDaemonSenderTest
     }
 
     @After
-    public void tearDown() throws Exception
-    {
+    public void tearDown() throws Exception {
         // Stop the clients
         clientSimulator1.close();
         clientSimulator2.close();
@@ -92,8 +87,7 @@ public class UnicastDaemonSenderTest
     }
 
     @Test
-    public void onNewAutoDiscDaemonClientInfo() throws Exception
-    {
+    public void onNewAutoDiscDaemonClientInfo() throws Exception {
         // Create a new DaemonClient
         final UnicastDaemonClientSimulator clientSimulator = new UnicastDaemonClientSimulator(AERON, IP, PORT_CLIENT_1, PORT_DAEMON, CLIENTS_STREAM_ID, SUBNET);
         clientSimulator.start("ClientSimulator");
@@ -145,8 +139,7 @@ public class UnicastDaemonSenderTest
     }
 
     @Test
-    public void onMultipleAutoDiscDaemonClientInfo() throws Exception
-    {
+    public void onMultipleAutoDiscDaemonClientInfo() throws Exception {
         // Create a message to forward and send it, the client should not receive it yet
         final AutoDiscTopicInfo topicInfoMsg = new AutoDiscTopicInfo(DAEMON_ID, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic");
 
@@ -195,8 +188,7 @@ public class UnicastDaemonSenderTest
         Assert.assertTrue(clientSimulator3.getNumRcvTopicInfoMsgs() == 3);
     }
 
-    private void sendMessage(final byte msgType, final IUnsafeSerializable serializable, boolean wrongVersion)
-    {
+    private void sendMessage(final byte msgType, final IUnsafeSerializable serializable, boolean wrongVersion) {
         // Prepare the send buffer
         this.sendBuffer.clear();
         this.sendBufferSerializer.wrap(this.sendBuffer);
@@ -204,12 +196,9 @@ public class UnicastDaemonSenderTest
         // Set msg type and write the base header
         BaseHeader baseHeader;
 
-        if (wrongVersion)
-        {
-            baseHeader = new BaseHeader(msgType, Version.toIntegerRepresentation((byte)55, (byte)3, (byte)1));
-        }
-        else
-        {
+        if (wrongVersion) {
+            baseHeader = new BaseHeader(msgType, Version.toIntegerRepresentation((byte) 55, (byte) 3, (byte) 1));
+        } else {
             baseHeader = new BaseHeader(msgType, Version.LOCAL_VERSION);
         }
 

@@ -22,12 +22,7 @@ import io.aeron.driver.MediaDriver;
 import org.agrona.CloseHelper;
 import org.agrona.concurrent.UnsafeBuffer;
 import org.easymock.EasyMock;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.nio.ByteBuffer;
 import java.util.Collections;
@@ -38,8 +33,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class PublishersManagerIpcMcastTest
-{
+public class PublishersManagerIpcMcastTest {
     private static final String KEYS_DIR = SecurityParamsTest.class.getClassLoader().getResource("keys").getPath();
 
     private static MediaDriver MEDIA_DRIVER;
@@ -52,8 +46,7 @@ public class PublishersManagerIpcMcastTest
     private PublishersManagerIpcMcast publisherManager;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         final Aeron.Context ctx1 = new Aeron.Context();
@@ -91,28 +84,24 @@ public class PublishersManagerIpcMcastTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Before
-    public void before()
-    {
+    public void before() {
         secureChangesListener = new OwnSecPubTopicsChangesListener();
         publisherManager = new PublishersManagerIpcMcast(VEGA_CONTEXT, secureChangesListener);
     }
 
     @After
-    public void after()
-    {
+    public void after() {
         publisherManager.close();
     }
 
     @Test
-    public void testAutodiscEvents()
-    {
+    public void testAutodiscEvents() {
         this.publisherManager.onNewAutoDiscTopicInfo(null);
         this.publisherManager.onNewAutoDiscTopicSocketInfo(null);
         this.publisherManager.onTimedOutAutoDiscTopicInfo(null);
@@ -120,8 +109,7 @@ public class PublishersManagerIpcMcastTest
     }
 
     @Test
-    public void testCreateIpcRemove() throws VegaException
-    {
+    public void testCreateIpcRemove() throws VegaException {
         final UUID instanceId = UUID.randomUUID();
 
         // Create the topic configuration
@@ -137,8 +125,7 @@ public class PublishersManagerIpcMcastTest
     }
 
     @Test
-    public void testCreateRemove() throws VegaException
-    {
+    public void testCreateRemove() throws VegaException {
         final UUID instanceId = UUID.randomUUID();
 
         // Create the topic configuration
@@ -205,8 +192,7 @@ public class PublishersManagerIpcMcastTest
     }
 
     @Test
-    public void testReceive() throws Exception
-    {
+    public void testReceive() throws Exception {
         // Create the topic configuration
         final TopicTemplateConfig templateMcast = new TopicTemplateConfig(
                 "template1",
@@ -262,8 +248,7 @@ public class PublishersManagerIpcMcastTest
     }
 
     @Test
-    public void testCreateSecureAndReceive() throws Exception
-    {
+    public void testCreateSecureAndReceive() throws Exception {
         // Create the topic configuration
         final TopicTemplateConfig templateMcast = new TopicTemplateConfig(
                 "template1",
@@ -306,8 +291,7 @@ public class PublishersManagerIpcMcastTest
         Assert.assertFalse(secureChangesListener.containsPubId(topicPublisher.getUniqueId()));
     }
 
-    private void sendMessagesFromTopicPublisher(ITopicPublisher topicPublisher, SimpleReceiver simpleReceiver1, SimpleReceiver simpleReceiver2, UnsafeBuffer buffer) throws InterruptedException
-    {
+    private void sendMessagesFromTopicPublisher(ITopicPublisher topicPublisher, SimpleReceiver simpleReceiver1, SimpleReceiver simpleReceiver2, UnsafeBuffer buffer) throws InterruptedException {
         buffer.putInt(0, 128);
 
         topicPublisher.sendMsg(buffer, 0, 4);
@@ -318,8 +302,7 @@ public class PublishersManagerIpcMcastTest
         simpleReceiver2.pollReceivedMessage();
     }
 
-    private void sendMessagesFromTopicPublisher(ITopicPublisher topicPublisher, SimpleReceiver simpleReceiver, UnsafeBuffer buffer) throws InterruptedException
-    {
+    private void sendMessagesFromTopicPublisher(ITopicPublisher topicPublisher, SimpleReceiver simpleReceiver, UnsafeBuffer buffer) throws InterruptedException {
         buffer.putInt(0, 128);
 
         topicPublisher.sendMsg(buffer, 0, 4);
@@ -329,14 +312,10 @@ public class PublishersManagerIpcMcastTest
         simpleReceiver.pollReceivedMessage();
     }
 
-    private void checkMsgReception(ITopicPublisher topicPublisher, SimpleReceiver simpleReceiver1, SimpleReceiver simpleReceiver2)
-    {
-        if (simpleReceiver1.getReusableReceivedMsg().getTopicPublisherId() != null)
-        {
+    private void checkMsgReception(ITopicPublisher topicPublisher, SimpleReceiver simpleReceiver1, SimpleReceiver simpleReceiver2) {
+        if (simpleReceiver1.getReusableReceivedMsg().getTopicPublisherId() != null) {
             Assert.assertEquals(topicPublisher.getUniqueId(), simpleReceiver1.getReusableReceivedMsg().getTopicPublisherId());
-        }
-        else
-        {
+        } else {
             Assert.assertEquals(topicPublisher.getUniqueId(), simpleReceiver2.getReusableReceivedMsg().getTopicPublisherId());
         }
 
@@ -344,8 +323,7 @@ public class PublishersManagerIpcMcastTest
         simpleReceiver2.reset();
     }
 
-    private void checkSecureMsgReception(SimpleReceiver simpleReceiver, AESCrypto decoder) throws VegaException
-    {
+    private void checkSecureMsgReception(SimpleReceiver simpleReceiver, AESCrypto decoder) throws VegaException {
         final IRcvMessage rcvMessage = simpleReceiver.getReusableReceivedMsg();
 
         // Decode, the result should be the same
@@ -364,8 +342,7 @@ public class PublishersManagerIpcMcastTest
         simpleReceiver.reset();
     }
 
-    private void checkSingleSocketMsgReception(SimpleReceiver simpleReceiver1, SimpleReceiver simpleReceiver2)
-    {
+    private void checkSingleSocketMsgReception(SimpleReceiver simpleReceiver1, SimpleReceiver simpleReceiver2) {
         Assert.assertTrue((simpleReceiver1.getReusableReceivedMsg().getTopicPublisherId() != null && simpleReceiver2.getReusableReceivedMsg().getTopicPublisherId() == null) ||
                 (simpleReceiver2.getReusableReceivedMsg().getTopicPublisherId() != null && simpleReceiver1.getReusableReceivedMsg().getTopicPublisherId() == null));
 
@@ -373,24 +350,20 @@ public class PublishersManagerIpcMcastTest
         simpleReceiver2.reset();
     }
 
-    private static class OwnSecPubTopicsChangesListener implements IOwnSecPubTopicsChangesListener
-    {
+    private static class OwnSecPubTopicsChangesListener implements IOwnSecPubTopicsChangesListener {
         private final Set<UUID> secureTopicPubAdded = new HashSet<>();
 
         @Override
-        public void onOwnSecureTopicPublisherAdded(UUID topicPubId, byte[] sessionKey, TopicSecurityTemplateConfig securityConfig)
-        {
+        public void onOwnSecureTopicPublisherAdded(UUID topicPubId, byte[] sessionKey, TopicSecurityTemplateConfig securityConfig) {
             secureTopicPubAdded.add(topicPubId);
         }
 
         @Override
-        public void onOwnSecuredTopicPublisherRemoved(UUID topicPubId)
-        {
+        public void onOwnSecuredTopicPublisherRemoved(UUID topicPubId) {
             secureTopicPubAdded.remove(topicPubId);
         }
 
-        public boolean containsPubId(final UUID id)
-        {
+        public boolean containsPubId(final UUID id) {
             return this.secureTopicPubAdded.contains(id);
         }
     }

@@ -19,8 +19,7 @@ import java.util.Objects;
  * Test for the {@link VegaInstance} class
  * Created by XE48745 on 15/09/2015.
  */
-public class VegaInstanceTest
-{
+public class VegaInstanceTest {
     private static final String STAND_ALONE_CONFIG = Objects.requireNonNull(ConfigReaderTest.class.getClassLoader().getResource("config/vegaInstanceStandAloneDriverTestConfig.xml")).getPath();
     private static final String EMBEDDED_CONFIG = Objects.requireNonNull(ConfigReaderTest.class.getClassLoader().getResource("config/vegaInstanceEmbeddedDriverTestConfig.xml")).getPath();
     private static final String LOWLATENCY_EMBEDDED_CONFIG = Objects.requireNonNull(ConfigReaderTest.class.getClassLoader().getResource("config/vegaInstanceLowLatencyEmbeddedDriverTestConfig.xml")).getPath();
@@ -30,21 +29,18 @@ public class VegaInstanceTest
     private static MediaDriver MEDIA_DRIVER;
 
     @BeforeClass
-    public static void beforeClass()
-    {
+    public static void beforeClass() {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
     }
 
     @AfterClass
-    public static void afterClass()
-    {
+    public static void afterClass() {
         //CloseHelper.quietClose(MEDIA_DRIVER);
         MEDIA_DRIVER.close();
     }
 
     @Test
-    public void testSendReceiveMultipleInstances() throws Exception
-    {
+    public void testSendReceiveMultipleInstances() throws Exception {
         final VegaInstanceParams params1 = VegaInstanceParams.builder().
                 instanceName("Instance1").
                 configurationFile(STAND_ALONE_CONFIG).
@@ -56,9 +52,8 @@ public class VegaInstanceTest
                 unmanagedMediaDriver(MEDIA_DRIVER).build();
 
         // Create 2 application instances, use auto-closeable just in case
-        try(final IVegaInstance subInstance = VegaInstance.createNewInstance(params1);
-            final IVegaInstance pubInstance = VegaInstance.createNewInstance(params2))
-        {
+        try (final IVegaInstance subInstance = VegaInstance.createNewInstance(params1);
+             final IVegaInstance pubInstance = VegaInstance.createNewInstance(params2)) {
             // Subscribe to 2 topis of each type
             final ReceiverListener utopic1Listener = new ReceiverListener();
             final ReceiverListener utopic2Listener = new ReceiverListener();
@@ -131,16 +126,14 @@ public class VegaInstanceTest
     }
 
     @Test
-    public void testSendReceiveSingleInstance() throws Exception
-    {
+    public void testSendReceiveSingleInstance() throws Exception {
         final VegaInstanceParams params1 = VegaInstanceParams.builder().
                 instanceName("Instance1").
                 configurationFile(STAND_ALONE_CONFIG).
                 unmanagedMediaDriver(MEDIA_DRIVER).build();
 
         // Create 2 application instances, use auto-closeable just in case
-        try(final IVegaInstance instance = VegaInstance.createNewInstance(params1))
-        {
+        try (final IVegaInstance instance = VegaInstance.createNewInstance(params1)) {
             // Subscribe to 2 topis of each type
             final ReceiverListener utopic1Listener = new ReceiverListener();
             final ReceiverListener utopic2Listener = new ReceiverListener();
@@ -204,8 +197,7 @@ public class VegaInstanceTest
     }
 
     @Test
-    public void testWildcardSubscriptions() throws Exception
-    {
+    public void testWildcardSubscriptions() throws Exception {
         final VegaInstanceParams params1 = VegaInstanceParams.builder().
                 instanceName("Instance1").
                 configurationFile(STAND_ALONE_CONFIG).
@@ -217,9 +209,8 @@ public class VegaInstanceTest
                 unmanagedMediaDriver(MEDIA_DRIVER).build();
 
         // Create 2 application instances, use auto-closeable just in case
-        try(final IVegaInstance subInstance = VegaInstance.createNewInstance(params1);
-            final IVegaInstance pubInstance = VegaInstance.createNewInstance(params2))
-        {
+        try (final IVegaInstance subInstance = VegaInstance.createNewInstance(params1);
+             final IVegaInstance pubInstance = VegaInstance.createNewInstance(params2)) {
             // Subscribe to 2 topis of each type
             final ReceiverListener listener = new ReceiverListener();
 
@@ -276,25 +267,21 @@ public class VegaInstanceTest
     }
 
     @Test
-    public void testEmbeddedDriver() throws Exception
-    {
+    public void testEmbeddedDriver() throws Exception {
         testEmbeddedDriver(EMBEDDED_CONFIG);
     }
 
     @Test
-    public void testEmbeddedLowLatencyDriver() throws Exception
-    {
+    public void testEmbeddedLowLatencyDriver() throws Exception {
         testEmbeddedDriver(LOWLATENCY_EMBEDDED_CONFIG);
     }
 
-    private void testEmbeddedDriver(String config) throws Exception
-    {
+    private void testEmbeddedDriver(String config) throws Exception {
         final VegaInstanceParams params1 = VegaInstanceParams.builder().
                 instanceName("Instance1").
                 configurationFile(config).build();
 
-        try(final IVegaInstance instance = VegaInstance.createNewInstance(params1))
-        {
+        try (final IVegaInstance instance = VegaInstance.createNewInstance(params1)) {
             // Subscribe to 2 topics of each type
             final ReceiverListener utopic1Listener = new ReceiverListener();
             instance.subscribeToTopic("utopic1", utopic1Listener);
@@ -319,8 +306,7 @@ public class VegaInstanceTest
         }
     }
 
-    private void testSendReceive(final ITopicPublisher publisher, final ReceiverListener listener, final boolean shouldReceive) throws Exception
-    {
+    private void testSendReceive(final ITopicPublisher publisher, final ReceiverListener listener, final boolean shouldReceive) throws Exception {
         // Reset the listener contents
         listener.reset();
 
@@ -332,19 +318,15 @@ public class VegaInstanceTest
         Thread.sleep(500);
 
         // Check for reception
-        if (shouldReceive)
-        {
+        if (shouldReceive) {
             Assert.assertEquals(33, listener.receivedMsg.getContents().getInt(0));
             Assert.assertEquals(listener.receivedMsg.getTopicName(), publisher.getTopicName());
-        }
-        else
-        {
+        } else {
             Assert.assertNull(listener.receivedMsg);
         }
     }
 
-    private void testReqResp(final ITopicPublisher publisher, final ReceiverListener listener, final boolean shouldArrive) throws Exception
-    {
+    private void testReqResp(final ITopicPublisher publisher, final ReceiverListener listener, final boolean shouldArrive) throws Exception {
         // Reset the listener contents
         listener.reset();
 
@@ -356,30 +338,25 @@ public class VegaInstanceTest
         Thread.sleep(500);
 
         // Check for reception of response and request
-        if (shouldArrive)
-        {
+        if (shouldArrive) {
             Assert.assertEquals(33, listener.receivedReq.getContents().getInt(0));
             Assert.assertEquals(listener.receivedReq.getTopicName(), publisher.getTopicName());
             Assert.assertEquals(33, listener.receivedResponse.getContents().getInt(0));
             Assert.assertEquals(listener.receivedResponse.getTopicName(), publisher.getTopicName());
-        }
-        else
-        {
+        } else {
             Assert.assertNull(listener.receivedReq);
             Assert.assertNull(listener.receivedResponse);
             Assert.assertNull(listener.receivedReq);
         }
     }
 
-    static class ReceiverListener implements ITopicSubListener, IResponseListener
-    {
+    static class ReceiverListener implements ITopicSubListener, IResponseListener {
         volatile IRcvMessage receivedMsg = null;
         volatile IRcvRequest receivedReq = null;
         volatile IRcvResponse receivedResponse = null;
         volatile ISentRequest timedOutRequest = null;
 
-        private void reset()
-        {
+        private void reset() {
             this.receivedMsg = null;
             this.receivedReq = null;
             this.receivedResponse = null;
@@ -387,14 +364,12 @@ public class VegaInstanceTest
         }
 
         @Override
-        public void onMessageReceived(final IRcvMessage receivedMessage)
-        {
+        public void onMessageReceived(final IRcvMessage receivedMessage) {
             this.receivedMsg = receivedMessage.promote();
         }
 
         @Override
-        public void onRequestReceived(IRcvRequest receivedRequest)
-        {
+        public void onRequestReceived(IRcvRequest receivedRequest) {
             this.receivedReq = receivedRequest.promote();
 
             // Send a response
@@ -405,14 +380,12 @@ public class VegaInstanceTest
         }
 
         @Override
-        public void onRequestTimeout(ISentRequest originalSentRequest)
-        {
+        public void onRequestTimeout(ISentRequest originalSentRequest) {
             this.timedOutRequest = originalSentRequest;
         }
 
         @Override
-        public void onResponseReceived(ISentRequest originalSentRequest, IRcvResponse response)
-        {
+        public void onResponseReceived(ISentRequest originalSentRequest, IRcvResponse response) {
             this.receivedResponse = response.promote();
 
             // Close the original request

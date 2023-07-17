@@ -7,31 +7,26 @@ import org.junit.Test;
 /**
  * Created by cnebrera on 01/08/16.
  */
-public class TopicConfigTest
-{
+public class TopicConfigTest {
     @Test
-    public void empyConstructor() throws Exception
-    {
+    public void empyConstructor() throws Exception {
         new TopicConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void validateEmptyBuilder() throws Exception
-    {
+    public void validateEmptyBuilder() throws Exception {
         final TopicConfig invalidConfig = TopicConfig.builder().build();
         invalidConfig.completeAndValidateConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void validateMissingTemplate() throws Exception
-    {
+    public void validateMissingTemplate() throws Exception {
         final TopicConfig invalidConfig = TopicConfig.builder().pattern("ab").build();
         invalidConfig.completeAndValidateConfig();
     }
 
     @Test
-    public void validateParams() throws Exception
-    {
+    public void validateParams() throws Exception {
         final TopicConfig config = TopicConfig.builder().pattern("ab*").template("tmp").build();
         config.completeAndValidateConfig();
 

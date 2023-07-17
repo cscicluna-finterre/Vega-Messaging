@@ -7,25 +7,20 @@ import org.junit.Test;
 /**
  * Test stand alone sniffer launcher
  */
-public class SnifferLauncherTest
-{
+public class SnifferLauncherTest {
     private final static SubnetAddress SUBNET = InetUtil.getDefaultSubnet();
 
     @Test
-    public void main() throws Exception
-    {
+    public void main() throws Exception {
         String[] VALID_CONFIG = new String[]{"-p", "35001", "-sn", SUBNET.toString(), "-t", "10000", "-ip", "225.0.0.1"};
 
         // Launch a signal to stop in 5 seconds
         new Thread(() ->
         {
-            try
-            {
+            try {
                 Thread.sleep(5000);
                 SnifferLauncher.stop();
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();

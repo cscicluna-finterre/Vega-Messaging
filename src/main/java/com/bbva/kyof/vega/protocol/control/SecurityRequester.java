@@ -10,7 +10,8 @@ import com.bbva.kyof.vega.util.collection.HashMapOfHashSet;
 import com.bbva.kyof.vega.util.crypto.AESCrypto;
 import com.bbva.kyof.vega.util.crypto.RSACrypto;
 import com.bbva.kyof.vega.util.threads.BlockCancelTask;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Closeable;
@@ -19,7 +20,7 @@ import java.util.*;
 
 /**
  * This class stores all the topic publisher information security retrieved from other instances.
- *
+ * <p>
  * Also handles the sending of requests to obtain the security information when a new publisher that has security is discovered
  * with the auto-discovery mechanism.
  */
@@ -28,49 +29,69 @@ class SecurityRequester implements
         ISecurityResponseListener,
         ISecurityRequesterNotifier,
         ISecuredMsgsDecoder,
-        Closeable
-{
-    /** Random number generator to generate request id's */
+        Closeable {
+    /**
+     * Random number generator to generate request id's
+     */
     private final Random rnd = new Random(System.nanoTime());
 
-    /** Map that contains all the publisher topic security info's stored by topic subscriber id */
+    /**
+     * Map that contains all the publisher topic security info's stored by topic subscriber id
+     */
     private final HashMapOfHashSet<UUID, TopicPubSecurityInfo> securityInfosByTopicSubId = new HashMapOfHashSet<>();
 
-    /** Map that stores all the publisher topic security info's stored by topic publisher id */
+    /**
+     * Map that stores all the publisher topic security info's stored by topic publisher id
+     */
     private final Map<UUID, TopicPubSecurityInfo> securityInfoByTopicPubId = new HashMap<>();
 
-    /** Timer used to schedule the sending of new security requests */
+    /**
+     * Timer used to schedule the sending of new security requests
+     */
     private final Timer securityRequestsTimer;
 
-    /** Stores all the control publishers to send requests to other instances */
+    /**
+     * Stores all the control publishers to send requests to other instances
+     */
     private final ControlPublishers controlPublishers;
 
-    /** Reusable buffer serializer to minimize memory creation during responses */
+    /**
+     * Reusable buffer serializer to minimize memory creation during responses
+     */
     private final UnsafeBufferSerializer requestBufferSerializer = new UnsafeBufferSerializer();
 
-    /** Reusable security request message to save memory space */
+    /**
+     * Reusable security request message to save memory space
+     */
     private final MsgSecurityReq reusableSecurityReqMsg = new MsgSecurityReq();
 
-    /** Our own instance security id */
+    /**
+     * Our own instance security id
+     */
     private final int ownSecurityId;
 
-    /** RSA crypto instance to sing, code, decode and verify messages */
+    /**
+     * RSA crypto instance to sing, code, decode and verify messages
+     */
     private final RSACrypto rsaCrypto;
 
-    /** Store our own instance id */
+    /**
+     * Store our own instance id
+     */
     private final UUID ownInstanceId;
 
-    /** Lock for instance synchronization */
+    /**
+     * Lock for instance synchronization
+     */
     private final Object lock = new Object();
 
     /**
      * Create a new security requester instance
      *
-     * @param vegaContext the vega instance context
+     * @param vegaContext       the vega instance context
      * @param controlPublishers the list of control publishers
      */
-    SecurityRequester(final VegaContext vegaContext, final ControlPublishers controlPublishers)
-    {
+    SecurityRequester(final VegaContext vegaContext, final ControlPublishers controlPublishers) {
         // Create the timer
         this.securityRequestsTimer = new Timer("SecurityRequestTimer_" + vegaContext.getInstanceUniqueId());
 
@@ -87,10 +108,8 @@ class SecurityRequester implements
     }
 
     @Override
-    public void removedSecureSubTopic(final UUID subTopicId)
-    {
-        synchronized (this.lock)
-        {
+    public void removedSecureSubTopic(final UUID subTopicId) {
+        synchronized (this.lock) {
             // Remove remove the security info
             this.securityInfosByTopicSubId.removeAndConsumeIfKeyEquals(subTopicId, pendingSecurityInfo ->
             {
@@ -103,13 +122,10 @@ class SecurityRequester implements
     }
 
     @Override
-    public void addedPubForSubTopic(final AutoDiscTopicInfo pubTopicInfo, final UUID subTopicId, final TopicSecurityTemplateConfig subSecurityConfig)
-    {
-        synchronized (this.lock)
-        {
+    public void addedPubForSubTopic(final AutoDiscTopicInfo pubTopicInfo, final UUID subTopicId, final TopicSecurityTemplateConfig subSecurityConfig) {
+        synchronized (this.lock) {
             // If we already have it, ignore it, it may be a duplicated event
-            if (this.securityInfoByTopicPubId.containsKey(pubTopicInfo.getUniqueId()))
-            {
+            if (this.securityInfoByTopicPubId.containsKey(pubTopicInfo.getUniqueId())) {
                 return;
             }
 
@@ -132,16 +148,13 @@ class SecurityRequester implements
     }
 
     @Override
-    public void removedPubForSubTopic(final AutoDiscTopicInfo pubTopicInfo, final UUID subTopicId)
-    {
-        synchronized (this.lock)
-        {
+    public void removedPubForSubTopic(final AutoDiscTopicInfo pubTopicInfo, final UUID subTopicId) {
+        synchronized (this.lock) {
             // Remove the security info
             final TopicPubSecurityInfo securityInfo = this.securityInfoByTopicPubId.remove(pubTopicInfo.getUniqueId());
 
             // If not there ignore, it may be a duplicated event
-            if (securityInfo == null)
-            {
+            if (securityInfo == null) {
                 return;
             }
 
@@ -155,21 +168,19 @@ class SecurityRequester implements
 
     /**
      * Cancel the task to try to get the security info of the topic publisher
+     *
      * @param securityInfo the security info class with the topic information to retrieve
      */
-    private void cancelRequestSecurityInfoTask(final TopicPubSecurityInfo securityInfo)
-    {
+    private void cancelRequestSecurityInfoTask(final TopicPubSecurityInfo securityInfo) {
         securityInfo.cancel();
         this.securityRequestsTimer.purge();
     }
 
     @Override
-    public AESCrypto getAesCryptoForSecPub(final UUID secureTopicPubId)
-    {
+    public AESCrypto getAesCryptoForSecPub(final UUID secureTopicPubId) {
         final TopicPubSecurityInfo secureInfo = this.securityInfoByTopicPubId.get(secureTopicPubId);
 
-        if(secureInfo != null)
-        {
+        if (secureInfo != null) {
             return secureInfo.getSessionKeyDecoder();
         }
 
@@ -177,16 +188,13 @@ class SecurityRequester implements
     }
 
     @Override
-    public void onSecuirtyResponseReceived(final MsgSecurityResp securityResponse)
-    {
-        synchronized (this.lock)
-        {
+    public void onSecuirtyResponseReceived(final MsgSecurityResp securityResponse) {
+        synchronized (this.lock) {
             // Find the security info
             final TopicPubSecurityInfo securityInfo = this.securityInfoByTopicPubId.get(securityResponse.getTopicPublisherId());
 
             // Verify the response
-            if (!verifyResponse(securityResponse, securityInfo))
-            {
+            if (!verifyResponse(securityResponse, securityInfo)) {
                 return;
             }
 
@@ -197,24 +205,18 @@ class SecurityRequester implements
 
             // Decode the session key
             final byte[] decodedKey;
-            try
-            {
+            try {
                 decodedKey = this.rsaCrypto.decodeWithOwnPrivKey(securityResponse.getEncodedSessionKey());
-            }
-            catch (final VegaException e)
-            {
+            } catch (final VegaException e) {
                 log.error("Error decoding received session key with own private key. " + securityResponse, e);
                 return;
             }
 
             // Create and set the AESCrypto
             final AESCrypto aesCrypto;
-            try
-            {
+            try {
                 aesCrypto = new AESCrypto(decodedKey);
-            }
-            catch (final VegaException e)
-            {
+            } catch (final VegaException e) {
                 log.error("Error creating session AES decoder for security response. " + securityResponse, e);
                 return;
             }
@@ -225,16 +227,13 @@ class SecurityRequester implements
     }
 
     @Override
-    public void onSecurityErrorResponseReceived(final MsgSecurityErrorResp errorResponse)
-    {
-        synchronized (this.lock)
-        {
+    public void onSecurityErrorResponseReceived(final MsgSecurityErrorResp errorResponse) {
+        synchronized (this.lock) {
             // Find the security info
             final TopicPubSecurityInfo securityInfo = this.securityInfoByTopicPubId.get(errorResponse.getTopicPublisherId());
 
             // Verify the response
-            if (!verifyResponse(errorResponse, securityInfo))
-            {
+            if (!verifyResponse(errorResponse, securityInfo)) {
                 return;
             }
 
@@ -242,8 +241,7 @@ class SecurityRequester implements
             this.cancelRequestSecurityInfoTask(securityInfo);
 
             // Log the error response code
-            switch (errorResponse.getErrorCode())
-            {
+            switch (errorResponse.getErrorCode()) {
                 case MsgSecurityErrorResp.NO_SECURE_PUB_FOUND:
                     log.error("Cannot retrieve security credentials for topic [{}] with id [{}], the publisher application cannot find the topic", securityInfo.getTopicName(), securityInfo.getPublisherTopicId());
                     break;
@@ -265,32 +263,28 @@ class SecurityRequester implements
 
     /**
      * Verify a security response. It will check that the security info for the response exists, and that the requests id's and security id matches.
-     *
+     * <p>
      * It will also verify the signature to be 100% sure the message has not been modified.
      *
      * @param securityResponse the security response
-     * @param securityInfo the original security information for the response
+     * @param securityInfo     the original security information for the response
      * @return true if the response is valid, false in other case
      */
-    private boolean verifyResponse(final AbstractMsgSecurity securityResponse, final TopicPubSecurityInfo securityInfo)
-    {
+    private boolean verifyResponse(final AbstractMsgSecurity securityResponse, final TopicPubSecurityInfo securityInfo) {
         // If not found or already canceled, ignore it
-        if (securityInfo == null || securityInfo.isCanceled())
-        {
+        if (securityInfo == null || securityInfo.isCanceled()) {
             log.info("Security response received but security information is not required anymore. {}", securityResponse);
             return false;
         }
 
         // Check if the request id match with the last one sent
-        if (!securityResponse.getRequestId().equals(securityInfo.getLastRequestIdSent()))
-        {
+        if (!securityResponse.getRequestId().equals(securityInfo.getLastRequestIdSent())) {
             log.info("Security response received but don't correspond to the last security request id sent. {}", securityResponse);
             return false;
         }
 
         // Check the security id as well
-        if (securityResponse.getSenderSecurityId() != securityInfo.getPublisherSecureId())
-        {
+        if (securityResponse.getSenderSecurityId() != securityInfo.getPublisherSecureId()) {
             log.info("Security response received but the security ids don't correspond. {}", securityResponse);
             return false;
         }
@@ -305,18 +299,13 @@ class SecurityRequester implements
      * @param securityResp the security response whose signature should be validated
      * @return true if valid, false in other case
      */
-    private boolean validateResponseSignature(final AbstractMsgSecurity securityResp)
-    {
-        try
-        {
-            if (!securityResp.verifySignature(this.rsaCrypto))
-            {
+    private boolean validateResponseSignature(final AbstractMsgSecurity securityResp) {
+        try {
+            if (!securityResp.verifySignature(this.rsaCrypto)) {
                 log.warn("Invalid signature on received security response. [{}]", securityResp);
                 return false;
             }
-        }
-        catch (final VegaException e)
-        {
+        } catch (final VegaException e) {
             log.warn("Unexpected error validating signature on received security response. " + securityResp, e);
             return false;
         }
@@ -325,10 +314,8 @@ class SecurityRequester implements
     }
 
     @Override
-    public void close()
-    {
-        synchronized (this.lock)
-        {
+    public void close() {
+        synchronized (this.lock) {
             // Cancel the timer
             this.securityRequestsTimer.cancel();
             this.securityRequestsTimer.purge();
@@ -342,31 +329,47 @@ class SecurityRequester implements
     /**
      * Stores the topic publisher security info and is also used as "task" to try to retrive the information from the external instance
      */
-    private class TopicPubSecurityInfo extends BlockCancelTask
-    {
-        /** Name of the topic represented by the topic publisher */
-        @Getter private final String topicName;
-        /** The unique instance id the topic publisher belongs to */
+    private class TopicPubSecurityInfo extends BlockCancelTask {
+        /**
+         * Name of the topic represented by the topic publisher
+         */
+        @Getter
+        private final String topicName;
+        /**
+         * The unique instance id the topic publisher belongs to
+         */
         private final UUID publisherInstanceId;
-        /** The secure id of the topic publisher */
-        @Getter private final int publisherSecureId;
-        /** The unique topic id of the topic publisher */
-        @Getter private final UUID publisherTopicId;
-        /** Stores the id of the last security sent request */
-        @Getter private volatile UUID lastRequestIdSent = null;
-        /** Stores the session key decoder retrived for the topic publisher, null if don't exists or it couldn't be retrieved */
-        @Getter @Setter private volatile AESCrypto sessionKeyDecoder = null;
+        /**
+         * The secure id of the topic publisher
+         */
+        @Getter
+        private final int publisherSecureId;
+        /**
+         * The unique topic id of the topic publisher
+         */
+        @Getter
+        private final UUID publisherTopicId;
+        /**
+         * Stores the id of the last security sent request
+         */
+        @Getter
+        private volatile UUID lastRequestIdSent = null;
+        /**
+         * Stores the session key decoder retrived for the topic publisher, null if don't exists or it couldn't be retrieved
+         */
+        @Getter
+        @Setter
+        private volatile AESCrypto sessionKeyDecoder = null;
 
         /**
          * Create a topip publisher security information
          *
-         * @param topicName the name of the topic
+         * @param topicName           the name of the topic
          * @param publisherInstanceId the unique instance id of the publisher the topic publisher belongs to
-         * @param publisherSecureId the security id of the publisher the topic publisher belongs to
-         * @param publisherTopicId the unique topic publisher ID
+         * @param publisherSecureId   the security id of the publisher the topic publisher belongs to
+         * @param publisherTopicId    the unique topic publisher ID
          */
-        TopicPubSecurityInfo(final String topicName, final UUID publisherInstanceId, final int publisherSecureId, final UUID publisherTopicId)
-        {
+        TopicPubSecurityInfo(final String topicName, final UUID publisherInstanceId, final int publisherSecureId, final UUID publisherTopicId) {
             super();
 
             this.topicName = topicName;
@@ -376,18 +379,15 @@ class SecurityRequester implements
         }
 
         @Override
-        public void action()
-        {
-            if (log.isTraceEnabled())
-            {
+        public void action() {
+            if (log.isTraceEnabled()) {
                 log.trace("Sending security request for pending security information {}", this);
             }
 
             final ControlPublisher publisher = controlPublishers.getControlPublisherForInstance(this.publisherInstanceId);
 
             // There is no publisher, maybe the instance information has not arrived yet.
-            if (publisher == null)
-            {
+            if (publisher == null) {
                 log.warn("Trying to send a security request message, but the control publisher is not ready yet for the instance. It will be retried. [{}]", this);
                 return;
             }
@@ -404,12 +404,9 @@ class SecurityRequester implements
             reusableSecurityReqMsg.setTopicPublisherId(this.publisherTopicId);
 
             // Sign and serialize the message
-            try
-            {
+            try {
                 reusableSecurityReqMsg.signAndSerialize(requestBufferSerializer, rsaCrypto);
-            }
-            catch (final VegaException e)
-            {
+            } catch (final VegaException e) {
                 log.error("Unexpected error creating security request message", e);
                 return;
             }
@@ -417,21 +414,17 @@ class SecurityRequester implements
             // Send the message
             final PublishResult sendResult = publisher.sendMessage(MsgType.CONTROL_SECURITY_REQ, requestBufferSerializer.getInternalBuffer(), 0, requestBufferSerializer.getOffset());
 
-            if (log.isTraceEnabled())
-            {
+            if (log.isTraceEnabled()) {
                 log.trace("Security request sent with result {}", sendResult);
             }
         }
 
         @Override
-        public boolean equals(final Object target)
-        {
-            if (this == target)
-            {
+        public boolean equals(final Object target) {
+            if (this == target) {
                 return true;
             }
-            if (target == null || getClass() != target.getClass())
-            {
+            if (target == null || getClass() != target.getClass()) {
                 return false;
             }
 
@@ -442,8 +435,7 @@ class SecurityRequester implements
         }
 
         @Override
-        public int hashCode()
-        {
+        public int hashCode() {
             return publisherTopicId != null ? publisherTopicId.hashCode() : 0;
         }
     }

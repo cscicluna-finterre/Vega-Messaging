@@ -6,13 +6,14 @@ import java.util.UUID;
 
 /**
  * Interface implemented by all the auto-discovery information messages that goes through the network. <p>
- *
+ * <p>
  * Any message should be serializable and contain a unique id for fast lookup. What is represented by the id depends on the
  * auto-discovery information type.
  */
-public interface IAutoDiscInfo extends IUnsafeSerializable
-{
+public interface IAutoDiscInfo extends IUnsafeSerializable {
 
-    /** @return the unique identifier of the auto-discovery information represented by this object */
+    /**
+     * @return the unique identifier of the auto-discovery information represented by this object
+     */
     UUID getUniqueId();
 }

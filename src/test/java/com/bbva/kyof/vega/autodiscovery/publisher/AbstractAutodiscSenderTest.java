@@ -20,8 +20,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 02/08/16.
  */
-public class AbstractAutodiscSenderTest
-{
+public class AbstractAutodiscSenderTest {
     private UUID sender1Id = UUID.randomUUID();
 
     private TestAutoDiscSender sender;
@@ -42,8 +41,7 @@ public class AbstractAutodiscSenderTest
             "host_topic_3");
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         // Create the configuration, with 300 millis refresh interval
         final AutoDiscoveryConfig config = AutoDiscoveryConfig.builder().autoDiscoType(AutoDiscoType.MULTICAST).refreshInterval(100L).build();
         config.completeAndValidateConfig();
@@ -54,8 +52,7 @@ public class AbstractAutodiscSenderTest
     }
 
     @Test
-    public void testClose()
-    {
+    public void testClose() {
         //Now, the publication is in the implementations of this abstract class. It is externally closed
         Publication publication = sender.getPublication();
         publication.close();
@@ -64,8 +61,7 @@ public class AbstractAutodiscSenderTest
     }
 
     @Test
-    public void testRegisterInstance() throws Exception
-    {
+    public void testRegisterInstance() throws Exception {
         // There should be no adverts if we try to send
         Assert.assertEquals(0, this.sender.sendNextTopicAdverts());
 
@@ -98,8 +94,7 @@ public class AbstractAutodiscSenderTest
     }
 
     @Test
-    public void testRegisterTopicInfo() throws Exception
-    {
+    public void testRegisterTopicInfo() throws Exception {
         // Test immediate send upon register
         this.sender2.registerTopic(this.topicInfo1);
         Assert.assertEquals(1, this.sender2.numTopicMsgsSent);
@@ -155,8 +150,7 @@ public class AbstractAutodiscSenderTest
     }
 
     @Test
-    public void testRegisterTopicSocketInfo() throws Exception
-    {
+    public void testRegisterTopicSocketInfo() throws Exception {
         // Test immediate send upon register
         this.sender2.registerTopicSocket(this.topicSocketInfo1);
         Assert.assertEquals(1, this.sender2.numTopicSocketMsgSent);
@@ -212,8 +206,7 @@ public class AbstractAutodiscSenderTest
     }
 
     @Test
-    public void testRepublishInstanceInfo() throws Exception
-    {
+    public void testRepublishInstanceInfo() throws Exception {
         Assert.assertEquals(0, this.sender2.numInstanceMsgSent);
 
         // Register an instance
@@ -240,8 +233,7 @@ public class AbstractAutodiscSenderTest
     }
 
     @Test
-    public void testRepublishTopicInfo() throws Exception
-    {
+    public void testRepublishTopicInfo() throws Exception {
         Assert.assertEquals(0, this.sender2.numInstanceMsgSent);
 
         // Register topic and topic sockets
@@ -284,18 +276,15 @@ public class AbstractAutodiscSenderTest
     }
 
     // Implementation for testing
-    private class TestAutoDiscSender extends AbstractAutodiscSender
-    {
+    private class TestAutoDiscSender extends AbstractAutodiscSender {
         boolean testIsClosed = false;
 
-        TestAutoDiscSender(Aeron aeron, AutoDiscoveryConfig config)
-        {
+        TestAutoDiscSender(Aeron aeron, AutoDiscoveryConfig config) {
             super(aeron, config);
         }
 
         @Override
-        public Publication getPublication()
-        {
+        public Publication getPublication() {
             final Publication publication = EasyMock.createNiceMock(Publication.class);
             publication.close();
             EasyMock.expectLastCall().andAnswer(this::closedCalled).anyTimes();
@@ -305,41 +294,34 @@ public class AbstractAutodiscSenderTest
             return publication;
         }
 
-        private Object closedCalled()
-        {
+        private Object closedCalled() {
             this.testIsClosed = true;
             return null;
         }
     }
 
     // Implementation for testing
-    private class TestAutoDiscSender2 extends AbstractAutodiscSender
-    {
+    private class TestAutoDiscSender2 extends AbstractAutodiscSender {
         int numInstanceMsgSent = 0;
         int numTopicMsgsSent = 0;
         int numTopicSocketMsgSent = 0;
 
-        TestAutoDiscSender2(Aeron aeron, AutoDiscoveryConfig config)
-        {
+        TestAutoDiscSender2(Aeron aeron, AutoDiscoveryConfig config) {
             super(aeron, config);
         }
 
         @Override
-        public Publication getPublication()
-        {
+        public Publication getPublication() {
             return null;
         }
 
         @Override
-        int sendMessageIfNotNull(final byte msgType, final IUnsafeSerializable serializable)
-        {
-            if (serializable == null)
-            {
+        int sendMessageIfNotNull(final byte msgType, final IUnsafeSerializable serializable) {
+            if (serializable == null) {
                 return 0;
             }
 
-            switch (msgType)
-            {
+            switch (msgType) {
                 case MsgType.AUTO_DISC_INSTANCE:
                     numInstanceMsgSent++;
                     return 1;

@@ -27,27 +27,36 @@ import java.util.Map;
  * Main class to handle the receiving functionality on the framework. It contains separate managers for unicast messaging and multicast/ipc messaging.
  * The reason fo this separation is that in unicast the subscriber is the end point and in multicast/ipc is the opposite. This creates a different required
  * behaviour for both cases.<p>
- *
+ * <p>
  * It also keep track of the created subscribers and configurations. <p>
- *
+ * <p>
  * This class is thread safe!!
  */
 @Slf4j
-public final class ReceiveManager implements ISubscribersPollerListener, Closeable, IAutodiscInstanceListener, IAutodiscPubTopicPatternListener
-{
-    /** Configuration is available in this object */
+public final class ReceiveManager implements ISubscribersPollerListener, Closeable, IAutodiscInstanceListener, IAutodiscPubTopicPatternListener {
+    /**
+     * Configuration is available in this object
+     */
     private final VegaContext vegaContext;
 
-    /** Manager for unicast reception */
+    /**
+     * Manager for unicast reception
+     */
     private final SubscribersManagerUnicast subscribersManagerUnicast;
 
-    /** Manager for multicast and ipc reception */
+    /**
+     * Manager for multicast and ipc reception
+     */
     private final SubscribersManagerIpcMcast subscribersManagerIpcMcast;
 
-    /** Manager for response publishers */
+    /**
+     * Manager for response publishers
+     */
     private final ResponsePublishersManager responsePublishersManager;
 
-    /** Security manager for subscriptions, it will be usd to decrypt messages */
+    /**
+     * Security manager for subscriptions, it will be usd to decrypt messages
+     */
     private final ISecuredMsgsDecoder subSecurityManager;
 
     /**
@@ -56,31 +65,40 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
      */
     private final TopicSubAndTopicPubIdRelations topicSubAndTopicPubIdRelations = new TopicSubAndTopicPubIdRelations();
 
-    /** Listeners for all the subscribed patterns */
+    /**
+     * Listeners for all the subscribed patterns
+     */
     private final Map<String, ITopicSubListener> listenersByTopicPattern = new HashMap<>();
 
-    /** Manager that handles all the pollers */
+    /**
+     * Manager that handles all the pollers
+     */
     private final SubscribersPollersManager pollersManager;
 
-    /** Content for a sent heartbeat response */
+    /**
+     * Content for a sent heartbeat response
+     */
     private final UnsafeBuffer heartbeatRespContent = new UnsafeBuffer(new byte[0]);
 
-    /** Lock for class synchronization */
+    /**
+     * Lock for class synchronization
+     */
     private final Object lock = new Object();
 
-    /** True if it has been closed */
+    /**
+     * True if it has been closed
+     */
     private boolean isClosed = false;
 
     /**
-     *  Constructor of the class
+     * Constructor of the class
      *
-     * @param vegaContext context of the instance
-     * @param subSecurityManager security manager for the subscribers
+     * @param vegaContext               context of the instance
+     * @param subSecurityManager        security manager for the subscribers
      * @param securityRequesterNotifier notifier to tell about new security requests
      * @throws VegaException exception thrown if there is a problem creating the manager
      */
-    public ReceiveManager(final VegaContext vegaContext, final ISecuredMsgsDecoder subSecurityManager, final ISecurityRequesterNotifier securityRequesterNotifier) throws VegaException
-    {
+    public ReceiveManager(final VegaContext vegaContext, final ISecuredMsgsDecoder subSecurityManager, final ISecurityRequesterNotifier securityRequesterNotifier) throws VegaException {
         this.vegaContext = vegaContext;
         this.subSecurityManager = subSecurityManager;
 
@@ -100,19 +118,16 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
 
     /**
      * Subscribe to the given topic in order to get messages and responses for the topic name
-     * @param topicName the name of the topic to onNewPubTopicForPattern to
-     * @param listener listener that will process incoming messages on the topic
      *
+     * @param topicName the name of the topic to onNewPubTopicForPattern to
+     * @param listener  listener that will process incoming messages on the topic
      * @throws VegaException exception thrown if there is a problem or already subscribed
      */
-    public void subscribeToTopic(final String topicName, final ITopicSubListener listener) throws VegaException
-    {
+    public void subscribeToTopic(final String topicName, final ITopicSubListener listener) throws VegaException {
         log.info("Subscribing to topic [{}]", topicName);
 
-        synchronized (this.lock)
-        {
-            if (this.isClosed)
-            {
+        synchronized (this.lock) {
+            if (this.isClosed) {
                 log.error("Cannot subscribe to topic [{}] on a closed manager", topicName);
                 throw new VegaException("Trying to subscribe to topic on a closed manager");
             }
@@ -127,8 +142,7 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
             this.verifyTopicSubscriberSecurityOrFail(securityTemplateConfig);
 
             // Call the right manager to do the rest of the job
-            switch (templateCfg.getTransportType())
-            {
+            switch (templateCfg.getTransportType()) {
                 case UNICAST:
                     this.subscribersManagerUnicast.subscribeToTopic(topicName, templateCfg, securityTemplateConfig, listener);
                     break;
@@ -144,13 +158,12 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
 
     /**
      * Verify the topic subscriber security. If security is enabled, it check if the application secure id match a valid secure id for the topic
+     *
      * @param securityTemplateConfig security configuration for the topic
      * @throws VegaException exception thrown if the security is not valid
      */
-    private void verifyTopicSubscriberSecurityOrFail(final TopicSecurityTemplateConfig securityTemplateConfig) throws VegaException
-    {
-        if (securityTemplateConfig != null && !securityTemplateConfig.getSubSecIds().contains(this.vegaContext.getSecurityContext().getSecurityId()))
-        {
+    private void verifyTopicSubscriberSecurityOrFail(final TopicSecurityTemplateConfig securityTemplateConfig) throws VegaException {
+        if (securityTemplateConfig != null && !securityTemplateConfig.getSubSecIds().contains(this.vegaContext.getSecurityContext().getSecurityId())) {
             log.error("Trying to subscribe to a secured topic, but the application secure id is not in the configuration list of valid subscribers");
             throw new VegaException("The current security id is not configured in the list of sub secure ids for the topic");
         }
@@ -162,14 +175,11 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
      * @param topicName the name of the topic to onPubTopicForPatternRemoved from
      * @throws VegaException exception thrown if there is a problem or if not previously subscribed
      */
-    public void unsubscribeFromTopic(final String topicName) throws VegaException
-    {
+    public void unsubscribeFromTopic(final String topicName) throws VegaException {
         log.info("Unsubscribing from topic [{}]", topicName);
 
-        synchronized (this.lock)
-        {
-            if (this.isClosed)
-            {
+        synchronized (this.lock) {
+            if (this.isClosed) {
                 log.error("Cannot unsubscribe from topic [{}] on a closed manager", topicName);
                 throw new VegaException("Trying to unsubscribe from topic on a closed manager");
             }
@@ -178,8 +188,7 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
             final TopicTemplateConfig templateCfg = this.findTopicConfigAndFailIfNotFound(topicName);
 
             // Call the right manager to do the rest of the job
-            switch (templateCfg.getTransportType())
-            {
+            switch (templateCfg.getTransportType()) {
                 case UNICAST:
                     this.subscribersManagerUnicast.unsubscribeFromTopic(topicName);
                     break;
@@ -197,22 +206,18 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
      * Subscribe to receive messages and requests from any topic that match the given pattern
      *
      * @param topicPattern the topic pattern to subscribe to
-     * @param listener the listener for messages that arrive to topics that match the pattern
+     * @param listener     the listener for messages that arrive to topics that match the pattern
      * @throws VegaException exception thrown if closed or already subscribed to the pattern
      */
-    public void subscribeToPattern(final String topicPattern, final ITopicSubListener listener) throws VegaException
-    {
-        synchronized (this.lock)
-        {
-            if (this.isClosed)
-            {
+    public void subscribeToPattern(final String topicPattern, final ITopicSubListener listener) throws VegaException {
+        synchronized (this.lock) {
+            if (this.isClosed) {
                 log.error("Cannot subscribe to patterns on a closed manager");
                 throw new VegaException("Trying to subscribe to pattern on a closed manager");
             }
 
             // Ensure it is not already subscribed
-            if (this.listenersByTopicPattern.containsKey(topicPattern))
-            {
+            if (this.listenersByTopicPattern.containsKey(topicPattern)) {
                 log.error("Trying to subscribe to the topic pattern [{}] twice", topicPattern);
                 throw new VegaException("Trying to subscribe twice to the same topic pattern");
             }
@@ -229,23 +234,17 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
      * @param topicPattern the topic pattern to unsubscribe from
      * @throws VegaException exception thrown if closed or not subscribed to the pattern
      */
-    public void unsubscribefromPattern(final String topicPattern) throws VegaException
-    {
-        synchronized (this.lock)
-        {
-            if (this.isClosed)
-            {
+    public void unsubscribefromPattern(final String topicPattern) throws VegaException {
+        synchronized (this.lock) {
+            if (this.isClosed) {
                 log.error("Cannot unsubscribe from patterns on a closed manager");
                 throw new VegaException("Trying to unsubscribe from pattern on a closed manager");
             }
 
-            if (this.listenersByTopicPattern.remove(topicPattern) == null)
-            {
+            if (this.listenersByTopicPattern.remove(topicPattern) == null) {
                 log.error("Trying to unsubscribe from the topic pattern [{}], but is not subscribed", topicPattern);
                 throw new VegaException("Trying to unsubscribe from a non subscribed topic pattern");
-            }
-            else
-            {
+            } else {
                 // Remove auto-discovery subscription
                 this.vegaContext.getAutodiscoveryManager().unsubscribeFromPubTopicPattern(topicPattern);
 
@@ -257,19 +256,15 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
     }
 
     @Override
-    public void onNewPubTopicForPattern(final AutoDiscTopicInfo pubTopicInfo, final String topicPattern)
-    {
-        synchronized (this.lock)
-        {
-            if (this.isClosed)
-            {
+    public void onNewPubTopicForPattern(final AutoDiscTopicInfo pubTopicInfo, final String topicPattern) {
+        synchronized (this.lock) {
+            if (this.isClosed) {
                 return;
             }
 
             // Get the listener for the pattern, it can be null if it has been removed but there was a pending auto-discovery event
             final ITopicSubListener listener = this.listenersByTopicPattern.get(topicPattern);
-            if (listener == null)
-            {
+            if (listener == null) {
                 return;
             }
 
@@ -277,8 +272,7 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
             final TopicTemplateConfig templateCfg = this.findTopicConfig(pubTopicInfo.getTopicName());
 
             // If there is no configuration for the topic, just ignore the event
-            if (templateCfg == null)
-            {
+            if (templateCfg == null) {
                 return;
             }
 
@@ -286,14 +280,12 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
             final TopicSecurityTemplateConfig securityTemplateConfig = this.findTopicSecurityConfig(pubTopicInfo.getTopicName());
 
             // Perform a security filter, both should be secured or non secured, and if secured the security id should be configured
-            if (!this.performNewPubForPatternSecurityFilter(securityTemplateConfig, topicPattern, pubTopicInfo))
-            {
+            if (!this.performNewPubForPatternSecurityFilter(securityTemplateConfig, topicPattern, pubTopicInfo)) {
                 return;
             }
 
             // Call the right manager to do the rest of the job
-            switch (templateCfg.getTransportType())
-            {
+            switch (templateCfg.getTransportType()) {
                 case UNICAST:
                     this.subscribersManagerUnicast.onNewPubTopicForPattern(pubTopicInfo, topicPattern, templateCfg, securityTemplateConfig, listener);
                     break;
@@ -308,19 +300,15 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
     }
 
     @Override
-    public void onPubTopicForPatternRemoved(final AutoDiscTopicInfo pubTopicInfo, final String topicPattern)
-    {
-        synchronized (this.lock)
-        {
-            if (this.isClosed)
-            {
+    public void onPubTopicForPatternRemoved(final AutoDiscTopicInfo pubTopicInfo, final String topicPattern) {
+        synchronized (this.lock) {
+            if (this.isClosed) {
                 return;
             }
 
             // Get the listener for the pattern, it can be null if it has been removed but there was a pending auto-discovery event
             final ITopicSubListener listener = this.listenersByTopicPattern.get(topicPattern);
-            if (listener == null)
-            {
+            if (listener == null) {
                 return;
             }
 
@@ -328,14 +316,12 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
             final TopicTemplateConfig templateCfg = this.findTopicConfig(pubTopicInfo.getTopicName());
 
             // If there is no configuration for the topic, just ignore the event
-            if (templateCfg == null)
-            {
+            if (templateCfg == null) {
                 return;
             }
 
             // Call the right manager to do the rest of the job
-            switch (templateCfg.getTransportType())
-            {
+            switch (templateCfg.getTransportType()) {
                 case UNICAST:
                     this.subscribersManagerUnicast.onPubTopicForPatternRemoved(pubTopicInfo.getTopicName(), topicPattern);
                     break;
@@ -355,8 +341,7 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
      * @param topicName the topic name to find the configuration for
      * @return the template configuration, null if not found
      */
-    private TopicTemplateConfig findTopicConfig(final String topicName)
-    {
+    private TopicTemplateConfig findTopicConfig(final String topicName) {
         // Find the subscriber configuration given the topic
         return this.vegaContext.getInstanceConfig().getTopicTemplateForTopic(topicName);
     }
@@ -367,8 +352,7 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
      * @param topicName the topic name to find the configuration for
      * @return an optional with the found configuration
      */
-    private TopicSecurityTemplateConfig findTopicSecurityConfig(final String topicName)
-    {
+    private TopicSecurityTemplateConfig findTopicSecurityConfig(final String topicName) {
         // Find the subscriber configuration given the topic
         return this.vegaContext.getInstanceConfig().getTopicSecurityTemplateForTopic(topicName);
     }
@@ -380,13 +364,11 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
      * @return an optional with the found configuration
      * @throws VegaException exception thrown if the configuration cannot be found
      */
-    private TopicTemplateConfig findTopicConfigAndFailIfNotFound(final String topicName) throws VegaException
-    {
+    private TopicTemplateConfig findTopicConfigAndFailIfNotFound(final String topicName) throws VegaException {
         // Find the subscriber configuration given the topic
         final TopicTemplateConfig config = this.findTopicConfig(topicName);
 
-        if (config == null)
-        {
+        if (config == null) {
             log.error("No configuration found for topic [{}]", topicName);
             throw new VegaException("Cannot find any valid configuration for topic " + topicName);
         }
@@ -395,49 +377,41 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
     }
 
     /**
-     *  Check the security to decide if the topic should be filtered. Both topics should have or not have security, if secured the security id of
-     *  the publisher should be in the list of valid id's for the subscriber.
+     * Check the security to decide if the topic should be filtered. Both topics should have or not have security, if secured the security id of
+     * the publisher should be in the list of valid id's for the subscriber.
      *
      * @param securityTemplate the security template for the topic
-     * @param pattern the pattern for the pattern subscription that has originated the call
-     * @param pubTopicInfo the new topic publisher information
+     * @param pattern          the pattern for the pattern subscription that has originated the call
+     * @param pubTopicInfo     the new topic publisher information
      * @return true if it pass the security filter
      */
-    private boolean performNewPubForPatternSecurityFilter(final TopicSecurityTemplateConfig securityTemplate, final String pattern, final AutoDiscTopicInfo pubTopicInfo)
-    {
+    private boolean performNewPubForPatternSecurityFilter(final TopicSecurityTemplateConfig securityTemplate, final String pattern, final AutoDiscTopicInfo pubTopicInfo) {
         // There is a security template for the topic
-        if (securityTemplate != null)
-        {
+        if (securityTemplate != null) {
             // First make sure we have permissions to subscribe to the secure topic
-            if (!securityTemplate.getSubSecIds().contains(this.vegaContext.getSecurityContext().getSecurityId()))
-            {
+            if (!securityTemplate.getSubSecIds().contains(this.vegaContext.getSecurityContext().getSecurityId())) {
                 log.warn("New secure publisher auto-discovery topic info received for pattern subscription [{}] but the application is not allowed to subscribe to the secured topic {}", pattern, pubTopicInfo);
                 return false;
             }
 
             // Now check that the event is also from a secure source
-            if (!pubTopicInfo.hasSecurity())
-            {
+            if (!pubTopicInfo.hasSecurity()) {
                 log.warn("New non secure auto-discovery topic info received for pattern subscription [{}] but the topic configuration has security enabled {}", pattern, pubTopicInfo);
                 return false;
             }
 
             // Make sure the secure source is in the list of valid secure id's
-            if(!securityTemplate.getPubSecIds().contains(pubTopicInfo.getSecurityId()))
-            {
+            if (!securityTemplate.getPubSecIds().contains(pubTopicInfo.getSecurityId())) {
                 log.warn("New secure publisher auto-discovery topic info received for pattern subscription [{}] but the subscriber don't have the security id on the list of valid pub id's. {}", pattern, pubTopicInfo);
                 return false;
             }
 
             // Make sure we have the public key of the source
-            if(!this.vegaContext.getSecurityContext().getRsaCrypto().isSecurityIdRegistered(pubTopicInfo.getSecurityId()))
-            {
+            if (!this.vegaContext.getSecurityContext().getRsaCrypto().isSecurityIdRegistered(pubTopicInfo.getSecurityId())) {
                 log.warn("New secure publisher auto-discovery topic info received for pattern subscription [{}] but the public key of the publisher has not been loaded. {}", pattern, pubTopicInfo);
                 return false;
             }
-        }
-        else if (pubTopicInfo.hasSecurity())
-        {
+        } else if (pubTopicInfo.hasSecurity()) {
             // The subscriber has no security, but the event comes from a secure publisher
             log.warn("New secure publisher auto-discovery topic info received for pattern subscription [{}] but the subscriber has no secure configuration. {}", pattern, pubTopicInfo);
             return false;
@@ -447,15 +421,12 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         log.info("Stopping receiver manager for instance ID [{}]", this.vegaContext.getInstanceUniqueId());
 
-        synchronized (this.lock)
-        {
+        synchronized (this.lock) {
             // Ignore multiple close calls
-            if (this.isClosed)
-            {
+            if (this.isClosed) {
                 return;
             }
 
@@ -484,14 +455,11 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
     }
 
     @Override
-    public void onNewAutoDiscInstanceInfo(final AutoDiscInstanceInfo info)
-    {
+    public void onNewAutoDiscInstanceInfo(final AutoDiscInstanceInfo info) {
         log.debug("New autodisc inscance info event received {}", info);
 
-        synchronized (this.lock)
-        {
-            if (this.isClosed)
-            {
+        synchronized (this.lock) {
+            if (this.isClosed) {
                 return;
             }
 
@@ -500,14 +468,11 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
     }
 
     @Override
-    public void onTimedOutAutoDiscInstanceInfo(final AutoDiscInstanceInfo info)
-    {
+    public void onTimedOutAutoDiscInstanceInfo(final AutoDiscInstanceInfo info) {
         log.debug("New timed out autodisc instance info event received {}", info);
 
-        synchronized (this.lock)
-        {
-            if (this.isClosed)
-            {
+        synchronized (this.lock) {
+            if (this.isClosed) {
                 return;
             }
 
@@ -515,22 +480,20 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
         }
     }
 
-    /** @return the parameters of the Aeron Subscriber that handle responses */
-    public AeronSubscriberParams getResponseSubscriberParams()
-    {
+    /**
+     * @return the parameters of the Aeron Subscriber that handle responses
+     */
+    public AeronSubscriberParams getResponseSubscriberParams() {
         return this.subscribersManagerUnicast.getResponsesSubscriberParams();
     }
 
     @Override
-    public void onDataMsgReceived(final RcvMessage msg)
-    {
+    public void onDataMsgReceived(final RcvMessage msg) {
         // Find the related topic subscriber if any
         final TopicSubscriber topicSubscriber = this.topicSubAndTopicPubIdRelations.getTopicSubscriberForTopicPublisherId(msg.getTopicPublisherId());
-        if (topicSubscriber != null)
-        {
+        if (topicSubscriber != null) {
             // The message is not encrypted, make sure the topic has no security
-            if (topicSubscriber.hasSecurity())
-            {
+            if (topicSubscriber.hasSecurity()) {
                 log.warn("Non encrypted message received on a secured topic subscriber. {}", msg);
                 return;
             }
@@ -544,18 +507,15 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
     }
 
     @Override
-    public void onEncryptedDataMsgReceived(final RcvMessage msg)
-    {
+    public void onEncryptedDataMsgReceived(final RcvMessage msg) {
         // Find the related topic subscriber if any
         final TopicSubscriber topicSubscriber = this.topicSubAndTopicPubIdRelations.getTopicSubscriberForTopicPublisherId(msg.getTopicPublisherId());
-        if (topicSubscriber != null)
-        {
+        if (topicSubscriber != null) {
             // Set the topic name
             msg.setTopicName(topicSubscriber.getTopicName());
 
             // The message is encrypted, make sure the topic has security
-            if (!topicSubscriber.hasSecurity())
-            {
+            if (!topicSubscriber.hasSecurity()) {
                 log.warn("Encrypted message received on a non secured topic subscriber. {}", msg);
                 return;
             }
@@ -564,21 +524,18 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
             final AESCrypto aesDecoder = this.subSecurityManager.getAesCryptoForSecPub(msg.getTopicPublisherId());
 
             // It may be null if it has not found yet, or we don't have permissions, or not configured, etc etc
-            if (aesDecoder != null)
-            {
-                ((SecureTopicSubscriber)topicSubscriber).onSecureMsgReceived(msg, aesDecoder);
+            if (aesDecoder != null) {
+                ((SecureTopicSubscriber) topicSubscriber).onSecureMsgReceived(msg, aesDecoder);
             }
         }
     }
 
     @Override
-    public void onDataRequestMsgReceived(final RcvRequest request)
-    {
+    public void onDataRequestMsgReceived(final RcvRequest request) {
         // Look for the responder socket for the given sender application instance id
         final AeronPublisher responsePublisher = this.responsePublishersManager.getResponsePublisherForInstance(request.getInstanceId());
 
-        if (responsePublisher == null)
-        {
+        if (responsePublisher == null) {
             log.info("Request received but no responder instance id found for it in auto-discovery. Requester id [{}]", request.getInstanceId());
             return;
         }
@@ -588,8 +545,7 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
 
         // Find the topic subscriber and notify to the listener
         final TopicSubscriber topicSubscriber = this.topicSubAndTopicPubIdRelations.getTopicSubscriberForTopicPublisherId(request.getTopicPublisherId());
-        if (topicSubscriber != null)
-        {
+        if (topicSubscriber != null) {
             // Set the topic name
             request.setTopicName(topicSubscriber.getTopicName());
             topicSubscriber.onRequestReceived(request);
@@ -597,67 +553,59 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
     }
 
     @Override
-    public void onHeartbeatRequestMsgReceived(final MsgReqHeader heartbeatReqMsgHeader)
-    {
+    public void onHeartbeatRequestMsgReceived(final MsgReqHeader heartbeatReqMsgHeader) {
         // Look for the responder socket for the given sender application instance id
         final AeronPublisher responsePublisher = this.responsePublishersManager.getResponsePublisherForInstance(heartbeatReqMsgHeader.getInstanceId());
 
         //Send the response
-        if (responsePublisher != null)
-        {
+        if (responsePublisher != null) {
             responsePublisher.sendResponse(heartbeatReqMsgHeader.getRequestId(), heartbeatRespContent, 0, 0);
         }
 
         // Find the topic subscriber and notify to the listener
         final TopicSubscriber topicSubscriber = this.topicSubAndTopicPubIdRelations.getTopicSubscriberForTopicPublisherId(heartbeatReqMsgHeader.getTopicPublisherId());
-        if (topicSubscriber != null)
-        {
+        if (topicSubscriber != null) {
             // Set the topic name
             topicSubscriber.onHeartbeatReceived(heartbeatReqMsgHeader, topicSubscriber.getTopicName());
         }
     }
 
     @Override
-    public void onDataResponseMsgReceived(final RcvResponse response)
-    {
+    public void onDataResponseMsgReceived(final RcvResponse response) {
         this.vegaContext.getAsyncRequestManager().processResponse(response);
     }
 
     /**
      * Return true if subscribed to pattern
-     *
+     * <p>
      * Method added for testing purposes
      *
      * @param pattern the pattern to look for
      * @return true if subscribed to pattern
      */
-    boolean isSubscribedToPattern(final String pattern)
-    {
+    boolean isSubscribedToPattern(final String pattern) {
         return this.listenersByTopicPattern.get(pattern) != null;
     }
 
     /**
      * Return true if subscribed to topic, due to topic subscription or pattern subscription
-     *
+     * <p>
      * Method added for testing purposes
      *
      * @param topicName the name of the topic
      * @return true if susbscribed
      */
-    TopicSubscriber getTopicSubscriber(final String topicName)
-    {
+    TopicSubscriber getTopicSubscriber(final String topicName) {
         // Find the template configuration
         final TopicTemplateConfig templateCfg = this.findTopicConfig(topicName);
 
         // If there is no configuration for the topic, just ignore the event
-        if (templateCfg == null)
-        {
+        if (templateCfg == null) {
             return null;
         }
 
         // Call the right manager to do the rest of the job
-        switch (templateCfg.getTransportType())
-        {
+        switch (templateCfg.getTransportType()) {
             case UNICAST:
                 return this.subscribersManagerUnicast.getTopicSubscriberForTopicName(topicName);
             case MULTICAST:
@@ -670,13 +618,12 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
 
     /**
      * Return the relations between topic subscribers and topic publishers
-     *
+     * <p>
      * Method added for testing purposes
      *
      * @return the relations between topic publishers and subscribers
      */
-    TopicSubAndTopicPubIdRelations getTopicSubAndTopicPubIdRelations()
-    {
+    TopicSubAndTopicPubIdRelations getTopicSubAndTopicPubIdRelations() {
         return this.topicSubAndTopicPubIdRelations;
     }
 }

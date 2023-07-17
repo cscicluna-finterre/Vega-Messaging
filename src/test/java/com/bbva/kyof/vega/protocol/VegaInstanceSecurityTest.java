@@ -23,28 +23,24 @@ import java.nio.ByteBuffer;
  * Test for the {@link VegaInstance} class
  * Created by XE48745 on 15/09/2015.
  */
-public class VegaInstanceSecurityTest
-{
+public class VegaInstanceSecurityTest {
     private static final String KEYS_DIR_PATH = VegaInstanceSecurityTest.class.getClassLoader().getResource("keys").getPath();
     private static final String SECURE_CONFIG = ConfigReaderTest.class.getClassLoader().getResource("config/vegaInstanceSecureTestConfig.xml").getPath();
     private UnsafeBuffer sendBuffer = new UnsafeBuffer(ByteBuffer.allocate(128));
     private static MediaDriver MEDIA_DRIVER;
 
     @BeforeClass
-    public static void beforeClass()
-    {
+    public static void beforeClass() {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Test(expected = VegaException.class)
-    public void testSecureConfigNoSecureParams() throws Exception
-    {
+    public void testSecureConfigNoSecureParams() throws Exception {
         final VegaInstanceParams params1 = VegaInstanceParams.builder().
                 instanceName("Instance1").
                 configurationFile(SECURE_CONFIG).
@@ -55,8 +51,7 @@ public class VegaInstanceSecurityTest
     }
 
     @Test
-    public void testSendReceiveMultipleInstances() throws Exception
-    {
+    public void testSendReceiveMultipleInstances() throws Exception {
         final SecurityParams securityParams1 = SecurityParams.builder().
                 keySecurityType(KeySecurityType.PLAIN_KEY_FILE).
                 privateKeyDirPath(KEYS_DIR_PATH).
@@ -82,9 +77,8 @@ public class VegaInstanceSecurityTest
                 securityParams(securityParams2).build();
 
         // Create 2 application instances, use auto-closeable just in case
-        try(final IVegaInstance subInstance = VegaInstance.createNewInstance(params1);
-            final IVegaInstance pubInstance = VegaInstance.createNewInstance(params2))
-        {
+        try (final IVegaInstance subInstance = VegaInstance.createNewInstance(params1);
+             final IVegaInstance pubInstance = VegaInstance.createNewInstance(params2)) {
             // Subscribe to a topic, we should have permissions
             final ReceiverListener stopic1Listener = new ReceiverListener();
             subInstance.subscribeToTopic("stopic1", stopic1Listener);
@@ -104,8 +98,7 @@ public class VegaInstanceSecurityTest
     }
 
     @Test
-    public void testWildcardSubscriptions() throws Exception
-    {
+    public void testWildcardSubscriptions() throws Exception {
         final SecurityParams securityParams1 = SecurityParams.builder().
                 keySecurityType(KeySecurityType.PLAIN_KEY_FILE).
                 privateKeyDirPath(KEYS_DIR_PATH).
@@ -131,9 +124,8 @@ public class VegaInstanceSecurityTest
                 securityParams(securityParams2).build();
 
         // Create 2 application instances, use auto-closeable just in case
-        try(final IVegaInstance subInstance = VegaInstance.createNewInstance(params1);
-            final IVegaInstance pubInstance = VegaInstance.createNewInstance(params2))
-        {
+        try (final IVegaInstance subInstance = VegaInstance.createNewInstance(params1);
+             final IVegaInstance pubInstance = VegaInstance.createNewInstance(params2)) {
             // Subscribe to 2 topis of each type
             final ReceiverListener listener = new ReceiverListener();
 
@@ -159,8 +151,7 @@ public class VegaInstanceSecurityTest
         }
     }
 
-    private void testSendReceive(final ITopicPublisher publisher, final ReceiverListener listener, final boolean shouldReceive) throws Exception
-    {
+    private void testSendReceive(final ITopicPublisher publisher, final ReceiverListener listener, final boolean shouldReceive) throws Exception {
         // Reset the listener contents
         listener.reset();
 
@@ -172,35 +163,28 @@ public class VegaInstanceSecurityTest
         Thread.sleep(1000);
 
         // Check for reception
-        if (shouldReceive)
-        {
+        if (shouldReceive) {
             Assert.assertTrue(listener.receivedMsg.getContents().getInt(0) == 33);
             Assert.assertEquals(listener.receivedMsg.getTopicName(), publisher.getTopicName());
-        }
-        else
-        {
+        } else {
             Assert.assertNull(listener.receivedMsg);
         }
     }
 
-    private static class ReceiverListener implements ITopicSubListener
-    {
+    private static class ReceiverListener implements ITopicSubListener {
         volatile IRcvMessage receivedMsg = null;
 
-        private void reset()
-        {
+        private void reset() {
             this.receivedMsg = null;
         }
 
         @Override
-        public void onMessageReceived(final IRcvMessage receivedMessage)
-        {
+        public void onMessageReceived(final IRcvMessage receivedMessage) {
             this.receivedMsg = receivedMessage.promote();
         }
 
         @Override
-        public void onRequestReceived(IRcvRequest receivedRequest)
-        {
+        public void onRequestReceived(IRcvRequest receivedRequest) {
         }
     }
 }

@@ -9,11 +9,9 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 02/08/16.
  */
-public class MsgRespHeaderTest
-{
+public class MsgRespHeaderTest {
     @Test
-    public void fromBinaryToBinary()
-    {
+    public void fromBinaryToBinary() {
         // Create the header
         final UUID instanceId = UUID.randomUUID();
         final UUID requestId = UUID.randomUUID();

@@ -1,17 +1,14 @@
 package com.bbva.kyof.vega.autodiscovery.advert;
 
-import com.bbva.kyof.vega.autodiscovery.advert.ActiveAdvert;
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
  * Created by cnebrera on 04/08/16.
  */
-public class ActiveAdvertTest
-{
+public class ActiveAdvertTest {
     @Test
-    public void testCreateTimeoutUpdate() throws Exception
-    {
+    public void testCreateTimeoutUpdate() throws Exception {
         // Create active advert instance
         final ActiveAdvert<Integer> registeredInfo = new ActiveAdvert<>(128, 100);
 
@@ -32,8 +29,7 @@ public class ActiveAdvertTest
     }
 
     @Test
-    public void equalsAndHashCode() throws Exception
-    {
+    public void equalsAndHashCode() throws Exception {
         // Create registered info instances
         final ActiveAdvert<Integer> advert1 = new ActiveAdvert<>(128, 100);
         final ActiveAdvert<Integer> advert2 = new ActiveAdvert<>(128, 90);

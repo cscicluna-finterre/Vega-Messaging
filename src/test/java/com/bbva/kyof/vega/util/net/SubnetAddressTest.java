@@ -6,12 +6,11 @@ import org.junit.Test;
 import java.net.InetAddress;
 
 /**
- *  * Class create to test {@link SubnetAddress}
- *
+ * * Class create to test {@link SubnetAddress}
+ * <p>
  * Created by cnebrera on 16/06/16.
  */
-public class SubnetAddressTest
-{
+public class SubnetAddressTest {
     private static final String TEST_ADDRESS_1_STRING = "192.168.1.0/24";
     private static final String TEST_ADDRESS_2_STRING = "192.168.1.0";
     private static final String TEST_ADDRESS_3_STRING = "192.168.1.0/32";
@@ -22,15 +21,13 @@ public class SubnetAddressTest
 
 
     @Test
-    public void testConstructors()
-    {
+    public void testConstructors() {
         new SubnetAddress(TEST_ADDRESS_2_STRING, 24);
         new SubnetAddress(TEST_ADDRESS_3_STRING);
     }
 
     @Test
-    public void correctAddress() throws Exception
-    {
+    public void correctAddress() throws Exception {
         final SubnetAddress correctAddress = new SubnetAddress(TEST_ADDRESS_1_STRING);
 
         Assert.assertEquals(correctAddress.toString(), TEST_ADDRESS_1_STRING);
@@ -45,14 +42,12 @@ public class SubnetAddressTest
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void incorrectAddressException() throws Exception
-    {
+    public void incorrectAddressException() throws Exception {
         new SubnetAddress(TEST_INCORRECT_ADDRESS_STRING);
     }
 
     @Test
-    public void checkIfMatch() throws Exception
-    {
+    public void checkIfMatch() throws Exception {
         final SubnetAddress address1 = new SubnetAddress(TEST_ADDRESS_1_STRING);
 
         Assert.assertTrue(address1.checkIfMatch(InetUtil.getInetAddressFromString(TEST_ADDRESS_4_STRING)));

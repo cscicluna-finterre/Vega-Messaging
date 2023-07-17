@@ -6,12 +6,11 @@ import java.util.UUID;
 
 /**
  * Interface for a class that is able to decode a secured message.
- *
+ * <p>
  * The message contents will be changed by the decoded content transparently. The new buffer used may be reused, the standard
  * rules of
  */
-public interface ISecuredMsgsDecoder
-{
+public interface ISecuredMsgsDecoder {
     /**
      * Return the session AES decoder for the given topic publisher.
      *

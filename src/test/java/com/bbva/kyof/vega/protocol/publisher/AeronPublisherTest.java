@@ -3,11 +3,7 @@ package com.bbva.kyof.vega.protocol.publisher;
 import com.bbva.kyof.vega.Version;
 import com.bbva.kyof.vega.config.general.GlobalConfiguration;
 import com.bbva.kyof.vega.config.general.TransportMediaType;
-import com.bbva.kyof.vega.msg.IRcvMessage;
-import com.bbva.kyof.vega.msg.IRcvRequest;
-import com.bbva.kyof.vega.msg.IRcvResponse;
-import com.bbva.kyof.vega.msg.MsgType;
-import com.bbva.kyof.vega.msg.PublishResult;
+import com.bbva.kyof.vega.msg.*;
 import com.bbva.kyof.vega.protocol.common.VegaContext;
 import com.bbva.kyof.vega.util.net.InetUtil;
 import com.bbva.kyof.vega.util.net.SubnetAddress;
@@ -28,8 +24,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class AeronPublisherTest
-{
+public class AeronPublisherTest {
     private static final Random RND = new Random();
     private static MediaDriver MEDIA_DRIVER;
     private static Aeron AERON;
@@ -37,8 +32,7 @@ public class AeronPublisherTest
     private static VegaContext VEGA_CONTEXT;
 
     @BeforeClass
-    public static void beforeClass()
-    {
+    public static void beforeClass() {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         final Aeron.Context ctx1 = new Aeron.Context();
@@ -51,15 +45,13 @@ public class AeronPublisherTest
     }
 
     @AfterClass
-    public static void afterClass()
-    {
+    public static void afterClass() {
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Test
-    public void testClaimOfferResultToString()
-    {
+    public void testClaimOfferResultToString() {
         Assert.assertEquals(AeronPublisher.claimOfferResultToString(1234), "1234");
         Assert.assertEquals(AeronPublisher.claimOfferResultToString(Publication.NOT_CONNECTED), "NOT_CONNECTED");
         Assert.assertEquals(AeronPublisher.claimOfferResultToString(Publication.BACK_PRESSURED), "BACK_PRESSURED");
@@ -69,8 +61,7 @@ public class AeronPublisherTest
     }
 
     @Test
-    public void testBackPressure() throws Exception
-    {
+    public void testBackPressure() throws Exception {
         // Create the publisher
         final AeronPublisherParams params = new AeronPublisherParams(
                 TransportMediaType.UNICAST,
@@ -98,10 +89,8 @@ public class AeronPublisherTest
         final long sequenceNumber = new Random().nextLong();
 
         // Send the message
-        while (true)
-        {
-            if (publisher.sendMessage(MsgType.DATA, topicId, sendBuffer, sequenceNumber, 0, 1024) == PublishResult.BACK_PRESSURED)
-            {
+        while (true) {
+            if (publisher.sendMessage(MsgType.DATA, topicId, sendBuffer, sequenceNumber, 0, 1024) == PublishResult.BACK_PRESSURED) {
                 break;
             }
         }
@@ -113,8 +102,7 @@ public class AeronPublisherTest
     }
 
     @Test
-    public void testMcastPublish() throws Exception
-    {
+    public void testMcastPublish() throws Exception {
         // Create the publisher
         final AeronPublisherParams params = new AeronPublisherParams(
                 TransportMediaType.MULTICAST,
@@ -140,8 +128,7 @@ public class AeronPublisherTest
     }
 
     @Test
-    public void testUcastPublish() throws Exception
-    {
+    public void testUcastPublish() throws Exception {
         // Create the publisher
         final AeronPublisherParams params = new AeronPublisherParams(
                 TransportMediaType.UNICAST,
@@ -167,8 +154,7 @@ public class AeronPublisherTest
     }
 
     @Test
-    public void testIpcPublish() throws Exception
-    {
+    public void testIpcPublish() throws Exception {
         // Create the publisher
         final AeronPublisherParams params = new AeronPublisherParams(
                 TransportMediaType.IPC,
@@ -199,44 +185,37 @@ public class AeronPublisherTest
         Assert.assertSame(publisher.sendResponse(null, null, 0, 0), PublishResult.OK);
     }
 
-    private void testSendMessages(AeronPublisher publisher, SimpleReceiver subscription) throws Exception
-    {
+    private void testSendMessages(AeronPublisher publisher, SimpleReceiver subscription) throws Exception {
         // Try different message sizes
         int msgSize = 128;
 
-        while (msgSize < 128000)
-        {
+        while (msgSize < 128000) {
             this.testSendMessage(publisher, subscription, msgSize);
             msgSize = msgSize * 2;
         }
     }
 
-    private void testSendRequests(AeronPublisher publisher, SimpleReceiver subscription) throws Exception
-    {
+    private void testSendRequests(AeronPublisher publisher, SimpleReceiver subscription) throws Exception {
         // Try different message sizes
         int msgSize = 128;
 
-        while (msgSize < 128000)
-        {
+        while (msgSize < 128000) {
             this.testSendRequest(publisher, subscription, msgSize);
             msgSize = msgSize * 2;
         }
     }
 
-    private void testSendResponses(AeronPublisher publisher, SimpleReceiver subscription) throws Exception
-    {
+    private void testSendResponses(AeronPublisher publisher, SimpleReceiver subscription) throws Exception {
         // Try different message sizes
         int msgSize = 128;
 
-        while (msgSize < 128000)
-        {
+        while (msgSize < 128000) {
             this.testSendResponse(publisher, subscription, msgSize);
             msgSize = msgSize * 2;
         }
     }
 
-    private void testSendMessage(final AeronPublisher publisher, final SimpleReceiver subscription, final int msgSize) throws Exception
-    {
+    private void testSendMessage(final AeronPublisher publisher, final SimpleReceiver subscription, final int msgSize) throws Exception {
         // Create random contents
         final byte[] array = new byte[msgSize];
         RND.nextBytes(array);
@@ -268,15 +247,13 @@ public class AeronPublisherTest
         this.checkResult(array, receivedMsg.getContents(), receivedMsg.getContentOffset(), receivedMsg.getContentLength());
     }
 
-    private void checkResult(final byte[] sendMsg, final UnsafeBuffer receivedContent, final int receivedContentOffset, final int receivedContentLength)
-    {
+    private void checkResult(final byte[] sendMsg, final UnsafeBuffer receivedContent, final int receivedContentOffset, final int receivedContentLength) {
         final byte[] resultArray = new byte[receivedContentLength];
         receivedContent.getBytes(receivedContentOffset, resultArray);
         Assert.assertArrayEquals(resultArray, sendMsg);
     }
 
-    private void testSendRequest(final AeronPublisher publisher, final SimpleReceiver subscription, final int msgSize) throws Exception
-    {
+    private void testSendRequest(final AeronPublisher publisher, final SimpleReceiver subscription, final int msgSize) throws Exception {
         // Create random contents
         final byte[] array = new byte[msgSize];
         RND.nextBytes(array);
@@ -308,8 +285,7 @@ public class AeronPublisherTest
         this.checkResult(array, receivedMsg.getContents(), receivedMsg.getContentOffset(), receivedMsg.getContentLength());
     }
 
-    private void testSendResponse(final AeronPublisher publisher, final SimpleReceiver subscription, final int msgSize) throws Exception
-    {
+    private void testSendResponse(final AeronPublisher publisher, final SimpleReceiver subscription, final int msgSize) throws Exception {
         // Create random contents
         final byte[] array = new byte[msgSize];
         RND.nextBytes(array);

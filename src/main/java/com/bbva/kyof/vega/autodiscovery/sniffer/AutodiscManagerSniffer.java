@@ -11,14 +11,12 @@ import java.util.UUID;
 /**
  * Main class that manages all the auto-discovery for a sniffer. It handles the reception of messages
  * and the related events .
- *
+ * <p>
  * The implementation follows a single thread model in which all the required actions are performed in sequence. This approach reduces
  * the amount of CPU consumed and simplify the synchronization process.
- *
  */
 @Slf4j
-public class AutodiscManagerSniffer extends RecurrentTask
-{
+public class AutodiscManagerSniffer extends RecurrentTask {
     /**
      * Instance unique identifier
      */
@@ -37,8 +35,7 @@ public class AutodiscManagerSniffer extends RecurrentTask
      * @param parameters the parameters from the sniffer
      * @param listener   listener for events
      */
-    public AutodiscManagerSniffer(final Aeron aeron, final SnifferParameters parameters, final ISnifferListener listener)
-    {
+    public AutodiscManagerSniffer(final Aeron aeron, final SnifferParameters parameters, final ISnifferListener listener) {
         // Idle strategy will be sleep to use as less CPU as possible
         super(new SleepingIdleStrategy(1000));
 
@@ -49,15 +46,13 @@ public class AutodiscManagerSniffer extends RecurrentTask
     /**
      * Start the sniffer
      */
-    public void start()
-    {
+    public void start() {
         super.start("AutodiscManagerSniffer_" + this.instanceId);
     }
 
 
     @Override
-    public int action()
-    {
+    public int action() {
         // Apply pending user actions
         int actionsApplied = this.autodiscSub.pollNextMessage();
 
@@ -69,8 +64,7 @@ public class AutodiscManagerSniffer extends RecurrentTask
     }
 
     @Override
-    public void cleanUp()
-    {
+    public void cleanUp() {
         log.info("Cleaning up after being stopped");
 
         //Close autodiscSub

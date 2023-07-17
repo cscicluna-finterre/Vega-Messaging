@@ -6,10 +6,10 @@ import com.bbva.kyof.vega.config.general.TopicSecurityTemplateConfig;
 import com.bbva.kyof.vega.config.general.TopicTemplateConfig;
 import com.bbva.kyof.vega.config.general.TransportMediaType;
 import com.bbva.kyof.vega.exception.VegaException;
-import com.bbva.kyof.vega.protocol.control.IOwnSecPubTopicsChangesListener;
-import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import com.bbva.kyof.vega.protocol.common.VegaContext;
+import com.bbva.kyof.vega.protocol.control.IOwnSecPubTopicsChangesListener;
 import com.bbva.kyof.vega.util.collection.HashMapOfHashSet;
+import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import com.bbva.kyof.vega.util.net.InetUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,16 +18,16 @@ import java.util.Map;
 import java.util.UUID;
 
 
-
 /**
  * Send manager for ipc and multicast sending. It will handle all the sockets and relations between topic publisher.
- *
+ * <p>
  * This class is thread safe!
  */
 @Slf4j
-class PublishersManagerIpcMcast extends AbstractPublishersManager<TopicPublisherIpcMcast>
-{
-    /** Stores all the publishers handled by the manager, given the parameters used to create them */
+class PublishersManagerIpcMcast extends AbstractPublishersManager<TopicPublisherIpcMcast> {
+    /**
+     * Stores all the publishers handled by the manager, given the parameters used to create them
+     */
     private final Map<AeronPublisherParams, AeronPublisher> publisherByParams = new HashMap<>();
 
     /**
@@ -36,31 +36,30 @@ class PublishersManagerIpcMcast extends AbstractPublishersManager<TopicPublisher
      */
     private final Map<UUID, AutoDiscTopicSocketInfo> registeredTopicSocketInfosByTopicId = new HashMap<>();
 
-    /** Store all the topic publishers related to the same aeron publisher */
+    /**
+     * Store all the topic publishers related to the same aeron publisher
+     */
     private final HashMapOfHashSet<AeronPublisher, TopicPublisherIpcMcast> topicPublishersByAeronPub = new HashMapOfHashSet<>();
 
     /**
      * Constructor
      *
-     * @param vegaContext the context of the library instance
+     * @param vegaContext           the context of the library instance
      * @param secureChangesNotifier to call when there is a change on a secure topic
      */
-    PublishersManagerIpcMcast(final VegaContext vegaContext, final IOwnSecPubTopicsChangesListener secureChangesNotifier)
-    {
+    PublishersManagerIpcMcast(final VegaContext vegaContext, final IOwnSecPubTopicsChangesListener secureChangesNotifier) {
         super(vegaContext, secureChangesNotifier);
     }
 
     @Override
-    protected void cleanAfterClose()
-    {
+    protected void cleanAfterClose() {
         this.publisherByParams.clear();
         this.registeredTopicSocketInfosByTopicId.clear();
         this.topicPublishersByAeronPub.clear();
     }
 
     @Override
-    protected void processCreatedTopicPublisher(final TopicPublisherIpcMcast topicPublisher)
-    {
+    protected void processCreatedTopicPublisher(final TopicPublisherIpcMcast topicPublisher) {
         // Create the aeron publisher parameters for the topic publisher
         final AeronPublisherParams aeronPublisherParams = this.createAeronPublisherParams(topicPublisher);
 
@@ -68,15 +67,12 @@ class PublishersManagerIpcMcast extends AbstractPublishersManager<TopicPublisher
         AeronPublisher aeronPublisher = this.publisherByParams.get(aeronPublisherParams);
 
         // If it doesn't exists already, create a new one
-        if (aeronPublisher == null)
-        {
+        if (aeronPublisher == null) {
             log.debug("Creating new AeronPublisher for topic publisher on topic [{}]", topicPublisher.getTopicName());
 
             aeronPublisher = new AeronPublisher(this.getVegaContext(), aeronPublisherParams);
             this.publisherByParams.put(aeronPublisherParams, aeronPublisher);
-        }
-        else
-        {
+        } else {
             log.debug("Reusing existing AeronPublisher for topic publisher on topic [{}]", topicPublisher.getTopicName());
         }
 
@@ -91,14 +87,12 @@ class PublishersManagerIpcMcast extends AbstractPublishersManager<TopicPublisher
     }
 
     @Override
-    protected TopicPublisherIpcMcast instantiateTopicPublisher(final String topicName, final TopicTemplateConfig templateCfg)
-    {
+    protected TopicPublisherIpcMcast instantiateTopicPublisher(final String topicName, final TopicTemplateConfig templateCfg) {
         return new TopicPublisherIpcMcast(topicName, templateCfg, this.getVegaContext());
     }
 
     @Override
-    protected SecureTopicPublisherIpcMcast instantiateSecureTopicPublisher(final String topicName, final TopicTemplateConfig templateCfg, final TopicSecurityTemplateConfig securityConfig) throws VegaException
-    {
+    protected SecureTopicPublisherIpcMcast instantiateSecureTopicPublisher(final String topicName, final TopicTemplateConfig templateCfg, final TopicSecurityTemplateConfig securityConfig) throws VegaException {
         // Create the secure topic publisher
         final SecureTopicPublisherIpcMcast result = new SecureTopicPublisherIpcMcast(topicName, templateCfg, this.getVegaContext(), securityConfig);
 
@@ -109,16 +103,14 @@ class PublishersManagerIpcMcast extends AbstractPublishersManager<TopicPublisher
     }
 
     @Override
-    protected void processTopicPublisherBeforeDestroy(final TopicPublisherIpcMcast topicPublisher)
-    {
+    protected void processTopicPublisherBeforeDestroy(final TopicPublisherIpcMcast topicPublisher) {
         // Check for the internal publisher
         topicPublisher.runForAeronPublisher(aeronPublisher ->
         {
             // Remove the topic publisher from the list of topic publishers for the aeron publisher
             this.topicPublishersByAeronPub.remove(aeronPublisher, topicPublisher);
 
-            if (!this.topicPublishersByAeronPub.containsKey(aeronPublisher))
-            {
+            if (!this.topicPublishersByAeronPub.containsKey(aeronPublisher)) {
                 aeronPublisher.close();
                 this.publisherByParams.remove(aeronPublisher.getParams());
             }
@@ -128,8 +120,7 @@ class PublishersManagerIpcMcast extends AbstractPublishersManager<TopicPublisher
         });
 
         // If secure topic, notify
-        if (topicPublisher.hasSecurity())
-        {
+        if (topicPublisher.hasSecurity()) {
             // Tell the secure changes notifier about the removal if required
             this.secureChangesNotifier.onOwnSecuredTopicPublisherRemoved(topicPublisher.getUniqueId());
         }
@@ -140,11 +131,11 @@ class PublishersManagerIpcMcast extends AbstractPublishersManager<TopicPublisher
 
     /**
      * Given the topic publisher it creates the aeron publisher parameters that correspond to the topic publisher
+     *
      * @param topicPublisher topic publisher to create the parameters from
      * @return the created parameters for the publisher
      */
-    private AeronPublisherParams createAeronPublisherParams(final TopicPublisherIpcMcast topicPublisher)
-    {
+    private AeronPublisherParams createAeronPublisherParams(final TopicPublisherIpcMcast topicPublisher) {
         // Get the name of the topic
         final String topicName = topicPublisher.getTopicName();
 
@@ -155,8 +146,7 @@ class PublishersManagerIpcMcast extends AbstractPublishersManager<TopicPublisher
         final int streamId = AeronChannelHelper.selectStreamFromRange(topicName, templateCfg.getNumStreamsPerPort());
 
         // Create the publisher parameters
-        if (templateCfg.getTransportType() == TransportMediaType.MULTICAST)
-        {
+        if (templateCfg.getTransportType() == TransportMediaType.MULTICAST) {
             // Select the ip address
             final String ipAddress = AeronChannelHelper.selectMcastIpFromRange(topicName, templateCfg.getMulticastAddressLow(), templateCfg.getMulticastAddressHigh());
 
@@ -165,9 +155,7 @@ class PublishersManagerIpcMcast extends AbstractPublishersManager<TopicPublisher
 
             // Create the parameters
             return new AeronPublisherParams(TransportMediaType.MULTICAST, InetUtil.convertIpAddressToInt(ipAddress), portNumber, streamId, templateCfg.getSubnetAddress());
-        }
-        else
-        {
+        } else {
             return new AeronPublisherParams(TransportMediaType.IPC, 0, 0, streamId, null);
         }
     }
@@ -175,11 +163,10 @@ class PublishersManagerIpcMcast extends AbstractPublishersManager<TopicPublisher
     /**
      * Register the information about a topic / socket pair in autodiscovery by providing the topic and the parameters of the socket (aeron publisher params)
      *
-     * @param topicPublisher the topic publisher of the topic / socket pair
+     * @param topicPublisher       the topic publisher of the topic / socket pair
      * @param aeronPublisherParams the publisher parameters of the socket
      */
-    private void registerTopicSocketInfoInAutodiscovery(final TopicPublisherIpcMcast topicPublisher, final AeronPublisherParams aeronPublisherParams)
-    {
+    private void registerTopicSocketInfoInAutodiscovery(final TopicPublisherIpcMcast topicPublisher, final AeronPublisherParams aeronPublisherParams) {
         final AutoDiscTopicSocketInfo autoDiscTopicSocketInfo = new AutoDiscTopicSocketInfo(
                 this.getVegaContext().getInstanceUniqueId(),
                 this.convertToPubAutodiscTransportType(aeronPublisherParams.getTransportType()),
@@ -203,37 +190,31 @@ class PublishersManagerIpcMcast extends AbstractPublishersManager<TopicPublisher
      *
      * @param topicPublisher the topic publisher of the topic / socket pair
      */
-    private void unRegisterTopicSocketInfoFromAutodiscovery(final TopicPublisherIpcMcast topicPublisher)
-    {
+    private void unRegisterTopicSocketInfoFromAutodiscovery(final TopicPublisherIpcMcast topicPublisher) {
         final AutoDiscTopicSocketInfo autoDiscTopicSocketInfo = this.registeredTopicSocketInfosByTopicId.remove(topicPublisher.getUniqueId());
 
-        if (autoDiscTopicSocketInfo != null)
-        {
+        if (autoDiscTopicSocketInfo != null) {
             this.getVegaContext().getAutodiscoveryManager().unregisterTopicSocketInfo(autoDiscTopicSocketInfo);
         }
     }
 
     @Override
-    public void onNewAutoDiscTopicInfo(final AutoDiscTopicInfo info)
-    {
+    public void onNewAutoDiscTopicInfo(final AutoDiscTopicInfo info) {
         log.debug("New topic info event received from auto-discovery {}", info);
     }
 
     @Override
-    public void onTimedOutAutoDiscTopicInfo(final AutoDiscTopicInfo info)
-    {
+    public void onTimedOutAutoDiscTopicInfo(final AutoDiscTopicInfo info) {
         log.debug("Topic info event timed out in auto-discovery {}", info);
     }
 
     @Override
-    public void onNewAutoDiscTopicSocketInfo(final AutoDiscTopicSocketInfo info)
-    {
+    public void onNewAutoDiscTopicSocketInfo(final AutoDiscTopicSocketInfo info) {
         log.debug("New topic socket info event received from auto-discovery {}", info);
     }
 
     @Override
-    public void onTimedOutAutoDiscTopicSocketInfo(final AutoDiscTopicSocketInfo info)
-    {
+    public void onTimedOutAutoDiscTopicSocketInfo(final AutoDiscTopicSocketInfo info) {
         log.debug("Topic socket info event timed out in auto-discovery {}", info);
     }
 }

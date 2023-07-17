@@ -9,13 +9,11 @@ import org.junit.Test;
 /**
  * Created by cnebrera on 05/08/16.
  */
-public class SnifferCommandLineParserTest
-{
+public class SnifferCommandLineParserTest {
     private final static SubnetAddress SUBNET = InetUtil.getDefaultSubnet();
 
     @Test
-    public void parseCommandLine() throws Exception
-    {
+    public void parseCommandLine() throws Exception {
         final MediaDriver mediaDriver = MediaDriver.launchEmbedded();
         final SubnetAddress subnetAddress = InetUtil.getDefaultSubnet();
 
@@ -44,7 +42,7 @@ public class SnifferCommandLineParserTest
 
         // Finally try with default parameters
 
-        parameters = parser.parseCommandLine(new String [] {});
+        parameters = parser.parseCommandLine(new String[]{});
 
         Assert.assertEquals(parameters.getIpAddress(), SnifferParameters.DEFAULT_MULTICAST_ADDRESS);
         Assert.assertTrue(SnifferParameters.DEFAULT_STREAM_ID == 10);
@@ -57,8 +55,7 @@ public class SnifferCommandLineParserTest
     }
 
     @Test(expected = SnifferException.class)
-    public void parseWrongCommandLine() throws Exception
-    {
+    public void parseWrongCommandLine() throws Exception {
         // Try with wrong parameters
         String[] commandLine = new String[]{"-skljdfsdf", "35000", "-sn", "sdfsdfsd", "-t", "10000"};
 
@@ -67,31 +64,28 @@ public class SnifferCommandLineParserTest
     }
 
     @Test(expected = SnifferException.class)
-    public void parseWrongCommandLine2() throws Exception
-    {
+    public void parseWrongCommandLine2() throws Exception {
         final SubnetAddress subnetAddress = InetUtil.getDefaultSubnet();
 
         // Try with wrong parameters
-        String[] commandLine = new String[]{"-p", "0", "-sn",subnetAddress.toString(), "-t", "10000"};
+        String[] commandLine = new String[]{"-p", "0", "-sn", subnetAddress.toString(), "-t", "10000"};
 
         SnifferCommandLineParser parser = new SnifferCommandLineParser();
         parser.parseCommandLine(commandLine);
     }
 
     @Test(expected = SnifferException.class)
-    public void parseWrongCommandLine3() throws Exception
-    {
+    public void parseWrongCommandLine3() throws Exception {
         // Try with wrong parameters
-        String [] commandLine = new String [] {"-p", "35000", "-sn", "1.1.1.1/32", "-t", "10000"};
+        String[] commandLine = new String[]{"-p", "35000", "-sn", "1.1.1.1/32", "-t", "10000"};
         SnifferCommandLineParser parser = new SnifferCommandLineParser();
         parser.parseCommandLine(commandLine);
     }
 
     @Test(expected = SnifferException.class)
-    public void parseWrongCommandLine4() throws Exception
-    {
+    public void parseWrongCommandLine4() throws Exception {
         // Try with wrong parameters
-        String [] commandLine = new String [] {"-p", "35000", "-sn", "1.1.1.1/32", "-t", "0"};
+        String[] commandLine = new String[]{"-p", "35000", "-sn", "1.1.1.1/32", "-t", "0"};
         SnifferCommandLineParser parser = new SnifferCommandLineParser();
         parser.parseCommandLine(commandLine);
     }

@@ -10,11 +10,9 @@ import java.nio.ByteBuffer;
 /**
  * Created by cnebrera on 02/08/16.
  */
-public class BaseHeaderTest
-{
+public class BaseHeaderTest {
     @Test
-    public void fromBinaryToBinary()
-    {
+    public void fromBinaryToBinary() {
         // Create the header
         final BaseHeader testHeader = new BaseHeader(MsgType.DATA, Version.LOCAL_VERSION);
 

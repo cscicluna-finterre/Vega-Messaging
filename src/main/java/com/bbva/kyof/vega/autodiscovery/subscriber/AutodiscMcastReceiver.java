@@ -12,31 +12,28 @@ import java.util.UUID;
 
 /**
  * Auto-Discovery implementation for multicast
- *
+ * <p>
  * The class is not thread-safe!
  */
 @Slf4j
-public class AutodiscMcastReceiver extends AbstractAutodiscReceiver
-{
+public class AutodiscMcastReceiver extends AbstractAutodiscReceiver {
     /**
      * Create a new autodiscovery subscriber handler
      *
-     * @param instanceId unique id of the library instance the subscriber belongs to
-     * @param aeron the Aeron instance
-     * @param config the configuration of auto-discovery
+     * @param instanceId               unique id of the library instance the subscriber belongs to
+     * @param aeron                    the Aeron instance
+     * @param config                   the configuration of auto-discovery
      * @param autodiscoverySubListener the listener that will receive events of new created or timed out adverts
      */
     public AutodiscMcastReceiver(final UUID instanceId,
                                  final Aeron aeron,
                                  final AutoDiscoveryConfig config,
-                                 final IAutodiscGlobalEventListener autodiscoverySubListener)
-    {
+                                 final IAutodiscGlobalEventListener autodiscoverySubListener) {
         super(instanceId, aeron, config, autodiscoverySubListener);
     }
 
     @Override
-    public Subscription createSubscription(final UUID instanceId, final Aeron aeron, final AutoDiscoveryConfig config)
-    {
+    public Subscription createSubscription(final UUID instanceId, final Aeron aeron, final AutoDiscoveryConfig config) {
         // Create the aeron channel
         final String channel = AeronChannelHelper.createMulticastChannelString(config.getMulticastAddress(), config.getMulticastPort(), config.getSubnetAddress());
 
@@ -47,16 +44,14 @@ public class AutodiscMcastReceiver extends AbstractAutodiscReceiver
     }
 
     @Override
-    protected boolean processAutoDiscDaemonServerInfoMsg(final AutoDiscDaemonServerInfo autoDiscDaemonServerInfo)
-    {
+    protected boolean processAutoDiscDaemonServerInfoMsg(final AutoDiscDaemonServerInfo autoDiscDaemonServerInfo) {
         // Do nothing for multicast
         // Return false because the buffer is not consumed
         return false;
     }
 
     @Override
-    protected int checkAutoDiscDaemonServerInfoTimeouts()
-    {
+    protected int checkAutoDiscDaemonServerInfoTimeouts() {
         // Do nothing for multicast
         return 0;
     }

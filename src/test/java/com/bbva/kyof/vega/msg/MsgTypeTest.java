@@ -8,19 +8,16 @@ import java.lang.reflect.Constructor;
 /**
  * Created by cnebrera on 02/08/16.
  */
-public class MsgTypeTest
-{
+public class MsgTypeTest {
     @Test
-    public void testContructor() throws Exception
-    {
+    public void testContructor() throws Exception {
         Constructor<?>[] cons = MsgType.class.getDeclaredConstructors();
         cons[0].setAccessible(true);
         cons[0].newInstance((Object[]) null);
     }
 
     @Test
-    public void testToString()
-    {
+    public void testToString() {
         Assert.assertEquals(MsgType.toString(MsgType.DATA), "DATA");
         Assert.assertEquals(MsgType.toString(MsgType.DATA_REQ), "DATA_REQ");
         Assert.assertEquals(MsgType.toString(MsgType.RESP), "RESP");
@@ -33,6 +30,6 @@ public class MsgTypeTest
         Assert.assertEquals(MsgType.toString(MsgType.ENCRYPTED_DATA), "ENCRYPTED_DATA");
         Assert.assertEquals(MsgType.toString(MsgType.AUTO_DISC_DAEMON_CLIENT_INFO), "AUTO_DISC_DAEMON_CLIENT_INFO");
         Assert.assertEquals(MsgType.toString(MsgType.CONTROL_SECURITY_ERROR_RESP), "CONTROL_SECURITY_ERROR_RESP");
-        Assert.assertEquals(MsgType.toString((byte)55), "UNKNOWN");
+        Assert.assertEquals(MsgType.toString((byte) 55), "UNKNOWN");
     }
 }

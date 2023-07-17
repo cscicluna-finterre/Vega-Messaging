@@ -6,20 +6,23 @@ import java.util.UUID;
 
 /**
  * Interface that represents received message.<p>
- *
+ * <p>
  * The contents of the message comes in the form of an UnsafeBuffer <p>
- *
+ * <p>
  * It is also possible to get the contents as a ByteBuffer <p>
- *
+ * <p>
  * The message object and contents are reused by the library to avoid memory allocation, always promote the message
  * if the message contents are going to be accessed on separate user thread!
  */
-public interface IRcvMessage
-{
-    /** @return the topic name of the received message */
+public interface IRcvMessage {
+    /**
+     * @return the topic name of the received message
+     */
     String getTopicName();
 
-    /** @return  the instance id of the message sender */
+    /**
+     * @return the instance id of the message sender
+     */
     UUID getInstanceId();
 
     /**
@@ -39,7 +42,7 @@ public interface IRcvMessage
 
     /**
      * Return an UnsafeBuffer with the user contents of the message. This is the most optimal way to deal with the message contents.
-     *
+     * <p>
      * The offset in the buffer and total user msg length can be retrieved using the respective methods, getContentOffset() and getContentLenght()
      *
      * @return the UnsafeBuffer with the message contents
@@ -48,7 +51,7 @@ public interface IRcvMessage
 
     /**
      * Promote the message by cloning all internal fields into a new message, including the content
-     *
+     * <p>
      * Since the library will try to reuse internal buffers you have to promote the message if it's contents are going
      * to be accessed from a separate thread.
      *

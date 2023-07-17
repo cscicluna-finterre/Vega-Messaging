@@ -7,11 +7,9 @@ import org.junit.Test;
 /**
  * Created by cnebrera on 11/10/2016.
  */
-public class PublicKeyConfigTest
-{
+public class PublicKeyConfigTest {
     @Test
-    public void testBuilder() throws VegaException
-    {
+    public void testBuilder() throws VegaException {
         final PublicKeyConfig config = PublicKeyConfig.builder().appSecurityId(11111).value("anInvalidValue").build();
 
         Assert.assertEquals(config.getAppSecurityId(), 11111);
@@ -21,8 +19,7 @@ public class PublicKeyConfigTest
     }
 
     @Test
-    public void testConstructors() throws VegaException
-    {
+    public void testConstructors() throws VegaException {
         final PublicKeyConfig config = new PublicKeyConfig("anInvalidValue", 11111);
         final PublicKeyConfig config2 = new PublicKeyConfig();
 

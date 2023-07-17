@@ -10,8 +10,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 02/08/16.
  */
-public class AutoDiscInstanceInfoTest
-{
+public class AutoDiscInstanceInfoTest {
 
     final static int RESP_TRANSP_IP = 33;
     final static int RESP_TRANSP_PORT = 32;
@@ -25,8 +24,7 @@ public class AutoDiscInstanceInfoTest
 
 
     @Test
-    public void fromBinaryToBinary()
-    {
+    public void fromBinaryToBinary() {
         // Create the header
         final UUID uniqueId = UUID.randomUUID();
 
@@ -59,7 +57,7 @@ public class AutoDiscInstanceInfoTest
         Assert.assertEquals(instanceInfo, instanceInfo);
         Assert.assertEquals(instanceInfo, readedInfo);
         Assert.assertNotEquals(instanceInfo, null);
-        Assert.assertNotEquals(instanceInfo, new AutoDiscInstanceInfo("name", UUID.randomUUID(), RESP_TRANSP_IP, RESP_TRANSP_PORT, RESP_TRANSP_STREAM_ID,"", CONTROL_TRANSP_IP, CONTROL_TRANSP_PORT,
+        Assert.assertNotEquals(instanceInfo, new AutoDiscInstanceInfo("name", UUID.randomUUID(), RESP_TRANSP_IP, RESP_TRANSP_PORT, RESP_TRANSP_STREAM_ID, "", CONTROL_TRANSP_IP, CONTROL_TRANSP_PORT,
                 CONTROL_TRANSP_STREAM_ID, ""));
         Assert.assertNotNull(instanceInfo.toString());
         Assert.assertEquals(instanceInfo.hashCode(), readedInfo.hashCode());

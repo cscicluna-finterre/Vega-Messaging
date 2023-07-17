@@ -28,8 +28,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class AbstractSubscribersManagerTest implements ITopicSubListener
-{
+public class AbstractSubscribersManagerTest implements ITopicSubListener {
     private static final String KEYS_DIR_PATH = CommandLineParserTest.class.getClassLoader().getResource("keys").getPath();
 
     TopicTemplateConfig topicConfigUnicast;
@@ -50,8 +49,7 @@ public class AbstractSubscribersManagerTest implements ITopicSubListener
     private SecurityRequesterNotifier securityRequesterNotifier = new SecurityRequesterNotifier();
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         final Aeron.Context ctx1 = new Aeron.Context();
@@ -72,35 +70,40 @@ public class AbstractSubscribersManagerTest implements ITopicSubListener
         // Set in the vega contexts
         VEGA_CONTEXT.initializeSecurity(securityParams);
 
-        POLLERS_MANAGER = new SubscribersPollersManager(VEGA_CONTEXT, new ISubscribersPollerListener()
-        {
+        POLLERS_MANAGER = new SubscribersPollersManager(VEGA_CONTEXT, new ISubscribersPollerListener() {
             @Override
-            public void onDataMsgReceived(RcvMessage msg) {}
+            public void onDataMsgReceived(RcvMessage msg) {
+            }
 
             @Override
-            public void onEncryptedDataMsgReceived(RcvMessage msg)
-            {
+            public void onEncryptedDataMsgReceived(RcvMessage msg) {
 
             }
 
-            @Override public void onDataRequestMsgReceived(RcvRequest request) {}
-            @Override public void onDataResponseMsgReceived(RcvResponse response) {}
-            @Override public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader) {}
+            @Override
+            public void onDataRequestMsgReceived(RcvRequest request) {
+            }
+
+            @Override
+            public void onDataResponseMsgReceived(RcvResponse response) {
+            }
+
+            @Override
+            public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader) {
+            }
         });
 
         Thread.sleep(1000);
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Before
-    public void beforeTest()
-    {
+    public void beforeTest() {
         topicConfigUnicast = TopicTemplateConfig.builder().name("name").transportType(TransportMediaType.UNICAST).build();
         topicConfigMulticast = TopicTemplateConfig.builder().name("name2").transportType(TransportMediaType.MULTICAST).build();
         topicConfigIpc = TopicTemplateConfig.builder().name("name3").transportType(TransportMediaType.IPC).build();
@@ -112,8 +115,7 @@ public class AbstractSubscribersManagerTest implements ITopicSubListener
     }
 
     @After
-    public void afterTest() throws Exception
-    {
+    public void afterTest() throws Exception {
         // First close should end calling clean
         subscribersManager.close();
         Assert.assertTrue(this.subscribersManager.cleanCalled);
@@ -127,36 +129,31 @@ public class AbstractSubscribersManagerTest implements ITopicSubListener
     }
 
     @Test(expected = VegaException.class)
-    public void testSubscribeToTopicTwice() throws Exception
-    {
+    public void testSubscribeToTopicTwice() throws Exception {
         subscribersManager.subscribeToTopic("ipc", topicConfigIpc, null, this);
         subscribersManager.subscribeToTopic("ipc", topicConfigIpc, null, this);
     }
 
     @Test(expected = VegaException.class)
-    public void testSubscribeOnClosed() throws Exception
-    {
+    public void testSubscribeOnClosed() throws Exception {
         subscribersManager.close();
         subscribersManager.subscribeToTopic("ipc", topicConfigIpc, null, this);
     }
 
     @Test(expected = VegaException.class)
-    public void testUnsubscribeOnClosed() throws Exception
-    {
+    public void testUnsubscribeOnClosed() throws Exception {
         subscribersManager.close();
         subscribersManager.unsubscribeFromTopic("ipc");
     }
 
     @Test(expected = VegaException.class)
-    public void testUnsubscribeNonExistingTopic() throws Exception
-    {
+    public void testUnsubscribeNonExistingTopic() throws Exception {
         subscribersManager.subscribeToTopic("ipc", topicConfigIpc, null, this);
         subscribersManager.unsubscribeFromTopic("perico");
     }
 
     @Test
-    public void testSubscribeUnsubscribe() throws Exception
-    {
+    public void testSubscribeUnsubscribe() throws Exception {
         subscribersManager.subscribeToTopic("ipc", topicConfigIpc, null, this);
         subscribersManager.subscribeToTopic("multicast", topicConfigMulticast, null, this);
         subscribersManager.subscribeToTopic("unicast", topicConfigUnicast, null, this);
@@ -181,9 +178,8 @@ public class AbstractSubscribersManagerTest implements ITopicSubListener
     }
 
     @Test
-    public void testNewPubTopicForPattern() throws Exception
-    {
-        subscribersManager.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(),"ipc"), "i.*", topicConfigIpc, null, this);
+    public void testNewPubTopicForPattern() throws Exception {
+        subscribersManager.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "ipc"), "i.*", topicConfigIpc, null, this);
 
         // Get the created subscriber
         TopicSubscriber subscriberForPattern = subscribersManager.getTopicSubscriberForTopicName("ipc");
@@ -217,10 +213,9 @@ public class AbstractSubscribersManagerTest implements ITopicSubListener
     }
 
     @Test
-    public void testTopicPatternUnsubscription() throws Exception
-    {
-        subscribersManager.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(),"ipc"), "i.*", topicConfigIpc, null, this);
-        subscribersManager.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_MUL, UUID.randomUUID(),"multicast"), "i.*", topicConfigMulticast, null, this);
+    public void testTopicPatternUnsubscription() throws Exception {
+        subscribersManager.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "ipc"), "i.*", topicConfigIpc, null, this);
+        subscribersManager.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "multicast"), "i.*", topicConfigMulticast, null, this);
 
         // Get the created subscribers
         Assert.assertNotNull(subscribersManager.getTopicSubscriberForTopicName("ipc"));
@@ -235,8 +230,7 @@ public class AbstractSubscribersManagerTest implements ITopicSubListener
     }
 
     @Test
-    public void testOnNewAutodiscTopicInfo() throws Exception
-    {
+    public void testOnNewAutodiscTopicInfo() throws Exception {
         AutoDiscTopicInfo autoDiscTopicInfo = new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic2");
         subscribersManager.onNewAutoDiscTopicInfo(autoDiscTopicInfo);
 
@@ -274,8 +268,7 @@ public class AbstractSubscribersManagerTest implements ITopicSubListener
     }
 
     @Test
-    public void testUnsubscribeAutoDiscTopicInfo() throws Exception
-    {
+    public void testUnsubscribeAutoDiscTopicInfo() throws Exception {
         // Subscribe to topic
         subscribersManager.subscribeToTopic("ipc", topicConfigIpc, null, this);
 
@@ -304,8 +297,7 @@ public class AbstractSubscribersManagerTest implements ITopicSubListener
     }
 
     @Test
-    public void testUnsubscribeSecureAutoDiscTopicInfo() throws Exception
-    {
+    public void testUnsubscribeSecureAutoDiscTopicInfo() throws Exception {
         // Create security template configuration for the subscriber topic
         final Set<Integer> pubTopic1SecureSubs = new HashSet<>(Arrays.asList(22222));
         final Set<Integer> pubTopic1SecurePubs = new HashSet<>(Arrays.asList(11111, 22222, 33333));
@@ -351,75 +343,63 @@ public class AbstractSubscribersManagerTest implements ITopicSubListener
     }
 
     @Override
-    public void onMessageReceived(IRcvMessage receivedMessage)
-    {
+    public void onMessageReceived(IRcvMessage receivedMessage) {
 
     }
 
     @Override
-    public void onRequestReceived(IRcvRequest receivedRequest)
-    {
+    public void onRequestReceived(IRcvRequest receivedRequest) {
 
     }
 
-    class SubscriberManagerImpl extends AbstractSubscribersManager
-    {
+    class SubscriberManagerImpl extends AbstractSubscribersManager {
         boolean cleanCalled = false;
         Set<String> topicProcessedBeforeDestroy = new HashSet<>();
 
         SubscriberManagerImpl(VegaContext vegaContext,
                               SubscribersPollersManager pollersManager,
                               TopicSubAndTopicPubIdRelations topicSubAndTopicPubIdRelations,
-                              ISecurityRequesterNotifier securityRequesterNotifier)
-        {
+                              ISecurityRequesterNotifier securityRequesterNotifier) {
             super(vegaContext, pollersManager, topicSubAndTopicPubIdRelations, securityRequesterNotifier);
         }
 
         @Override
-        protected void processTopicSubscriberBeforeDestroy(TopicSubscriber topicSubscriber)
-        {
+        protected void processTopicSubscriberBeforeDestroy(TopicSubscriber topicSubscriber) {
             topicProcessedBeforeDestroy.add(topicSubscriber.getTopicName());
         }
 
         @Override
-        protected void cleanAfterClose()
-        {
+        protected void cleanAfterClose() {
             this.cleanCalled = true;
         }
 
 
         @Override
-        public void onNewAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info)
-        {
+        public void onNewAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info) {
 
         }
 
         @Override
-        public void onTimedOutAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info)
-        {
+        public void onTimedOutAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info) {
 
         }
     }
 
-    class SecurityRequesterNotifier implements ISecurityRequesterNotifier
-    {
+    class SecurityRequesterNotifier implements ISecurityRequesterNotifier {
         final HashMapOfHashSet<UUID, UUID> topicPubsIdRequestedBySubId = new HashMapOfHashSet<>();
 
         @Override
-        public void removedSecureSubTopic(UUID subTopicId)
-        {
+        public void removedSecureSubTopic(UUID subTopicId) {
             this.topicPubsIdRequestedBySubId.removeKey(subTopicId);
         }
 
         @Override
-        public void addedPubForSubTopic(AutoDiscTopicInfo pubTopicInfo, UUID subTopicId, TopicSecurityTemplateConfig subSecurityConfig)
-        {
+        public void addedPubForSubTopic(AutoDiscTopicInfo pubTopicInfo, UUID subTopicId, TopicSecurityTemplateConfig subSecurityConfig) {
             this.topicPubsIdRequestedBySubId.put(subTopicId, pubTopicInfo.getUniqueId());
         }
 
         @Override
-        public void removedPubForSubTopic(AutoDiscTopicInfo pubTopicInfo, UUID subTopicId)
-        {
+        public void removedPubForSubTopic(AutoDiscTopicInfo pubTopicInfo, UUID subTopicId) {
             this.topicPubsIdRequestedBySubId.remove(subTopicId, pubTopicInfo.getUniqueId());
         }
     }

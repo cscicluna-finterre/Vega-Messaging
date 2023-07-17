@@ -7,11 +7,9 @@ import org.junit.Test;
  * Class created to test {@link RegisteredInfo}
  * Created by XE52727 on 07/07/2016.
  */
-public class RegisteredInfoTest
-{
+public class RegisteredInfoTest {
     @Test
-    public void shouldSend() throws Exception
-    {
+    public void shouldSend() throws Exception {
         // Create registered info instance
         final RegisteredInfo<Integer> registeredInfo = new RegisteredInfo<>(128, 100);
 
@@ -46,8 +44,7 @@ public class RegisteredInfoTest
     }
 
     @Test
-    public void equalsAndHashCode() throws Exception
-    {
+    public void equalsAndHashCode() throws Exception {
         // Create registered info instances
         final RegisteredInfo<Integer> registeredInfo1 = new RegisteredInfo<>(128, 100);
         final RegisteredInfo<Integer> registeredInfo2 = new RegisteredInfo<>(128, 90);

@@ -15,117 +15,114 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RunWith(PowerMockRunner.class)
-public class AdvertsUniformSenderTest
-{
+public class AdvertsUniformSenderTest {
 
-	@Test
-	public void testConstructor() throws NoSuchFieldException, IllegalAccessException
-	{
-		final AutoDiscoveryConfig config = PowerMock.createMock(AutoDiscoveryConfig.class);
-		AdvertsUniformSender advertsUniformSender = new AdvertsUniformSender(config);
+    @Test
+    public void testConstructor() throws NoSuchFieldException, IllegalAccessException {
+        final AutoDiscoveryConfig config = PowerMock.createMock(AutoDiscoveryConfig.class);
+        AdvertsUniformSender advertsUniformSender = new AdvertsUniformSender(config);
 
-		final AutoDiscoveryConfig uniformConfig = (AutoDiscoveryConfig) ReflectionUtils
-				.getObjectByReflection(advertsUniformSender, "config");
+        final AutoDiscoveryConfig uniformConfig = (AutoDiscoveryConfig) ReflectionUtils
+                .getObjectByReflection(advertsUniformSender, "config");
 
-		Assert.assertEquals(config, uniformConfig);
-	}
+        Assert.assertEquals(config, uniformConfig);
+    }
 
-	@Test
-	public void testSendBurstAdverts() throws InterruptedException
-	{
-		final AtomicLong numElementsConsumed = new AtomicLong(0);
+    @Test
+    public void testSendBurstAdverts() throws InterruptedException {
+        final AtomicLong numElementsConsumed = new AtomicLong(0);
 
-		RegisteredInfoQueue registeredInfos = new RegisteredInfoQueue(100);
-		final AutoDiscoveryConfig config = PowerMock.createMock(AutoDiscoveryConfig.class);
-		AdvertsUniformSender advertsUniformSender = new AdvertsUniformSender(config);
+        RegisteredInfoQueue registeredInfos = new RegisteredInfoQueue(100);
+        final AutoDiscoveryConfig config = PowerMock.createMock(AutoDiscoveryConfig.class);
+        AdvertsUniformSender advertsUniformSender = new AdvertsUniformSender(config);
 
-		//advertsCount = 0 elements, busrtInterval = 1, numberOfAdvertsToSend = 0
-		int numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
-				(element) -> numElementsConsumed.getAndIncrement());
+        //advertsCount = 0 elements, busrtInterval = 1, numberOfAdvertsToSend = 0
+        int numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
+                (element) -> numElementsConsumed.getAndIncrement());
 
-		Assert.assertEquals(0, numAdvertsSent);
-		Assert.assertEquals(0, numElementsConsumed.get());
+        Assert.assertEquals(0, numAdvertsSent);
+        Assert.assertEquals(0, numElementsConsumed.get());
 
-		registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
+        registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
 
-		//advertsCount = 1 elements, busrtInterval = 5, numberOfAdvertsToSend = 1
-		EasyMock.expect(config.getRefreshInterval()).andReturn(5l).anyTimes();
-		EasyMock.replay(config);
+        //advertsCount = 1 elements, busrtInterval = 5, numberOfAdvertsToSend = 1
+        EasyMock.expect(config.getRefreshInterval()).andReturn(5l).anyTimes();
+        EasyMock.replay(config);
 
-		numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
-				(element) -> numElementsConsumed.getAndIncrement());
-		Assert.assertEquals(1, numAdvertsSent);
-		Assert.assertEquals(1, numElementsConsumed.get());
+        numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
+                (element) -> numElementsConsumed.getAndIncrement());
+        Assert.assertEquals(1, numAdvertsSent);
+        Assert.assertEquals(1, numElementsConsumed.get());
 
         //repeat without timeout
-		numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
-				(element) -> numElementsConsumed.getAndIncrement());
-		Assert.assertEquals(0, numAdvertsSent);
-		Assert.assertEquals(1, numElementsConsumed.get());
+        numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
+                (element) -> numElementsConsumed.getAndIncrement());
+        Assert.assertEquals(0, numAdvertsSent);
+        Assert.assertEquals(1, numElementsConsumed.get());
 
 
-		//advertsCount = 5 elements, busrtInterval = 1, numberOfAdvertsToSend = 1
-		registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
-		registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
-		registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
-		registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
+        //advertsCount = 5 elements, busrtInterval = 1, numberOfAdvertsToSend = 1
+        registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
+        registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
+        registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
+        registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
 
-		numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
-				(element) -> numElementsConsumed.getAndIncrement());
-		Assert.assertEquals(1, numAdvertsSent);
-		Assert.assertEquals(2, numElementsConsumed.get());
+        numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
+                (element) -> numElementsConsumed.getAndIncrement());
+        Assert.assertEquals(1, numAdvertsSent);
+        Assert.assertEquals(2, numElementsConsumed.get());
 
-		//advertsCount = 9 elements, busrtInterval = 1, numberOfAdvertsToSend = 1
-		Thread.sleep(100);
+        //advertsCount = 9 elements, busrtInterval = 1, numberOfAdvertsToSend = 1
+        Thread.sleep(5000);
 
-		registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
-		registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
-		registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
-		registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
+        registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
+        registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
+        registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
+        registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
 
-		numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
-				(element) -> numElementsConsumed.getAndIncrement());
-		Assert.assertEquals(1, numAdvertsSent);
-		Assert.assertEquals(3, numElementsConsumed.get());
+        numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
+                (element) -> numElementsConsumed.getAndIncrement());
+        Assert.assertEquals(1, numAdvertsSent);
+        Assert.assertEquals(3, numElementsConsumed.get());
 
-		//advertsCount = 10 elements, busrtInterval = 1, numberOfAdvertsToSend = 2
-		Thread.sleep(100);
+        //advertsCount = 10 elements, busrtInterval = 1, numberOfAdvertsToSend = 2
+        Thread.sleep(5000);
 
-		registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
+        registeredInfos.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1"));
 
-		numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
-				(element) -> numElementsConsumed.getAndIncrement());
-		Assert.assertEquals(2, numAdvertsSent);
-		Assert.assertEquals(5, numElementsConsumed.get());
+        numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
+                (element) -> numElementsConsumed.getAndIncrement());
+        Assert.assertEquals(2, numAdvertsSent);
+        Assert.assertEquals(5, numElementsConsumed.get());
 
-		Thread.sleep(1);
-		numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
-				(element) -> numElementsConsumed.getAndIncrement());
-		Assert.assertEquals(2, numAdvertsSent);
-		Assert.assertEquals(7, numElementsConsumed.get());
+        Thread.sleep(1);
+        numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
+                (element) -> numElementsConsumed.getAndIncrement());
+        Assert.assertEquals(2, numAdvertsSent);
+        Assert.assertEquals(7, numElementsConsumed.get());
 
-		Thread.sleep(1);
-		numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
-				(element) -> numElementsConsumed.getAndIncrement());
-		Assert.assertEquals(2, numAdvertsSent);
-		Assert.assertEquals(9, numElementsConsumed.get());
+        Thread.sleep(1);
+        numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
+                (element) -> numElementsConsumed.getAndIncrement());
+        Assert.assertEquals(2, numAdvertsSent);
+        Assert.assertEquals(9, numElementsConsumed.get());
 
-		Thread.sleep(1);
-		numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
-				(element) -> numElementsConsumed.getAndIncrement());
-		Assert.assertEquals(2, numAdvertsSent);
-		Assert.assertEquals(11, numElementsConsumed.get());
+        Thread.sleep(1);
+        numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
+                (element) -> numElementsConsumed.getAndIncrement());
+        Assert.assertEquals(2, numAdvertsSent);
+        Assert.assertEquals(11, numElementsConsumed.get());
 
-		Thread.sleep(1);
-		numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
-				(element) -> numElementsConsumed.getAndIncrement());
-		Assert.assertEquals(2, numAdvertsSent);
-		Assert.assertEquals(13, numElementsConsumed.get());
+        Thread.sleep(1);
+        numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
+                (element) -> numElementsConsumed.getAndIncrement());
+        Assert.assertEquals(2, numAdvertsSent);
+        Assert.assertEquals(13, numElementsConsumed.get());
 
-		Thread.sleep(1);
-		numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
-				(element) -> numElementsConsumed.getAndIncrement());
-		Assert.assertEquals(2, numAdvertsSent);
-		Assert.assertEquals(15, numElementsConsumed.get());
-	}
+        Thread.sleep(1);
+        numAdvertsSent = advertsUniformSender.sendBurstAdverts(registeredInfos,
+                (element) -> numElementsConsumed.getAndIncrement());
+        Assert.assertEquals(2, numAdvertsSent);
+        Assert.assertEquals(15, numElementsConsumed.get());
+    }
 }

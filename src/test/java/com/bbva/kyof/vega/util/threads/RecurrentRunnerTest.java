@@ -10,20 +10,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class created to test {@link RecurrentRunner}
- *
+ * <p>
  * Created by XE52727 on 04/07/2016.
  */
-public class RecurrentRunnerTest
-{
-    /** Default sleep time 1 millisecond */
+public class RecurrentRunnerTest {
+    /**
+     * Default sleep time 1 millisecond
+     */
     private final static long DEFAULT_SLEEP_IDLE = TimeUnit.MILLISECONDS.toNanos(500);
 
-    /** Idle strategy to wait between consecutive action executions */
+    /**
+     * Idle strategy to wait between consecutive action executions
+     */
     private final IdleStrategy idleStrategy = new SleepingIdleStrategy(DEFAULT_SLEEP_IDLE);
 
     @Test
-    public void testRunnerThatNeverExecute() throws Exception
-    {
+    public void testRunnerThatNeverExecute() throws Exception {
         final RunnerImplementation runner = new RunnerImplementation(idleStrategy, true, 0);
 
         // Start the thread
@@ -50,8 +52,7 @@ public class RecurrentRunnerTest
     }
 
     @Test
-    public void testRunnerAlwaysExecute() throws Exception
-    {
+    public void testRunnerAlwaysExecute() throws Exception {
         final RunnerImplementation runner = new RunnerImplementation(idleStrategy, false, 0);
 
         // Start the thread
@@ -72,8 +73,7 @@ public class RecurrentRunnerTest
     }
 
     @Test
-    public void testRunnerLongStopTime() throws Exception
-    {
+    public void testRunnerLongStopTime() throws Exception {
         final RunnerImplementation runner = new RunnerImplementation(idleStrategy, false, 3000);
 
         // Start the thread
@@ -91,37 +91,28 @@ public class RecurrentRunnerTest
         Assert.assertTrue(totalStopTime > 1500);
     }
 
-    private class RunnerImplementation extends RecurrentRunner
-    {
+    private class RunnerImplementation extends RecurrentRunner {
         final AtomicInteger totalActionsTaken = new AtomicInteger(0);
         private final boolean neverExecute;
         private final int sleepMillisPerAction;
 
-        RunnerImplementation(final IdleStrategy idleStrategy, final boolean neverExecute, final int sleepMillisPerAction)
-        {
+        RunnerImplementation(final IdleStrategy idleStrategy, final boolean neverExecute, final int sleepMillisPerAction) {
             super(idleStrategy);
             this.neverExecute = neverExecute;
             this.sleepMillisPerAction = sleepMillisPerAction;
         }
 
         @Override
-        public int action()
-        {
+        public int action() {
             this.totalActionsTaken.getAndIncrement();
 
             // Simulate that only one of each 2 actions is actually executed
-            if (this.neverExecute)
-            {
+            if (this.neverExecute) {
                 return 0;
-            }
-            else
-            {
-                try
-                {
+            } else {
+                try {
                     Thread.sleep(sleepMillisPerAction);
-                }
-                catch (InterruptedException e)
-                {
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
@@ -130,8 +121,7 @@ public class RecurrentRunnerTest
         }
 
         @Override
-        public void cleanUp()
-        {
+        public void cleanUp() {
             this.totalActionsTaken.set(0);
         }
     }

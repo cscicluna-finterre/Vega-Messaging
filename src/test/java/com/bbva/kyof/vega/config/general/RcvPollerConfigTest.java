@@ -9,31 +9,26 @@ import org.junit.Test;
 /**
  * Created by cnebrera on 01/08/16.
  */
-public class RcvPollerConfigTest
-{
+public class RcvPollerConfigTest {
     @Test
-    public void emptyConstructor() throws Exception
-    {
+    public void emptyConstructor() throws Exception {
         new RcvPollerConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void configMissingName() throws Exception
-    {
+    public void configMissingName() throws Exception {
         final RcvPollerConfig config = RcvPollerConfig.builder().build();
         config.completeAndValidateConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void configMissingIdleStrategy() throws Exception
-    {
+    public void configMissingIdleStrategy() throws Exception {
         final RcvPollerConfig config = RcvPollerConfig.builder().name("name").build();
         config.completeAndValidateConfig();
     }
 
     @Test
-    public void validConfigDefaultParams() throws Exception
-    {
+    public void validConfigDefaultParams() throws Exception {
         final RcvPollerConfig config = RcvPollerConfig.builder().name("name").idleStrategyType(IdleStrategyType.BUSY_SPIN).build();
         config.completeAndValidateConfig();
         Assert.assertTrue(config.getIdleStrategy() instanceof BusySpinIdleStrategy);
@@ -42,15 +37,13 @@ public class RcvPollerConfigTest
     }
 
     @Test(expected = VegaException.class)
-    public void validConfigSleepIdleMissingTime() throws Exception
-    {
+    public void validConfigSleepIdleMissingTime() throws Exception {
         final RcvPollerConfig config = RcvPollerConfig.builder().name("name").idleStrategyType(IdleStrategyType.SLEEP_NANOS).build();
         config.completeAndValidateConfig();
     }
 
     @Test
-    public void validConfigSleep() throws Exception
-    {
+    public void validConfigSleep() throws Exception {
         final RcvPollerConfig config = RcvPollerConfig.builder().name("name").
                 idleStrategyType(IdleStrategyType.SLEEP_NANOS).idleStrategySleepTime(10L)
                 .build();

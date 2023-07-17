@@ -1,4 +1,3 @@
-
 package com.bbva.kyof.vega.protocol.subscriber;
 
 import com.bbva.kyof.vega.config.general.TransportMediaType;
@@ -8,24 +7,40 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-/** Parameters for an Aeron subscriber */
+/**
+ * Parameters for an Aeron subscriber
+ */
 @ToString
 @AllArgsConstructor
 @EqualsAndHashCode
-public class AeronSubscriberParams
-{
-    /** Transport type */
-    @Getter private final TransportMediaType transportType;
+public class AeronSubscriberParams {
+    /**
+     * Transport type
+     */
+    @Getter
+    private final TransportMediaType transportType;
 
-    /** Ip used for the publication (0 for ipc)*/
-    @Getter private final int ipAddress;
+    /**
+     * Ip used for the publication (0 for ipc)
+     */
+    @Getter
+    private final int ipAddress;
 
-    /** Port used for the publication (0 for ipc)*/
-    @Getter private final int port;
+    /**
+     * Port used for the publication (0 for ipc)
+     */
+    @Getter
+    private final int port;
 
-    /** StreamId used by the publication */
-    @Getter private final int streamId;
+    /**
+     * StreamId used by the publication
+     */
+    @Getter
+    private final int streamId;
 
-    /** Subnet for the publication (null for ipc) */
-    @Getter private final SubnetAddress subnetAddress;
+    /**
+     * Subnet for the publication (null for ipc)
+     */
+    @Getter
+    private final SubnetAddress subnetAddress;
 }

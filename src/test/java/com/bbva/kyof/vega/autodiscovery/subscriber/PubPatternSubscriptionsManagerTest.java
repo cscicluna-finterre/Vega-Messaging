@@ -10,11 +10,9 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 04/08/16.
  */
-public class PubPatternSubscriptionsManagerTest
-{
+public class PubPatternSubscriptionsManagerTest {
     @Test
-    public void testSubscribeUnsubscribe()
-    {
+    public void testSubscribeUnsubscribe() {
         final ListenerImpl listener = new ListenerImpl();
         final ListenerImpl listener2 = new ListenerImpl();
 
@@ -39,8 +37,7 @@ public class PubPatternSubscriptionsManagerTest
     }
 
     @Test
-    public void testAdverts()
-    {
+    public void testAdverts() {
         final UUID instanceId = UUID.randomUUID();
         final ListenerImpl listener = new ListenerImpl();
         final ListenerImpl listener2 = new ListenerImpl();
@@ -110,20 +107,17 @@ public class PubPatternSubscriptionsManagerTest
         Assert.assertTrue(listener2.removedNotifications == 1);
     }
 
-    public class ListenerImpl implements IAutodiscPubTopicPatternListener
-    {
+    public class ListenerImpl implements IAutodiscPubTopicPatternListener {
         int addedNotifications = 0;
         int removedNotifications = 0;
 
         @Override
-        public void onNewPubTopicForPattern(AutoDiscTopicInfo topicInfo, String topicPattern)
-        {
+        public void onNewPubTopicForPattern(AutoDiscTopicInfo topicInfo, String topicPattern) {
             addedNotifications++;
         }
 
         @Override
-        public void onPubTopicForPatternRemoved(AutoDiscTopicInfo topicInfo, String topicPattern)
-        {
+        public void onPubTopicForPatternRemoved(AutoDiscTopicInfo topicInfo, String topicPattern) {
             removedNotifications++;
         }
     }

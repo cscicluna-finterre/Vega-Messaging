@@ -11,11 +11,9 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Created by cnebrera on 02/08/16.
  */
-public class RegisteredInfoQueueTest
-{
+public class RegisteredInfoQueueTest {
     @Test
-    public void testAddRemoveClear()
-    {
+    public void testAddRemoveClear() {
         final RegisteredInfoQueue<AutoDiscTopicInfo> queue = new RegisteredInfoQueue<>(100);
         final UUID instanceId = UUID.randomUUID();
         final UUID uniqueId = UUID.randomUUID();
@@ -44,8 +42,7 @@ public class RegisteredInfoQueueTest
     }
 
     @Test
-    public void getNextIfShouldSend() throws Exception
-    {
+    public void getNextIfShouldSend() throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         final UUID uniqueId1 = UUID.randomUUID();
@@ -90,8 +87,7 @@ public class RegisteredInfoQueueTest
     }
 
     @Test
-    public void resetNextSendTime() throws Exception
-    {
+    public void resetNextSendTime() throws Exception {
         final AtomicLong numElementsConsumed = new AtomicLong(0);
 
         final UUID instanceId = UUID.randomUUID();
@@ -154,8 +150,7 @@ public class RegisteredInfoQueueTest
     }
 
     @Test
-    public void testRegisteredInfoQueueSize()
-    {
+    public void testRegisteredInfoQueueSize() {
         RegisteredInfoQueue<AutoDiscTopicInfo> registeredInfoQueue = new RegisteredInfoQueue(1000);
         Assert.assertEquals(0, registeredInfoQueue.size());
         registeredInfoQueue.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(), "topic1"));
@@ -165,10 +160,8 @@ public class RegisteredInfoQueueTest
     }
 
 
-
     @Test
-    public void testResetNextSendTimeAndMultipleConsume() throws Exception
-    {
+    public void testResetNextSendTimeAndMultipleConsume() throws Exception {
         final AtomicLong numElementsConsumed = new AtomicLong(0);
 
         final UUID instanceId = UUID.randomUUID();

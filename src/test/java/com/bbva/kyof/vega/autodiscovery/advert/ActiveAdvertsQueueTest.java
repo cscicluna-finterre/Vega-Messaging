@@ -1,6 +1,5 @@
 package com.bbva.kyof.vega.autodiscovery.advert;
 
-import com.bbva.kyof.vega.autodiscovery.advert.ActiveAdvertsQueue;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicInfo;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTransportType;
 import org.junit.Assert;
@@ -12,11 +11,9 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Created by cnebrera on 04/08/16.
  */
-public class ActiveAdvertsQueueTest
-{
+public class ActiveAdvertsQueueTest {
     @Test
-    public void testSingleElement() throws Exception
-    {
+    public void testSingleElement() throws Exception {
         final ActiveAdvertsQueue<AutoDiscTopicInfo> queue = new ActiveAdvertsQueue<>(200);
         final UUID instanceId = UUID.randomUUID();
         final UUID topicInfoUniqueId = UUID.randomUUID();
@@ -46,8 +43,7 @@ public class ActiveAdvertsQueueTest
     }
 
     @Test
-    public void testMultipleElement() throws Exception
-    {
+    public void testMultipleElement() throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         final UUID uniqueId1 = UUID.randomUUID();
@@ -94,8 +90,7 @@ public class ActiveAdvertsQueueTest
     }
 
     @Test
-    public void testMultipleElementWithUpdates() throws Exception
-    {
+    public void testMultipleElementWithUpdates() throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         final UUID uniqueId1 = UUID.randomUUID();

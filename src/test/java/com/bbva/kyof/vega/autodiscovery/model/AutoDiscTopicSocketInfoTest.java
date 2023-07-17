@@ -10,16 +10,14 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 02/08/16.
  */
-public class AutoDiscTopicSocketInfoTest
-{
+public class AutoDiscTopicSocketInfoTest {
     final static int IP = 44;
     final static int PORT = 33;
     final static int STREAM_ID = 22;
     final static String HOSTNAME = "host_234";
 
     @Test
-    public void fromBinaryToBinary()
-    {
+    public void fromBinaryToBinary() {
         // Create the header
         final UUID instanceId = UUID.randomUUID();
         final UUID uniqueId = UUID.randomUUID();
@@ -72,14 +70,13 @@ public class AutoDiscTopicSocketInfoTest
     }
 
     @Test
-    public void fromBinaryToBinaryWithSecurity()
-    {
+    public void fromBinaryToBinaryWithSecurity() {
         // Create the header
         final UUID instanceId = UUID.randomUUID();
         final UUID uniqueId = UUID.randomUUID();
         final UUID topicId = UUID.randomUUID();
 
-        final AutoDiscTopicSocketInfo topicSocketInfo = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, uniqueId, "topic", topicId, IP, PORT, STREAM_ID, HOSTNAME,22);
+        final AutoDiscTopicSocketInfo topicSocketInfo = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, uniqueId, "topic", topicId, IP, PORT, STREAM_ID, HOSTNAME, 22);
 
         // Create the buffer to serialize it
         final ByteBuffer buffer = ByteBuffer.allocate(1024);

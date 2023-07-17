@@ -13,26 +13,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by cnebrera on 05/10/2016.
  */
-public class HeartbeatControllerTest
-{
+public class HeartbeatControllerTest {
     private Timer timer;
 
     @Before
-    public void before()
-    {
+    public void before() {
         this.timer = new Timer("TestTimer");
     }
 
     @After
-    public void after()
-    {
+    public void after() {
         this.timer.cancel();
         this.timer.purge();
     }
 
     @Test
-    public void testHeartbeatController() throws Exception
-    {
+    public void testHeartbeatController() throws Exception {
         final Sender sender = new Sender();
         final ClientConnectionListener listener = new ClientConnectionListener();
         final HeartbeatController controller = new HeartbeatController(this.timer, "topic", sender, listener, HeartbeatParameters.builder().build());
@@ -48,23 +44,22 @@ public class HeartbeatControllerTest
         Assert.assertTrue(sender.requestSent.get() == 3);
     }
 
-    private class Sender implements IHeartbeatSender
-    {
+    private class Sender implements IHeartbeatSender {
         final AtomicInteger requestSent = new AtomicInteger(0);
 
         @Override
-        public void sendHeartbeat(IResponseListener responseListener, long timeout)
-        {
+        public void sendHeartbeat(IResponseListener responseListener, long timeout) {
             requestSent.getAndIncrement();
         }
     }
 
-    private class ClientConnectionListener implements IClientConnectionListener
-    {
+    private class ClientConnectionListener implements IClientConnectionListener {
         @Override
-        public void onClientConnected(String topicName, UUID clientInstanceId) {}
+        public void onClientConnected(String topicName, UUID clientInstanceId) {
+        }
 
         @Override
-        public void onClientDisconnected(String topicName, UUID clientInstanceId) {}
+        public void onClientDisconnected(String topicName, UUID clientInstanceId) {
+        }
     }
 }

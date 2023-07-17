@@ -4,15 +4,13 @@ package com.bbva.kyof.vega.autodiscovery.exception;
 /**
  * Autodiscovery exception type
  */
-public class AutodiscException extends Exception
-{
+public class AutodiscException extends Exception {
     /**
      * Constructor with an exception code and a message
      *
      * @param customMsg the message for the exception
      */
-    public AutodiscException(final String customMsg)
-    {
+    public AutodiscException(final String customMsg) {
         super(customMsg);
     }
 
@@ -21,19 +19,17 @@ public class AutodiscException extends Exception
      *
      * @param cause the cause of the exception
      */
-    public AutodiscException(final Throwable cause)
-    {
+    public AutodiscException(final Throwable cause) {
         super(cause);
     }
 
     /**
      * Constructor with an exception code, message and cause of the exception
      *
-     * @param cause the cause of the exception
+     * @param cause         the cause of the exception
      * @param customMessage the message for the exception
      */
-    public AutodiscException(final String customMessage, final Throwable cause)
-    {
+    public AutodiscException(final String customMessage, final Throwable cause) {
         super(customMessage, cause);
     }
 }

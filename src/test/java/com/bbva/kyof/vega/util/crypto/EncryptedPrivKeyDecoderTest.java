@@ -8,11 +8,9 @@ import org.junit.Test;
 /**
  * Created by cnebrera on 08/03/2017.
  */
-public class EncryptedPrivKeyDecoderTest
-{
+public class EncryptedPrivKeyDecoderTest {
     @Test
-    public void decryptPrivKey() throws Exception
-    {
+    public void decryptPrivKey() throws Exception {
         final String privateKey = new String("This is a private key value");
         final byte[] privateKeyBytes = privateKey.getBytes();
 
@@ -23,14 +21,12 @@ public class EncryptedPrivKeyDecoderTest
     }
 
     @Test(expected = VegaException.class)
-    public void encryptWrongKeySize() throws Exception
-    {
+    public void encryptWrongKeySize() throws Exception {
         EncryptedPrivKeyDecoder.encryptPrivateKey("AA".getBytes(), "AA");
     }
 
     @Test(expected = VegaException.class)
-    public void encryptWrongKeyValues() throws Exception
-    {
+    public void encryptWrongKeyValues() throws Exception {
         EncryptedPrivKeyDecoder.encryptPrivateKey("AA".getBytes(), TestConstants.PRIVATE_KEY_PASSWORD_HEX.replace("A", "M"));
     }
 }

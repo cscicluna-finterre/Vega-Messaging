@@ -31,8 +31,7 @@ import java.util.concurrent.TimeUnit;
  * Test for the {@link VegaInstance} class
  * Created by XE48745 on 15/09/2015.
  */
-public class VegaInstanceStressTest
-{
+public class VegaInstanceStressTest {
     // Configuration
     private static final String STAND_ALONE_CONFIG = ConfigReaderTest.class.getClassLoader().getResource("config/vegaInstanceSecureStandAloneDriverTestConfig.xml").getPath();
 
@@ -51,8 +50,7 @@ public class VegaInstanceStressTest
     private static Level ORIG_LOG_LEVEL;
 
     @BeforeClass
-    public static void beforeClass()
-    {
+    public static void beforeClass() {
         // Return log level to trace for normal unit tests
         Logger root = (Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
         ORIG_LOG_LEVEL = root.getLevel();
@@ -61,8 +59,7 @@ public class VegaInstanceStressTest
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         // Create a list of TOPICS, 20 TOPICS of each type, including secure topics
-        for (int i = 0; i < NUM_TOPICS; i++)
-        {
+        for (int i = 0; i < NUM_TOPICS; i++) {
             TOPICS[i] = "utopic" + i;
             TOPICS[i + NUM_TOPICS] = "mtopic" + i;
             TOPICS[i + NUM_TOPICS * 2] = "itopic" + i;
@@ -71,8 +68,7 @@ public class VegaInstanceStressTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         CloseHelper.quietClose(MEDIA_DRIVER);
 
         // Return log level to trace for normal unit tests
@@ -81,8 +77,7 @@ public class VegaInstanceStressTest
     }
 
     @Test
-    public void testSendReceiveMultipleInstances() throws Exception
-    {
+    public void testSendReceiveMultipleInstances() throws Exception {
         final SecurityParams securityParams1 = SecurityParams.builder().
                 keySecurityType(KeySecurityType.PLAIN_KEY_FILE).
                 privateKeyDirPath(KEYS_DIR_PATH).
@@ -108,14 +103,12 @@ public class VegaInstanceStressTest
                 securityParams(securityParams2).build();
 
         // Create 2 application instances, use auto-closeable just in case
-        try(final IVegaInstance instance1 = VegaInstance.createNewInstance(params1);
-            final IVegaInstance instance2 = VegaInstance.createNewInstance(params2))
-        {
+        try (final IVegaInstance instance1 = VegaInstance.createNewInstance(params1);
+             final IVegaInstance instance2 = VegaInstance.createNewInstance(params2)) {
             final List<ActionExecutor> executors = new LinkedList<>();
 
             // Create a thread per instance
-            for (int i = 0; i < NUM_THREADS; i++)
-            {
+            for (int i = 0; i < NUM_THREADS; i++) {
                 final ActionExecutor newExecutor1 = new ActionExecutor(TOPICS, instance1);
                 final ActionExecutor newExecutor2 = new ActionExecutor(TOPICS, instance2);
                 executors.add(newExecutor1);
@@ -133,8 +126,7 @@ public class VegaInstanceStressTest
         }
     }
 
-    public static class ActionType
-    {
+    public static class ActionType {
         public static final int SUB = 0;
         public static final int UNSUB = 1;
         public static final int WILDCARD_SUB = 2;
@@ -145,8 +137,7 @@ public class VegaInstanceStressTest
         public static final int REQ = 7;
     }
 
-    private static class ActionExecutor extends RecurrentTask implements ITopicSubListener, IResponseListener
-    {
+    private static class ActionExecutor extends RecurrentTask implements ITopicSubListener, IResponseListener {
         private final List<ITopicPublisher> topicPublishers = new LinkedList<>();
         private final List<String> subscriptions = new LinkedList<>();
         private final List<String> wildcardSubscriptions = new LinkedList<>();
@@ -154,23 +145,19 @@ public class VegaInstanceStressTest
         private final String[] topics;
         private final IVegaInstance vegaInstance;
 
-        public ActionExecutor(final String[] topics, final IVegaInstance vegaInstance)
-        {
+        public ActionExecutor(final String[] topics, final IVegaInstance vegaInstance) {
             super(new SleepingIdleStrategy(TimeUnit.MILLISECONDS.toNanos(1)));
             this.topics = topics;
             this.vegaInstance = vegaInstance;
         }
 
-        private String getRandomTopic()
-        {
+        private String getRandomTopic() {
             return topics[rnd.nextInt(topics.length)];
         }
 
         @Override
-        public int action()
-        {
-            switch (rnd.nextInt(8))
-            {
+        public int action() {
+            switch (rnd.nextInt(8)) {
                 case ActionType.SUB:
                     this.subscribe();
                     break;
@@ -200,10 +187,8 @@ public class VegaInstanceStressTest
             return 0;
         }
 
-        private void req()
-        {
-            if (topicPublishers.isEmpty())
-            {
+        private void req() {
+            if (topicPublishers.isEmpty()) {
                 return;
             }
 
@@ -213,10 +198,8 @@ public class VegaInstanceStressTest
             this.topicPublishers.get(rnd.nextInt(topicPublishers.size())).sendRequest(buffer, 0, 4, 1000, this);
         }
 
-        private void pub()
-        {
-            if (topicPublishers.isEmpty())
-            {
+        private void pub() {
+            if (topicPublishers.isEmpty()) {
                 return;
             }
 
@@ -226,18 +209,14 @@ public class VegaInstanceStressTest
             this.topicPublishers.get(rnd.nextInt(topicPublishers.size())).sendMsg(buffer, 0, 4);
         }
 
-        private void destroyPub()
-        {
+        private void destroyPub() {
             // Get random topic
             final String topic = this.getRandomTopic();
 
             // Destroy
-            try
-            {
-               this.vegaInstance.destroyPublisher(topic);
-            }
-            catch (VegaException e)
-            {
+            try {
+                this.vegaInstance.destroyPublisher(topic);
+            } catch (VegaException e) {
                 return;
             }
 
@@ -245,19 +224,15 @@ public class VegaInstanceStressTest
             this.topicPublishers.removeIf((topicPub) -> topicPub.getTopicName().equals(topic));
         }
 
-        private void createPub()
-        {
+        private void createPub() {
             // Get random topic
             final String topic = this.getRandomTopic();
             ITopicPublisher publisher = null;
 
             // Subscribe
-            try
-            {
+            try {
                 publisher = this.vegaInstance.createPublisher(topic);
-            }
-            catch (VegaException e)
-            {
+            } catch (VegaException e) {
                 return;
             }
 
@@ -265,18 +240,14 @@ public class VegaInstanceStressTest
             this.topicPublishers.add(publisher);
         }
 
-        private void wildcardUnsub()
-        {
+        private void wildcardUnsub() {
             // Get random topic
             final String topic = this.getRandomTopic();
 
             // Unsubscribe
-            try
-            {
+            try {
                 this.vegaInstance.unsubscribeFromPattern(topic);
-            }
-            catch (VegaException e)
-            {
+            } catch (VegaException e) {
                 return;
             }
 
@@ -284,18 +255,14 @@ public class VegaInstanceStressTest
             this.wildcardSubscriptions.remove(topic);
         }
 
-        private void wildcardSub()
-        {
+        private void wildcardSub() {
             // Get random topic
             final String topic = this.getRandomTopic();
 
             // Unsubscribe
-            try
-            {
+            try {
                 this.vegaInstance.subscribeToPattern(topic, this);
-            }
-            catch (VegaException e)
-            {
+            } catch (VegaException e) {
                 return;
             }
 
@@ -303,18 +270,14 @@ public class VegaInstanceStressTest
             this.wildcardSubscriptions.add(topic);
         }
 
-        private void unsubscribe()
-        {
+        private void unsubscribe() {
             // Get random topic
             final String topic = this.getRandomTopic();
 
             // Unsubscribe
-            try
-            {
+            try {
                 this.vegaInstance.unsubscribeFromTopic(topic);
-            }
-            catch (VegaException e)
-            {
+            } catch (VegaException e) {
                 return;
             }
 
@@ -322,18 +285,14 @@ public class VegaInstanceStressTest
             this.subscriptions.remove(topic);
         }
 
-        private void subscribe()
-        {
+        private void subscribe() {
             // Get random topic
             final String topic = this.getRandomTopic();
 
             // Subscribe
-            try
-            {
+            try {
                 this.vegaInstance.subscribeToTopic(topic, this);
-            }
-            catch (VegaException e)
-            {
+            } catch (VegaException e) {
                 return;
             }
 
@@ -342,33 +301,28 @@ public class VegaInstanceStressTest
         }
 
         @Override
-        public void cleanUp()
-        {
+        public void cleanUp() {
 
         }
 
         @Override
-        public void onMessageReceived(IRcvMessage receivedMessage)
-        {
+        public void onMessageReceived(IRcvMessage receivedMessage) {
         }
 
         @Override
-        public void onRequestReceived(IRcvRequest receivedRequest)
-        {
+        public void onRequestReceived(IRcvRequest receivedRequest) {
             UnsafeBuffer responseBuffer = new UnsafeBuffer(ByteBuffer.allocate(128));
             responseBuffer.putInt(0, 55);
             receivedRequest.sendResponse(responseBuffer, 0, 4);
         }
 
         @Override
-        public void onRequestTimeout(ISentRequest originalSentRequest)
-        {
+        public void onRequestTimeout(ISentRequest originalSentRequest) {
 
         }
 
         @Override
-        public void onResponseReceived(ISentRequest originalSentRequest, IRcvResponse response)
-        {
+        public void onResponseReceived(ISentRequest originalSentRequest, IRcvResponse response) {
         }
     }
 }

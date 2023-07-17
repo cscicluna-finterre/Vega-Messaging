@@ -9,25 +9,20 @@ import sun.misc.Signal;
  * Created by cnebrera on 29/07/16.
  */
 @Slf4j
-public class StandAloneMediaDriversTest
-{
+public class StandAloneMediaDriversTest {
     @Ignore
     @Test
-    public void testDriverExitStop() throws Exception
-    {
+    public void testDriverExitStop() throws Exception {
         log.info("Waiting 10 seconds to allow first media driver to free all resources");
         Thread.sleep(10000);
 
         // Launch a signal to stop in 5 seconds
         new Thread(() ->
         {
-            try
-            {
+            try {
                 Thread.sleep(5000);
                 Signal.raise(new Signal("INT"));
-            }
-            catch (InterruptedException e)
-            {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }).start();
@@ -38,21 +33,17 @@ public class StandAloneMediaDriversTest
 
     @Ignore
     @Test
-    public void testLowLatencyDriverExitStop() throws Exception
-    {
+    public void testLowLatencyDriverExitStop() throws Exception {
         log.info("Waiting 10 seconds to allow first media driver to free all resources");
         Thread.sleep(10000);
 
         // Launch a signal to stop in 5 seconds
         new Thread(() ->
         {
-            try
-            {
+            try {
                 Thread.sleep(5000);
                 Signal.raise(new Signal("INT"));
-            }
-            catch (InterruptedException e)
-            {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }).start();

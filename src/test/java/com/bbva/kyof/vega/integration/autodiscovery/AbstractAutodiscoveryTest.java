@@ -45,23 +45,21 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * This class contains all the logic for setting up the unicast daemons, publishers and subscribers for integration testing.
- *
+ * <p>
  * This abstract class allow to generate a random number of Publishers, Subscribers and Unicast Daemons to test High Availability.
- *
+ * <p>
  * VegaInstance is used, and this class only accept a xml configuration file.
- *
+ * <p>
  * Because the Ip address is not known, the xml config files can not contain it. So, the xml config files contains
  * the MULTICAST configuration for autodisc_config, and in runtime, the AbstractAutodiscReceiver and AbstractAutodiscSender
  * are replaced from their multicast implementation to their unicast implementation (AutodiscUnicastReceiver and
  * AutodiscUnicastSender respectively).
- *
  */
 @Slf4j
-abstract class AbstractAutodiscoveryTest
-{
+abstract class AbstractAutodiscoveryTest {
     //TIMERS FOR TESTING  ***********************************************************************
     //Wait for all the threads up
-    private static final int INIT_DURATION= 20000;
+    private static final int INIT_DURATION = 20000;
     //Time to wait for publisher and subscriber threads to finnish with stop variable
     private static final int TIME_TO_WAIT_FOR_STOPPING_PUBLISHER_SUBSCRIBER_THREADS = 5000;
     //Time to wait for the publisher & subscriber to set down the unicast daemon before to finnish the test
@@ -123,8 +121,7 @@ abstract class AbstractAutodiscoveryTest
     /**
      * Method to initialize all the attributes of this class to repeat a test
      */
-    void initializeTestAttributes()
-    {
+    void initializeTestAttributes() {
         stop = false;
         messages.clear();
         messageId.set(0);
@@ -133,10 +130,10 @@ abstract class AbstractAutodiscoveryTest
     /*********************************************LAUNCHERS************************************************************/
     /**
      * Launch one AutodiscDaemon with the index passed by parameters
+     *
      * @param index the daemon to get up inside the autodiscDaemons array
      */
-    void launchAutodiscDaemon(int index) throws AutodiscException
-    {
+    void launchAutodiscDaemon(int index) throws AutodiscException {
         log.debug("Starting unicast daemon {}", index);
         int port = autodiscPortHA + index;
 
@@ -160,15 +157,13 @@ abstract class AbstractAutodiscoveryTest
      * exception = -1 to getting up all the daemons) and at restart time (where only one daemon is up, with the
      * exception value as the index,
      * and this method have to get up all the others)
+     *
      * @param exception if the exception is with a valid index (exception < numAutodiscHA), this daemon is not get up
      *                  (autodiscDaemons array index)
      */
-    private void launchAutodiscDaemons(int exception) throws AutodiscException
-    {
-        for(int index = 0; index < numAutodiscHA; index++)
-        {
-            if(index != exception)
-            {
+    private void launchAutodiscDaemons(int exception) throws AutodiscException {
+        for (int index = 0; index < numAutodiscHA; index++) {
+            if (index != exception) {
                 launchAutodiscDaemon(index);
             }
         }
@@ -177,10 +172,8 @@ abstract class AbstractAutodiscoveryTest
     /**
      * Launch the publishers
      */
-    private void launchPublishers() throws NoSuchFieldException, IllegalAccessException, VegaException
-    {
-        for(int i = 0; i < numPublishers; i++)
-        {
+    private void launchPublishers() throws NoSuchFieldException, IllegalAccessException, VegaException {
+        for (int i = 0; i < numPublishers; i++) {
             publishers[i] = new Publisher();
             publishersThreads[i] = new Thread(publishers[i]);
             publishersThreads[i].start();
@@ -190,10 +183,8 @@ abstract class AbstractAutodiscoveryTest
     /**
      * Launch the subscribers
      */
-    private void launchSubscribers() throws NoSuchFieldException, IllegalAccessException, VegaException
-    {
-        for(int i = 0; i < numSubscribers; i++)
-        {
+    private void launchSubscribers() throws NoSuchFieldException, IllegalAccessException, VegaException {
+        for (int i = 0; i < numSubscribers; i++) {
             subscribers[i] = new Subscriber();
             subscribersThreads[i] = new Thread(subscribers[i]);
             subscribersThreads[i].start();
@@ -202,14 +193,14 @@ abstract class AbstractAutodiscoveryTest
 
     /**
      * Launch all the daemons, publishers and subscribers
-     * @throws AutodiscException AutodiscException
-     * @throws VegaException VegaException
-     * @throws NoSuchFieldException NoSuchFieldException
+     *
+     * @throws AutodiscException      AutodiscException
+     * @throws VegaException          VegaException
+     * @throws NoSuchFieldException   NoSuchFieldException
      * @throws IllegalAccessException IllegalAccessException
      */
     void initializeAllDaemonsAndClients()
-            throws AutodiscException, VegaException, NoSuchFieldException, IllegalAccessException, InterruptedException
-    {
+            throws AutodiscException, VegaException, NoSuchFieldException, IllegalAccessException, InterruptedException {
         //Pass -1 as parameter to start all the unicast daemons
         launchAutodiscDaemons(-1);
         launchSubscribers();
@@ -220,14 +211,14 @@ abstract class AbstractAutodiscoveryTest
 
     /**
      * Launch all the daemons, publishers and subscribers
-     * @throws AutodiscException AutodiscException
-     * @throws VegaException VegaException
-     * @throws NoSuchFieldException NoSuchFieldException
+     *
+     * @throws AutodiscException      AutodiscException
+     * @throws VegaException          VegaException
+     * @throws NoSuchFieldException   NoSuchFieldException
      * @throws IllegalAccessException IllegalAccessException
      */
     void initializeOneDaemonAndAllClients(int daemonIndex)
-            throws AutodiscException, VegaException, NoSuchFieldException, IllegalAccessException, InterruptedException
-    {
+            throws AutodiscException, VegaException, NoSuchFieldException, IllegalAccessException, InterruptedException {
         //Pass -1 as parameter to start all the unicast daemons
         launchAutodiscDaemon(daemonIndex);
         launchSubscribers();
@@ -238,16 +229,15 @@ abstract class AbstractAutodiscoveryTest
 
     /**
      * Close all the clients
-     * @throws IOException IOException
+     *
+     * @throws IOException          IOException
      * @throws InterruptedException InterruptedException
      */
     void closeAllClients() throws IOException, InterruptedException {
-        for(int i = 0; i < numPublishers; i++)
-        {
+        for (int i = 0; i < numPublishers; i++) {
             publishers[i].close();
         }
-        for(int i = 0; i < numSubscribers; i++)
-        {
+        for (int i = 0; i < numSubscribers; i++) {
             subscribers[i].close();
         }
         Thread.sleep(TIME_TO_CLOSE_PUBLISHER_SUBSCRIBER);
@@ -255,8 +245,9 @@ abstract class AbstractAutodiscoveryTest
 
     /**
      * Close the daemon with index passed as param
+     *
      * @param index the Unicast Daemon to close
-     * @throws IOException IOException
+     * @throws IOException          IOException
      * @throws InterruptedException InterruptedException
      */
     public void closeOneDaemon(int index) throws IOException, InterruptedException {
@@ -266,13 +257,13 @@ abstract class AbstractAutodiscoveryTest
 
     /**
      * Close all the daemons and clients
-     * @throws IOException IOException
+     *
+     * @throws IOException          IOException
      * @throws InterruptedException InterruptedException
      */
     void closeAllDaemonsAndClients() throws IOException, InterruptedException {
         closeAllClients();
-        for (int i = 0; i < numAutodiscHA; i++)
-        {
+        for (int i = 0; i < numAutodiscHA; i++) {
             autodiscDaemons[i].cleanUp();
         }
         Thread.sleep(TIME_TO_CLOSE_UNICAST_DAEMONS);
@@ -280,10 +271,10 @@ abstract class AbstractAutodiscoveryTest
 
     /**
      * Stop the test
+     *
      * @throws InterruptedException
      */
-    void stopTest() throws InterruptedException
-    {
+    void stopTest() throws InterruptedException {
         stop = true;
         //Time to wait for publisher and subscriber threads to finnish with stop variable
         Thread.sleep(TIME_TO_WAIT_FOR_STOPPING_PUBLISHER_SUBSCRIBER_THREADS);
@@ -293,17 +284,16 @@ abstract class AbstractAutodiscoveryTest
     /**
      * Check that all the messages sent was received
      */
-    void assertNotMessagesLost()
-    {
+    void assertNotMessagesLost() {
         //first check using aeron responses
         long totalSentMessages = Arrays.stream(publishers).mapToInt(p -> p.getSentMsgs().get()).reduce(0, Integer::sum);
         long totalErrorMessages = Arrays.stream(publishers).map(p -> p.getErrorMsgs().get()).reduce(0, Integer::sum);
         long totalReceivedMessages = Arrays.stream(subscribers).map(s -> s.getReceivedMsgs().get()).reduce(0, Integer::sum);
-        log.debug("Results: totalSentMessages={} totalReceivedMessages={} totalErrorMessages={}\n",totalSentMessages, totalReceivedMessages, totalErrorMessages);
+        log.debug("Results: totalSentMessages={} totalReceivedMessages={} totalErrorMessages={}\n", totalSentMessages, totalReceivedMessages, totalErrorMessages);
         assertEquals(totalSentMessages, totalReceivedMessages);
         assertEquals(0, totalErrorMessages);
         //second check using time of request and responses
-        long errors = messages.values().stream().filter(m -> m.getTimeRx()==0).count();
+        long errors = messages.values().stream().filter(m -> m.getTimeRx() == 0).count();
         assertEquals(0l, errors);
     }
 
@@ -312,12 +302,12 @@ abstract class AbstractAutodiscoveryTest
      * It finds that the client change the unicast daemon that uses to publicate the topics
      * Search the comment "Returning a new Random publication to unicast discovery daemon server with uuid" in the logs
      * to see the moment it happends
+     *
      * @return The unicast daemon that was not restarted
      * @throws InterruptedException InterruptedException
-     * @throws AutodiscException AutodiscException
+     * @throws AutodiscException    AutodiscException
      */
-    int restartAlmostAllDaemons() throws InterruptedException, AutodiscException
-    {
+    int restartAlmostAllDaemons() throws InterruptedException, AutodiscException {
         int daemon = new Random().nextInt(numAutodiscHA);
         restartAllDaemonsExceptOne(daemon);
         return daemon;
@@ -328,18 +318,16 @@ abstract class AbstractAutodiscoveryTest
      * It finds that the client change the unicast daemon that uses to publicate the topics
      * Search the comment "Returning a new Random publication to unicast discovery daemon server with uuid" in the logs
      * to see the moment it happends
+     *
      * @param daemon The index of the daemon that will not become reset
      * @return The unicast daemon that was not restarted
      * @throws InterruptedException InterruptedException
-     * @throws AutodiscException AutodiscException
+     * @throws AutodiscException    AutodiscException
      */
-    void restartAllDaemonsExceptOne(int daemon) throws InterruptedException, AutodiscException
-    {
+    void restartAllDaemonsExceptOne(int daemon) throws InterruptedException, AutodiscException {
         log.info("Stopping all daemons except {}", daemon);
-        for (int i = 0; i < numAutodiscHA; i++)
-        {
-            if(i != daemon)
-            {
+        for (int i = 0; i < numAutodiscHA; i++) {
+            if (i != daemon) {
                 log.info("Stopping daemon {}", i);
                 autodiscDaemons[i].cleanUp();
             }
@@ -353,27 +341,26 @@ abstract class AbstractAutodiscoveryTest
     /*********************************************PUBLISHER && SUBSCRIBER COMMON METHODS*******************************/
     /**
      * Create a list with all the IPs and Ports of the daemon discovery configured in this test
+     *
      * @return the list with address and ips
      */
-    private List<UnicastInfo> createUnicastInfoArray()
-    {
+    private List<UnicastInfo> createUnicastInfoArray() {
         List<UnicastInfo> list = new ArrayList<>();
-        for (int i = 0; i < numAutodiscHA; i++)
-        {
-            list.add(new UnicastInfo(ucastIpHA, autodiscPortHA+i));
+        for (int i = 0; i < numAutodiscHA; i++) {
+            list.add(new UnicastInfo(ucastIpHA, autodiscPortHA + i));
         }
         return list;
     }
 
     /**
      * Create the configuration for all the unicast daemon configured in this test
+     *
      * @return AutoDiscoveryConfig
      * @throws VegaException
      */
-    private AutoDiscoveryConfig createAutoDiscoveryConfig(String type) throws VegaException
-    {
+    private AutoDiscoveryConfig createAutoDiscoveryConfig(String type) throws VegaException {
         AutoDiscoveryConfig autoDiscoveryConfig = null;
-        if(PUBLISHER.equals(type)) {
+        if (PUBLISHER.equals(type)) {
             autoDiscoveryConfig = AutoDiscoveryConfig.builder()
                     .autoDiscoType(AutoDiscoType.UNICAST_DAEMON)
                     .unicastInfoArray(createUnicastInfoArray())
@@ -381,7 +368,7 @@ abstract class AbstractAutodiscoveryTest
                     .unicastResolverRcvPortMax(35013)
                     .build();
         }
-        if(SUBSCRIBER.equals(type)) {
+        if (SUBSCRIBER.equals(type)) {
             autoDiscoveryConfig = AutoDiscoveryConfig.builder()
                     .autoDiscoType(AutoDiscoType.UNICAST_DAEMON)
                     .unicastInfoArray(createUnicastInfoArray())
@@ -399,20 +386,20 @@ abstract class AbstractAutodiscoveryTest
      * the MULTICAST configuration for autodisc_config, and in runtime, the AbstractAutodiscReceiver and AbstractAutodiscSender
      * are replaced from their multicast implementation to their unicast implementation (AutodiscUnicastReceiver and
      * AutodiscUnicastSender respectively).
-     *
+     * <p>
      * This method uses reflection to substitute the multicast AbstractAutodiscReceiver and AbstractAutodiscSender
      * configured by the xml configuration file to theis unicast implementation
+     *
      * @param instance
      * @throws NoSuchFieldException
      * @throws IllegalAccessException
      * @throws VegaException
      */
     public void changePublicationsManager(final IVegaInstance instance, String type)
-            throws NoSuchFieldException, IllegalAccessException, VegaException
-    {
+            throws NoSuchFieldException, IllegalAccessException, VegaException {
         //Get necessary instances
         VegaContext vegaContext = (VegaContext) ReflectionUtils.getObjectByReflection(instance, "vegaContext");
-        Aeron aeron = (Aeron)ReflectionUtils.getObjectByReflection(vegaContext, "aeron");
+        Aeron aeron = (Aeron) ReflectionUtils.getObjectByReflection(vegaContext, "aeron");
         GlobalConfiguration globalConfiguration = (GlobalConfiguration) ReflectionUtils.getObjectByReflection(vegaContext, "instanceConfig");
 
         //Replace the configuration from multicast to unicast
@@ -423,11 +410,11 @@ abstract class AbstractAutodiscoveryTest
 
         //Create the publicationsManager for unicast, to use in the AutodiscUnicastReceiver and AutodiscUnicastSender
         PublicationsManager publicationsManager = new PublicationsManager(aeron, autoDiscoveryConfig);
-        AutodiscManager autodiscoveryManager = (AutodiscManager)ReflectionUtils.getObjectByReflection(vegaContext, "autodiscoveryManager");
+        AutodiscManager autodiscoveryManager = (AutodiscManager) ReflectionUtils.getObjectByReflection(vegaContext, "autodiscoveryManager");
 
         //Create the AutodiscUnicastReceiver and AutodiscUnicastSender
         AbstractAutodiscReceiver autodiscSub = new AutodiscUnicastReceiver(instance.getInstanceId(), aeron, autoDiscoveryConfig, autodiscoveryManager, publicationsManager);
-        AbstractAutodiscSender autodiscPub = new AutodiscUnicastSender(aeron, autoDiscoveryConfig, ((AutodiscUnicastReceiver)autodiscSub).getDaemonClientInfo(), publicationsManager);
+        AbstractAutodiscSender autodiscPub = new AutodiscUnicastSender(aeron, autoDiscoveryConfig, ((AutodiscUnicastReceiver) autodiscSub).getDaemonClientInfo(), publicationsManager);
 
         //Close the multicast receiver & sender, they will not been used
         log.debug("\n");
@@ -453,27 +440,28 @@ abstract class AbstractAutodiscoveryTest
     /**
      * Class with a Publisher
      */
-    class Publisher implements Runnable
-    {
+    class Publisher implements Runnable {
         private final String configFile;
         private final VegaInstanceParams vegaInstanceParams;
         private final IVegaInstance instance;
-        @Getter private AtomicInteger sentMsgs = new AtomicInteger();
-        @Getter private AtomicInteger errorMsgs = new AtomicInteger();
+        @Getter
+        private AtomicInteger sentMsgs = new AtomicInteger();
+        @Getter
+        private AtomicInteger errorMsgs = new AtomicInteger();
 
         /**
          * Constructor to create the Publisher
-         * @throws VegaException VegaException
-         * @throws NoSuchFieldException NoSuchFieldException
+         *
+         * @throws VegaException          VegaException
+         * @throws NoSuchFieldException   NoSuchFieldException
          * @throws IllegalAccessException IllegalAccessException
          */
-        public Publisher() throws VegaException, NoSuchFieldException, IllegalAccessException
-        {
+        public Publisher() throws VegaException, NoSuchFieldException, IllegalAccessException {
             super();
 
             configFile = Publisher.class.getClassLoader().getResource("integrationConfig/publicationConfig.xml").getPath();
 
-            vegaInstanceParams  = VegaInstanceParams.builder().
+            vegaInstanceParams = VegaInstanceParams.builder().
                     instanceName("PublisherInstance").
                     configurationFile(configFile).build();
             instance = VegaInstance.createNewInstance(vegaInstanceParams);
@@ -485,16 +473,18 @@ abstract class AbstractAutodiscoveryTest
 
         /**
          * Method to close the publisher
+         *
          * @throws IOException IOException
          */
         public void close() throws IOException {
             log.debug("Closing publisher");
             instance.close();
-            log.debug("Closed tested publisher with sendedMsgs={} and errorMsgs={}",sentMsgs, errorMsgs);
+            log.debug("Closed tested publisher with sendedMsgs={} and errorMsgs={}", sentMsgs, errorMsgs);
         }
 
         /**
          * Method to send a message and save it into the messages structure
+         *
          * @param iTopicPublisherList
          */
         private void sendMsg(List<ITopicPublisher> iTopicPublisherList) {
@@ -516,35 +506,28 @@ abstract class AbstractAutodiscoveryTest
 
             if (result == PublishResult.BACK_PRESSURED || result == PublishResult.UNEXPECTED_ERROR) {
                 errorMsgs.incrementAndGet();
-            }
-            else{
+            } else {
                 sentMsgs.incrementAndGet();
             }
         }
 
         @Override
-        public void run()
-        {
-            try
-            {
+        public void run() {
+            try {
                 //Time to get the Daemon Servers, Publisher and Subscriber up
                 Thread.sleep(TIME_TO_WAIT_DAEMON_PUBLISHER_SUBSCRIBER_THREADS_UP);
 
                 List<ITopicPublisher> iTopicPublisherList = new ArrayList<>();
-                for(int i = 0; i < numTopics; i++)
-                {
-                    iTopicPublisherList.add( instance.createPublisher("Topic"+i) );
+                for (int i = 0; i < numTopics; i++) {
+                    iTopicPublisherList.add(instance.createPublisher("Topic" + i));
                 }
                 //Time to having all the subscribers subscribed to all the topics, before start sending messages
                 Thread.sleep(TIME_TO_ALL_SUBSCRIBED_TO_TOPICS);
-                while(!stop)
-                {
+                while (!stop) {
                     sendMsg(iTopicPublisherList);
                     Thread.sleep(TIME_BETWEEN_SENT_MESSAGES);
                 }
-            }
-            catch (InterruptedException | VegaException e)
-            {
+            } catch (InterruptedException | VegaException e) {
                 e.printStackTrace();
             }
         }
@@ -554,8 +537,7 @@ abstract class AbstractAutodiscoveryTest
     /**
      * Class to instance a Subscriber
      */
-    class Subscriber implements Runnable
-    {
+    class Subscriber implements Runnable {
         private final String configFile;
         private final VegaInstanceParams vegaInstanceParams;
         private final IVegaInstance instance;
@@ -564,17 +546,17 @@ abstract class AbstractAutodiscoveryTest
 
         /**
          * Create the Subscribers
-         * @throws VegaException VegaException
-         * @throws NoSuchFieldException NoSuchFieldException
+         *
+         * @throws VegaException          VegaException
+         * @throws NoSuchFieldException   NoSuchFieldException
          * @throws IllegalAccessException IllegalAccessException
          */
-        public Subscriber() throws VegaException, NoSuchFieldException, IllegalAccessException
-        {
+        public Subscriber() throws VegaException, NoSuchFieldException, IllegalAccessException {
             super();
 
             configFile = Subscriber.class.getClassLoader().getResource("integrationConfig/subscriptionConfig.xml").getPath();
 
-            vegaInstanceParams  = VegaInstanceParams.builder().
+            vegaInstanceParams = VegaInstanceParams.builder().
                     instanceName("SubscriberInstance").
                     configurationFile(configFile).build();
             instance = VegaInstance.createNewInstance(vegaInstanceParams);
@@ -586,6 +568,7 @@ abstract class AbstractAutodiscoveryTest
 
         /**
          * Method to close the subscriber
+         *
          * @throws IOException
          */
         public void close() throws IOException {
@@ -595,14 +578,11 @@ abstract class AbstractAutodiscoveryTest
         }
 
         @Override
-        public void run()
-        {
+        public void run() {
             // Create a listener
-            ITopicSubListener listener = new ITopicSubListener()
-            {
+            ITopicSubListener listener = new ITopicSubListener() {
                 @Override
-                public void onMessageReceived(IRcvMessage receivedMessage)
-                {
+                public void onMessageReceived(IRcvMessage receivedMessage) {
                     //log.info("RECIBIDO MSJ: "+receivedMessage.getTopicName()+" -> "+receivedMessage.getContents());
                     receivedMsgs.incrementAndGet();
 
@@ -634,27 +614,23 @@ abstract class AbstractAutodiscoveryTest
                 }
             };
 
-            try
-            {
+            try {
                 //Time to get the Daemon Servers, Publisher and Subscriber up
                 Thread.sleep(TIME_TO_WAIT_DAEMON_PUBLISHER_SUBSCRIBER_THREADS_UP);
 
-                for (int i = 0; i < numTopics; i++ ) {
+                for (int i = 0; i < numTopics; i++) {
                     // Subscribe to topic
                     try {
-                        instance.subscribeToTopic("Topic"+i, listener);
+                        instance.subscribeToTopic("Topic" + i, listener);
                     } catch (VegaException e) {
                         e.printStackTrace();
                     }
                 }
 
-                while(!stop)
-                {
+                while (!stop) {
                     Thread.sleep(TIME_TO_SLEEP_SUBSCRIBER_THREAD);
                 }
-            }
-            catch (InterruptedException e)
-            {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
@@ -665,8 +641,7 @@ abstract class AbstractAutodiscoveryTest
      */
     @Data
     @AllArgsConstructor
-    public class Message
-    {
+    public class Message {
         private String topic;
         private long timeTxVega;
         private long timeRx;

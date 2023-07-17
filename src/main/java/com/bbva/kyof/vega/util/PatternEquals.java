@@ -6,8 +6,7 @@ import java.util.regex.Pattern;
 /**
  * Pattern with equals to be used on hashmaps
  */
-public class PatternEquals
-{
+public class PatternEquals {
     /**
      * Original pattern wrapped
      */
@@ -18,15 +17,17 @@ public class PatternEquals
      */
     private final Matcher matcher;
 
-    /** Lock for instance synchronization */
+    /**
+     * Lock for instance synchronization
+     */
     private final Object lock = new Object();
 
     /**
      * Construct a new pattern equals with the given string
+     *
      * @param patternRegex the regex that represent the pattern
      */
-    public PatternEquals(final String patternRegex)
-    {
+    public PatternEquals(final String patternRegex) {
         this.patternRegex = patternRegex;
         this.matcher = Pattern.compile(patternRegex).matcher("");
     }
@@ -38,24 +39,19 @@ public class PatternEquals
      * @param input The input sequence
      * @return true if it matches TOTALLY, false otherwise
      */
-    public boolean matches(final CharSequence input)
-    {
-        synchronized (this.lock)
-        {
+    public boolean matches(final CharSequence input) {
+        synchronized (this.lock) {
             this.matcher.reset(input);
             return this.matcher.matches();
         }
     }
 
     @Override
-    public boolean equals(final Object target)
-    {
-        if (this == target)
-        {
+    public boolean equals(final Object target) {
+        if (this == target) {
             return true;
         }
-        if (target == null || getClass() != target.getClass())
-        {
+        if (target == null || getClass() != target.getClass()) {
             return false;
         }
 
@@ -66,8 +62,7 @@ public class PatternEquals
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return patternRegex.hashCode();
     }
 }

@@ -6,8 +6,7 @@ import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicSocketInfo;
 /**
  * Listener to receive the events triggered by the auto-discovery mechanism
  */
-public interface IAutodiscTopicSubListener
-{
+public interface IAutodiscTopicSubListener {
     /**
      * Called when a new autodiscovery topic info is added
      *

@@ -15,50 +15,76 @@ import org.agrona.DirectBuffer;
 
 /**
  * Class that perform message polling over a set of subscribers
- *
+ * <p>
  * This class is thread safe!!
  */
 @Slf4j
-class SubcribersPoller extends RecurrentTask
-{
-    /** Default initial subscribers number, it is used to reserve some memory in the subscribers array */
+class SubcribersPoller extends RecurrentTask {
+    /**
+     * Default initial subscribers number, it is used to reserve some memory in the subscribers array
+     */
     private static final int DEFAULT_SUB_NUMBER = 10;
 
-    /** Reusable base header for received messages */
+    /**
+     * Reusable base header for received messages
+     */
     private final BaseHeader reusableBaseHeader = new BaseHeader();
 
-    /** Reusable header for received data messages */
+    /**
+     * Reusable header for received data messages
+     */
     private final MsgDataHeader reusableDataMsgHeader = new MsgDataHeader();
 
-    /** Reusable header for received request */
+    /**
+     * Reusable header for received request
+     */
     private final MsgReqHeader reusableReqMsgHeader = new MsgReqHeader();
 
-    /** Reusable header for received responses */
+    /**
+     * Reusable header for received responses
+     */
     private final MsgRespHeader reusableRespMsgHeader = new MsgRespHeader();
 
-    /** Reusable message object for received messages */
+    /**
+     * Reusable message object for received messages
+     */
     private final RcvMessage reusableReceivedMsg = new RcvMessage();
 
-    /** Reusable message object for received requests */
+    /**
+     * Reusable message object for received requests
+     */
     private final RcvRequest reusableReceivedRequest = new RcvRequest();
 
-    /** Reusable message object for received responses */
+    /**
+     * Reusable message object for received responses
+     */
     private final RcvResponse reusableReceivedResponse = new RcvResponse();
 
-    /** Reusable buffer serializer */
+    /**
+     * Reusable buffer serializer
+     */
     private final UnsafeBufferSerializer bufferSerializer = new UnsafeBufferSerializer();
 
-    /** Delayed changes collection with all subscriptors for the poller */
+    /**
+     * Delayed changes collection with all subscriptors for the poller
+     */
     private final IDelayedChangesArray<AeronSubscriber> subscribers;
-  
-    /** Fragment assembler that will handle the new messages in the subscribers */
+
+    /**
+     * Fragment assembler that will handle the new messages in the subscribers
+     */
     private final FragmentAssembler fragmentAssembler;
 
-    /** Listener for received messages */
+    /**
+     * Listener for received messages
+     */
     private final ISubscribersPollerListener listener;
 
-    /** Stores the configuration of the poller */
-    @Getter private final RcvPollerConfig config;
+    /**
+     * Stores the configuration of the poller
+     */
+    @Getter
+    private final RcvPollerConfig config;
 
     /**
      * Store the maximum number of fragments to look for when polling a single subscriber.
@@ -72,10 +98,9 @@ class SubcribersPoller extends RecurrentTask
      * Create a new poller
      *
      * @param listener listener that will receive the polled messages
-     * @param config poller configuration
+     * @param config   poller configuration
      */
-    SubcribersPoller(final ISubscribersPollerListener listener, final RcvPollerConfig config)
-    {
+    SubcribersPoller(final ISubscribersPollerListener listener, final RcvPollerConfig config) {
         super(config.getIdleStrategy());
         this.listener = listener;
         this.config = config;
@@ -86,34 +111,32 @@ class SubcribersPoller extends RecurrentTask
 
     /**
      * Add a subscription to be processed during polling
+     *
      * @param subscription the aeron subscription to poll
      */
-    void addSubscription(final AeronSubscriber subscription)
-    {
+    void addSubscription(final AeronSubscriber subscription) {
         this.subscribers.addElement(subscription);
     }
 
     /**
      * Remove a subscription from the poller
+     *
      * @param subscription the subscription to remove from the poller
      */
-    void removeSubscription(final AeronSubscriber subscription)
-    {
+    void removeSubscription(final AeronSubscriber subscription) {
         this.subscribers.removeElement(subscription);
     }
 
     /**
      * Start the poller
      */
-    void start()
-    {
+    void start() {
         log.info("Starting poller manager with name [{}]", this.config.getName());
         this.start("SubscriberPoller " + this.config.getName());
     }
 
     @Override
-    public int action()
-    {
+    public int action() {
         // Apply pending changes
         this.subscribers.applyPendingChanges();
 
@@ -123,8 +146,7 @@ class SubcribersPoller extends RecurrentTask
         final AeronSubscriber[] subscriptionsArray = this.subscribers.getInternalArray();
 
         // Poll all the subscribers
-        for (int i = 0; i < this.subscribers.getNumElements() && !this.shouldStop(); i++)
-        {
+        for (int i = 0; i < this.subscribers.getNumElements() && !this.shouldStop(); i++) {
             fragmentsRead += subscriptionsArray[i].poll(this.fragmentAssembler, this.maxFragmentsPerPoll);
         }
 
@@ -133,21 +155,20 @@ class SubcribersPoller extends RecurrentTask
     }
 
     @Override
-    public void cleanUp()
-    {
+    public void cleanUp() {
         log.info("Cleaning poller manager [{}] after closing", this.config.getName());
         this.subscribers.clear();
     }
 
     /**
      * Process a polled message from one of the registered AeronSubscribers
+     *
      * @param buffer the buffer that contains the message
      * @param offset the offset where the message starts on the buffer
      * @param length the length of the message
      * @param header the Aeron header of the message
      */
-    private void processAeronMsg(final DirectBuffer buffer, final int offset, final int length, final Header header)
-    {
+    private void processAeronMsg(final DirectBuffer buffer, final int offset, final int length, final Header header) {
         // Wrap the buffer into the serializer
         this.bufferSerializer.wrap(buffer, offset, length);
 
@@ -155,15 +176,13 @@ class SubcribersPoller extends RecurrentTask
         this.reusableBaseHeader.fromBinary(this.bufferSerializer);
 
         // Check the version
-        if (!this.reusableBaseHeader.isVersionCompatible())
-        {
+        if (!this.reusableBaseHeader.isVersionCompatible()) {
             log.warn("Message message received from incompatible library version [{}]", Version.toStringRep(this.reusableBaseHeader.getVersion()));
             return;
         }
 
         // Check the message type
-        switch (this.reusableBaseHeader.getMsgType())
-        {
+        switch (this.reusableBaseHeader.getMsgType()) {
             case MsgType.DATA:
                 this.processDataMessage();
                 break;
@@ -185,11 +204,11 @@ class SubcribersPoller extends RecurrentTask
         }
     }
 
-    /** Process a message of type data that has already been wrapped on the buffer serializer */
-    private void processDataMessage()
-    {
-        if (log.isTraceEnabled())
-        {
+    /**
+     * Process a message of type data that has already been wrapped on the buffer serializer
+     */
+    private void processDataMessage() {
+        if (log.isTraceEnabled()) {
             log.trace("Data message received");
         }
 
@@ -207,11 +226,11 @@ class SubcribersPoller extends RecurrentTask
         this.listener.onDataMsgReceived(this.reusableReceivedMsg);
     }
 
-    /** Process a message of type data that has already been wrapped on the buffer serializer */
-    private void processEncryptedDataMessage()
-    {
-        if (log.isTraceEnabled())
-        {
+    /**
+     * Process a message of type data that has already been wrapped on the buffer serializer
+     */
+    private void processEncryptedDataMessage() {
+        if (log.isTraceEnabled()) {
             log.trace("Encrypted data message received");
         }
 
@@ -229,11 +248,11 @@ class SubcribersPoller extends RecurrentTask
         this.listener.onEncryptedDataMsgReceived(this.reusableReceivedMsg);
     }
 
-    /** Process a message of type data response that has already been wrapped on the buffer serializer */
-    private void processDataResponseMessage()
-    {
-        if (log.isTraceEnabled())
-        {
+    /**
+     * Process a message of type data response that has already been wrapped on the buffer serializer
+     */
+    private void processDataResponseMessage() {
+        if (log.isTraceEnabled()) {
             log.trace("Response message received");
         }
 
@@ -250,11 +269,11 @@ class SubcribersPoller extends RecurrentTask
         this.listener.onDataResponseMsgReceived(this.reusableReceivedResponse);
     }
 
-    /** Process a message of type data request that has already been wrapped on the buffer serializer */
-    private void processDataRequestMessage()
-    {
-        if (log.isTraceEnabled())
-        {
+    /**
+     * Process a message of type data request that has already been wrapped on the buffer serializer
+     */
+    private void processDataRequestMessage() {
+        if (log.isTraceEnabled()) {
             log.trace("Request message received");
         }
 
@@ -273,11 +292,11 @@ class SubcribersPoller extends RecurrentTask
         this.listener.onDataRequestMsgReceived(this.reusableReceivedRequest);
     }
 
-    /** Process a message of type heartbeat request */
-    private void processHeartbeatRequestMessage()
-    {
-        if (log.isTraceEnabled())
-        {
+    /**
+     * Process a message of type heartbeat request
+     */
+    private void processHeartbeatRequestMessage() {
+        if (log.isTraceEnabled()) {
             log.trace("Heartbeat request message received");
         }
 

@@ -12,33 +12,33 @@ import java.util.UUID;
 
 /**
  * Class created to test {@link UnsafeBufferSerializer}
- *
+ * <p>
  * Created by XE52727 on 05/07/2016.
  */
-public class UnsafeBufferSerializerTest
-{
-    /** Reusable send buffer */
+public class UnsafeBufferSerializerTest {
+    /**
+     * Reusable send buffer
+     */
     private static ByteBuffer REUSABLE_SEND_BUFFER = ByteBuffer.allocate(1024);
 
-    /** Reusable send buffer serializer */
+    /**
+     * Reusable send buffer serializer
+     */
     private static UnsafeBufferSerializer BUFFER_SERIALIZER = new UnsafeBufferSerializer();
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         BUFFER_SERIALIZER.wrap(REUSABLE_SEND_BUFFER);
     }
 
     @After
-    public void tearDown() throws Exception
-    {
+    public void tearDown() throws Exception {
         REUSABLE_SEND_BUFFER.clear();
         BUFFER_SERIALIZER.wrap(REUSABLE_SEND_BUFFER);
     }
 
     @Test
-    public void wrap() throws Exception
-    {
+    public void wrap() throws Exception {
         UnsafeBuffer buffer = new UnsafeBuffer(ByteBuffer.allocate(128));
 
         BUFFER_SERIALIZER.wrap(buffer);
@@ -54,8 +54,7 @@ public class UnsafeBufferSerializerTest
     }
 
     @Test
-    public void wrap1() throws Exception
-    {
+    public void wrap1() throws Exception {
         UnsafeBuffer buffer = new UnsafeBuffer(ByteBuffer.allocate(128));
 
         BUFFER_SERIALIZER.wrap(buffer, 0, 4);
@@ -71,8 +70,7 @@ public class UnsafeBufferSerializerTest
     }
 
     @Test
-    public void wrap2() throws Exception
-    {
+    public void wrap2() throws Exception {
         BUFFER_SERIALIZER.writeInt(786777);
 
         REUSABLE_SEND_BUFFER.flip();
@@ -88,8 +86,7 @@ public class UnsafeBufferSerializerTest
     }
 
     @Test
-    public void wrap3() throws Exception
-    {
+    public void wrap3() throws Exception {
         BUFFER_SERIALIZER.writeInt(786777);
 
         REUSABLE_SEND_BUFFER.flip();
@@ -105,10 +102,9 @@ public class UnsafeBufferSerializerTest
     }
 
     @Test
-    public void byteSerialization() throws Exception
-    {
-        BUFFER_SERIALIZER.writeByte((byte)12);
-        BUFFER_SERIALIZER.writeByte((byte)24);
+    public void byteSerialization() throws Exception {
+        BUFFER_SERIALIZER.writeByte((byte) 12);
+        BUFFER_SERIALIZER.writeByte((byte) 24);
 
         REUSABLE_SEND_BUFFER.flip();
         BUFFER_SERIALIZER.wrap(REUSABLE_SEND_BUFFER);
@@ -120,8 +116,7 @@ public class UnsafeBufferSerializerTest
     }
 
     @Test
-    public void writeBytes() throws Exception
-    {
+    public void writeBytes() throws Exception {
         final ByteBuffer unsafeInternalBuffer = BUFFER_SERIALIZER.getInternalBuffer().byteBuffer();
 
         final ByteBuffer buffer = ByteBuffer.allocate(128);
@@ -133,8 +128,7 @@ public class UnsafeBufferSerializerTest
     }
 
     @Test
-    public void writeReadBytesArray() throws Exception
-    {
+    public void writeReadBytesArray() throws Exception {
         // Write the bytes first
         final ByteBuffer unsafeInternalBuffer = BUFFER_SERIALIZER.getInternalBuffer().byteBuffer();
 
@@ -146,7 +140,7 @@ public class UnsafeBufferSerializerTest
         Assert.assertEquals(unsafeInternalBuffer.getInt(), 786777);
 
         // Now read them
-        byte[] readedBytes = new byte [4];
+        byte[] readedBytes = new byte[4];
         BUFFER_SERIALIZER.readBytes(0, readedBytes);
 
         Assert.assertEquals(ByteBuffer.wrap(readedBytes).getInt(), 786777);
@@ -158,8 +152,7 @@ public class UnsafeBufferSerializerTest
     }
 
     @Test
-    public void writeBytesDirectBuffer() throws Exception
-    {
+    public void writeBytesDirectBuffer() throws Exception {
         final ByteBuffer unsafeInternalBuffer = BUFFER_SERIALIZER.getInternalBuffer().byteBuffer();
 
         final ByteBuffer buffer = ByteBuffer.allocate(128);
@@ -171,8 +164,7 @@ public class UnsafeBufferSerializerTest
     }
 
     @Test
-    public void boolSerialization() throws Exception
-    {
+    public void boolSerialization() throws Exception {
         BUFFER_SERIALIZER.writeBool(true);
         BUFFER_SERIALIZER.writeBool(false);
 
@@ -185,8 +177,7 @@ public class UnsafeBufferSerializerTest
     }
 
     @Test
-    public void intSerialization() throws Exception
-    {
+    public void intSerialization() throws Exception {
         BUFFER_SERIALIZER.writeInt(67892);
         BUFFER_SERIALIZER.writeInt(99999);
 
@@ -199,9 +190,8 @@ public class UnsafeBufferSerializerTest
     }
 
     @Test
-    public void int1Serialization() throws Exception
-    {
-        BUFFER_SERIALIZER.writeInt(67892,0);
+    public void int1Serialization() throws Exception {
+        BUFFER_SERIALIZER.writeInt(67892, 0);
         BUFFER_SERIALIZER.writeInt(99999, UnsafeBufferSerializer.INT_SIZE);
 
         REUSABLE_SEND_BUFFER.flip();
@@ -213,8 +203,7 @@ public class UnsafeBufferSerializerTest
     }
 
     @Test
-    public void longSerialization() throws Exception
-    {
+    public void longSerialization() throws Exception {
         BUFFER_SERIALIZER.writeLong(67892);
         BUFFER_SERIALIZER.writeLong(99999);
 
@@ -227,8 +216,7 @@ public class UnsafeBufferSerializerTest
     }
 
     @Test
-    public void uuidSerialization() throws Exception
-    {
+    public void uuidSerialization() throws Exception {
         UUID uuid1 = UUID.randomUUID();
         UUID uuid2 = UUID.randomUUID();
 
@@ -244,11 +232,9 @@ public class UnsafeBufferSerializerTest
     }
 
     @Test
-    public void stringSerialization() throws Exception
-    {
+    public void stringSerialization() throws Exception {
         // Perform several tests
-        for(int i = 0; i < 100; i++)
-        {
+        for (int i = 0; i < 100; i++) {
             final String string1 = RandomStringUtils.random(10);
             final String string2 = RandomStringUtils.random(10);
 
@@ -270,43 +256,35 @@ public class UnsafeBufferSerializerTest
     }
 
     @Test
-    public void serializedSize() throws Exception
-    {
+    public void serializedSize() throws Exception {
         Assert.assertTrue(BUFFER_SERIALIZER.serializedSize("Test") == "Test".length() + UnsafeBufferSerializer.INT_SIZE);
     }
 
     @Test
-    public void getInternalBuffer() throws Exception
-    {
+    public void getInternalBuffer() throws Exception {
         Assert.assertTrue(BUFFER_SERIALIZER.getInternalBuffer() != null);
     }
 
     @Test
-    public void getOffset() throws Exception
-    {
+    public void getOffset() throws Exception {
         Assert.assertTrue(BUFFER_SERIALIZER.getOffset() >= 0);
     }
 
     @Test
-    public void getMsgLength() throws Exception
-    {
+    public void getMsgLength() throws Exception {
         Assert.assertTrue(BUFFER_SERIALIZER.getMsgLength() >= 0);
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
-    public void testBufferOverflowWritting()
-    {
-        while(true)
-        {
+    public void testBufferOverflowWritting() {
+        while (true) {
             BUFFER_SERIALIZER.writeString("lkajsfklasf");
         }
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
-    public void testBufferOverflowReading()
-    {
-        while(true)
-        {
+    public void testBufferOverflowReading() {
+        while (true) {
             BUFFER_SERIALIZER.readInt();
         }
     }

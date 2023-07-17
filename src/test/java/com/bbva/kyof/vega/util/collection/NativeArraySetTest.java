@@ -9,18 +9,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by cnebrera on 29/07/16.
  */
-public class NativeArraySetTest
-{
+public class NativeArraySetTest {
     @Test
-    public void testConstructors() throws Exception
-    {
+    public void testConstructors() throws Exception {
         new NativeArraySet<>(Integer.class, 2, 2);
         new NativeArraySet<>(Integer.class, 2);
     }
 
     @Test
-    public void testAddRemoveContains() throws Exception
-    {
+    public void testAddRemoveContains() throws Exception {
         final NativeArraySet<Integer> arraySet = new NativeArraySet<>(Integer.class, 2, 2);
 
         // The internal array should have size 2
@@ -105,8 +102,7 @@ public class NativeArraySetTest
     }
 
     @Test
-    public void testAddRemoveTwice() throws Exception
-    {
+    public void testAddRemoveTwice() throws Exception {
         final NativeArraySet<Integer> arraySet = new NativeArraySet<>(Integer.class, 2, 2);
 
         Assert.assertTrue(arraySet.addElement(1));
@@ -118,8 +114,7 @@ public class NativeArraySetTest
     }
 
     @Test
-    public void testConsumeAll() throws Exception
-    {
+    public void testConsumeAll() throws Exception {
         final NativeArraySet<Integer> arraySet = new NativeArraySet<>(Integer.class, 2, 2);
         arraySet.addElement(1);
         arraySet.addElement(2);
@@ -132,8 +127,7 @@ public class NativeArraySetTest
     }
 
     @Test
-    public void testClear() throws Exception
-    {
+    public void testClear() throws Exception {
         final NativeArraySet<Integer> arraySet = new NativeArraySet<>(Integer.class, 2, 2);
         arraySet.addElement(1);
         arraySet.addElement(2);
@@ -150,13 +144,11 @@ public class NativeArraySetTest
         Assert.assertTrue(sum.get() == 0);
     }
 
-    private int getNumberOfNotNullElements(final NativeArraySet<Integer> arraySet)
-    {
+    private int getNumberOfNotNullElements(final NativeArraySet<Integer> arraySet) {
         final AtomicInteger numNotNullElements = new AtomicInteger(0);
         Arrays.asList(arraySet.getInternalArray()).forEach((element) ->
         {
-            if (element != null)
-            {
+            if (element != null) {
                 numNotNullElements.incrementAndGet();
             }
         });

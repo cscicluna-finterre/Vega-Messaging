@@ -9,11 +9,9 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class TopicSubAndTopicPubIdRelationsTest
-{
+public class TopicSubAndTopicPubIdRelationsTest {
     @Test
-    public void test()
-    {
+    public void test() {
         final TopicSubAndTopicPubIdRelations relations = new TopicSubAndTopicPubIdRelations();
 
         final UUID topicSubId1 = UUID.randomUUID();

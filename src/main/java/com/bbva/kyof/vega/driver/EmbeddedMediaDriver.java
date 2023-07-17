@@ -17,27 +17,24 @@ import java.io.Closeable;
  * Embedded media driver
  */
 @Slf4j
-public class EmbeddedMediaDriver implements Closeable
-{
-    /** The created Aeron Media Driver */
+public class EmbeddedMediaDriver implements Closeable {
+    /**
+     * The created Aeron Media Driver
+     */
     private final MediaDriver driver;
 
     /**
      * Constructor to create the media driver
      *
      * @param driverConfigFile configuration field for the driver, it can be null to use default configuration
-     * @param driverType type of the driver to use
+     * @param driverType       type of the driver to use
      */
-    public EmbeddedMediaDriver(final String driverConfigFile, final AeronDriverType driverType)
-    {
+    public EmbeddedMediaDriver(final String driverConfigFile, final AeronDriverType driverType) {
         log.info("Creating embedded media driver with configuration file [{}] and type [{}]", driverConfigFile, driverType);
 
-        if (driverConfigFile == null)
-        {
+        if (driverConfigFile == null) {
             SystemUtil.loadPropertiesFiles(new String[0]);
-        }
-        else
-        {
+        } else {
             SystemUtil.loadPropertiesFiles(new String[]{driverConfigFile});
         }
 
@@ -48,13 +45,11 @@ public class EmbeddedMediaDriver implements Closeable
         final String aeronDirectory = System.getProperty("aeron.dir");
 
         // If not settled use a random one
-        if (aeronDirectory == null || aeronDirectory.isEmpty())
-        {
+        if (aeronDirectory == null || aeronDirectory.isEmpty()) {
             ctx.aeronDirectoryName(Aeron.Context.generateRandomDirName());
         }
 
-        switch (driverType)
-        {
+        switch (driverType) {
             case EXTERNAL:
                 throw new IllegalArgumentException("Embedded driver cannot be created with external driver type ");
             case EMBEDDED:
@@ -82,21 +77,22 @@ public class EmbeddedMediaDriver implements Closeable
         this.driver = MediaDriver.launch(ctx);
     }
 
-    /** @return the directory name where the driver is writing */
-    public String getDriverDirectoryName()
-    {
+    /**
+     * @return the directory name where the driver is writing
+     */
+    public String getDriverDirectoryName() {
         return driver.aeronDirectoryName();
     }
 
-    /** Stop the media driver */
-    public void stop()
-    {
+    /**
+     * Stop the media driver
+     */
+    public void stop() {
         CloseHelper.quietClose(this.driver);
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         log.info("Stopping embedded media driver");
         this.stop();
     }

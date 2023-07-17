@@ -18,8 +18,7 @@ import java.util.*;
 /**
  * Created by cnebrera on 16/11/2016.
  */
-public class SecureTopicSubscriberTest
-{
+public class SecureTopicSubscriberTest {
     private final Random rnd = new Random();
     // Create an AES Crypto
     private AESCrypto aesCrypto;
@@ -28,8 +27,7 @@ public class SecureTopicSubscriberTest
 
 
     @Before
-    public void before() throws Exception
-    {
+    public void before() throws Exception {
         aesCrypto = AESCrypto.createNewInstance();
 
         final TopicTemplateConfig config = new TopicTemplateConfig();
@@ -51,8 +49,7 @@ public class SecureTopicSubscriberTest
 
 
     @Test
-    public void testInternalBufferGrow() throws Exception
-    {
+    public void testInternalBufferGrow() throws Exception {
         ByteBuffer msg = this.createMsg(128);
         ByteBuffer encodedMsg = this.encodeMsg(msg, aesCrypto);
 
@@ -89,10 +86,8 @@ public class SecureTopicSubscriberTest
     }
 
     @Test
-    public void onSecureMsgReceivedDifferentSizes() throws Exception
-    {
-        for (int i = 0; i < 4096; i++)
-        {
+    public void onSecureMsgReceivedDifferentSizes() throws Exception {
+        for (int i = 0; i < 4096; i++) {
             // Create and encode a message
             final ByteBuffer msg = this.createMsg(i);
             // Create the byte buffer that will contain the encoded msg
@@ -113,8 +108,7 @@ public class SecureTopicSubscriberTest
     }
 
     @Test
-    public void onSecureMsgWrongEncryption()
-    {
+    public void onSecureMsgWrongEncryption() {
         // Create a message without encoding
         final ByteBuffer msg = this.createMsg(32);
         listener.lastRcvMsg = null;
@@ -125,8 +119,7 @@ public class SecureTopicSubscriberTest
         Assert.assertNull(listener.lastRcvMsg);
     }
 
-    private void simulateRcvMsg(AESCrypto aesCrypto, ByteBuffer encodedMsg)
-    {
+    private void simulateRcvMsg(AESCrypto aesCrypto, ByteBuffer encodedMsg) {
         final UnsafeBuffer unsafeBuffer = new UnsafeBuffer(encodedMsg, 0, encodedMsg.limit());
         final RcvMessage rcvMessage = new RcvMessage();
         rcvMessage.setUnsafeBufferContent(unsafeBuffer);
@@ -136,8 +129,7 @@ public class SecureTopicSubscriberTest
         topicSubscriber.onSecureMsgReceived(rcvMessage, aesCrypto);
     }
 
-    private ByteBuffer createMsg(final int size)
-    {
+    private ByteBuffer createMsg(final int size) {
         // Create and encode a message
         final byte[] msg = new byte[size];
         rnd.nextBytes(msg);
@@ -149,8 +141,7 @@ public class SecureTopicSubscriberTest
         return byteBufferMsg;
     }
 
-    private ByteBuffer encodeMsg(final ByteBuffer msg, final AESCrypto aesCrypto) throws VegaException
-    {
+    private ByteBuffer encodeMsg(final ByteBuffer msg, final AESCrypto aesCrypto) throws VegaException {
         final ByteBuffer encodedMsg = ByteBuffer.allocate(aesCrypto.expectedEncryptedSize(msg));
         aesCrypto.encode(msg, encodedMsg);
         encodedMsg.flip();
@@ -158,19 +149,16 @@ public class SecureTopicSubscriberTest
         return encodedMsg;
     }
 
-    private class Listener implements ITopicSubListener
-    {
+    private class Listener implements ITopicSubListener {
         private IRcvMessage lastRcvMsg;
 
         @Override
-        public void onMessageReceived(IRcvMessage receivedMessage)
-        {
+        public void onMessageReceived(IRcvMessage receivedMessage) {
             this.lastRcvMsg = receivedMessage;
         }
 
         @Override
-        public void onRequestReceived(IRcvRequest receivedRequest)
-        {
+        public void onRequestReceived(IRcvRequest receivedRequest) {
         }
     }
 }

@@ -8,11 +8,9 @@ import org.junit.Test;
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class AeronPublisherParamsTest
-{
+public class AeronPublisherParamsTest {
     @Test
-    public void testMethods()
-    {
+    public void testMethods() {
         final AeronPublisherParams params1 = new AeronPublisherParams(TransportMediaType.UNICAST, 5678, 34, 12, new SubnetAddress("192.168.1.1/24"));
         final AeronPublisherParams params2 = new AeronPublisherParams(TransportMediaType.UNICAST, 5678, 34, 12, new SubnetAddress("192.168.1.2/24"));
         final AeronPublisherParams params3 = new AeronPublisherParams(TransportMediaType.UNICAST, 5678, 34, 12, new SubnetAddress("192.168.1.1/24"));

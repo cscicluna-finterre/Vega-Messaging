@@ -7,9 +7,9 @@ import com.bbva.kyof.vega.config.general.AutoDiscoType;
 import com.bbva.kyof.vega.config.general.AutoDiscoveryConfig;
 import com.bbva.kyof.vega.msg.BaseHeader;
 import com.bbva.kyof.vega.msg.MsgType;
-import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import com.bbva.kyof.vega.serialization.IUnsafeSerializable;
 import com.bbva.kyof.vega.serialization.UnsafeBufferSerializer;
+import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import io.aeron.Aeron;
 import io.aeron.Publication;
 import io.aeron.Subscription;
@@ -23,8 +23,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 04/08/16.
  */
-public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListener
-{
+public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListener {
     private final ByteBuffer sendBuffer = ByteBuffer.allocate(1024);
     private final UnsafeBufferSerializer sendBufferSerializer = new UnsafeBufferSerializer();
 
@@ -38,8 +37,7 @@ public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListene
     private static final GlobalEventListener GLOBAL_EVENT_LISTENER = new GlobalEventListener();
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         final Aeron.Context ctx = new Aeron.Context();
@@ -66,8 +64,7 @@ public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListene
     }
 
     @AfterClass
-    public static void afterClass()
-    {
+    public static void afterClass() {
         PUBLICATION.close();
         RECEIVER.close();
         AERON.close();
@@ -75,18 +72,16 @@ public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListene
     }
 
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
 
     }
 
     @Test
-    public void testWrongReceptions() throws Exception
-    {
-        final AutoDiscInstanceInfo instanceInfo = new AutoDiscInstanceInfo("instance1", UUID.randomUUID(), 12, 23, 55,TestConstants.EMPTY_HOSTNAME, 12, 23, 56,TestConstants.EMPTY_HOSTNAME);
+    public void testWrongReceptions() throws Exception {
+        final AutoDiscInstanceInfo instanceInfo = new AutoDiscInstanceInfo("instance1", UUID.randomUUID(), 12, 23, 55, TestConstants.EMPTY_HOSTNAME, 12, 23, 56, TestConstants.EMPTY_HOSTNAME);
 
         // Wrong message type
-        this.sendMessage((byte)128, instanceInfo);
+        this.sendMessage((byte) 128, instanceInfo);
 
         // Wait a bit and force message reception
         Thread.sleep(100);
@@ -94,15 +89,14 @@ public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListene
 
         // Try now with wrong version
         // Wrong message type
-        this.sendMessage((byte)128, instanceInfo, true);
+        this.sendMessage((byte) 128, instanceInfo, true);
         Thread.sleep(100);
         this.callReceiverLifeCycle();
     }
 
     @Test
-    public void testInstanceSubscriptionUnsubscription() throws Exception
-    {
-        final AutoDiscInstanceInfo instanceInfo = new AutoDiscInstanceInfo("instance1", UUID.randomUUID(), 12, 23, 55, TestConstants.EMPTY_HOSTNAME, 12, 23, 56,TestConstants.EMPTY_HOSTNAME);
+    public void testInstanceSubscriptionUnsubscription() throws Exception {
+        final AutoDiscInstanceInfo instanceInfo = new AutoDiscInstanceInfo("instance1", UUID.randomUUID(), 12, 23, 55, TestConstants.EMPTY_HOSTNAME, 12, 23, 56, TestConstants.EMPTY_HOSTNAME);
         final AutoDiscInstanceListener listener = new AutoDiscInstanceListener();
 
         Assert.assertTrue(RECEIVER.subscribeToInstances(listener));
@@ -168,8 +162,7 @@ public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListene
     }
 
     @Test
-    public void testTopicSubscriptionUnsubscription() throws Exception
-    {
+    public void testTopicSubscriptionUnsubscription() throws Exception {
         final AutoDiscTopicInfo topicInfo = new AutoDiscTopicInfo(SENDER_INSTANCE_ID, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic");
         final AutoDiscTopicSocketInfo topicSocketInfo = new AutoDiscTopicSocketInfo(SENDER_INSTANCE_ID, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 4, TestConstants.EMPTY_HOSTNAME);
         final AutoDiscTopicListener listener = new AutoDiscTopicListener();
@@ -263,8 +256,7 @@ public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListene
     }
 
     @Test
-    public void patternSubscriptionUnsubscription() throws Exception
-    {
+    public void patternSubscriptionUnsubscription() throws Exception {
         final AutoDiscTopicInfo topicInfo = new AutoDiscTopicInfo(SENDER_INSTANCE_ID, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic");
         final AutoDiscTopicInfo topicInfo2 = new AutoDiscTopicInfo(SENDER_INSTANCE_ID, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic2");
         final AutoDiscTopicInfo topicInfo3 = new AutoDiscTopicInfo(SENDER_INSTANCE_ID, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "atopic3");
@@ -333,19 +325,16 @@ public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListene
         Assert.assertEquals(listener.topicAdded, topicInfo.getTopicName());
     }
 
-    private void callReceiverLifeCycle()
-    {
+    private void callReceiverLifeCycle() {
         RECEIVER.pollNextMessage();
         RECEIVER.checkNextTimeout();
     }
 
-    private void sendMessage(final byte msgType, final IUnsafeSerializable serializable)
-    {
+    private void sendMessage(final byte msgType, final IUnsafeSerializable serializable) {
         this.sendMessage(msgType, serializable, false);
     }
 
-    private void sendMessage(final byte msgType, final IUnsafeSerializable serializable, boolean wrongVersion)
-    {
+    private void sendMessage(final byte msgType, final IUnsafeSerializable serializable, boolean wrongVersion) {
         // Prepare the send buffer
         this.sendBuffer.clear();
         this.sendBufferSerializer.wrap(this.sendBuffer);
@@ -353,12 +342,9 @@ public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListene
         // Set msg type and write the base header
         BaseHeader baseHeader;
 
-        if (wrongVersion)
-        {
-            baseHeader = new BaseHeader(msgType, Version.toIntegerRepresentation((byte)55, (byte)3, (byte)1));
-        }
-        else
-        {
+        if (wrongVersion) {
+            baseHeader = new BaseHeader(msgType, Version.toIntegerRepresentation((byte) 55, (byte) 3, (byte) 1));
+        } else {
             baseHeader = new BaseHeader(msgType, Version.LOCAL_VERSION);
         }
 
@@ -373,98 +359,82 @@ public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListene
     }
 
     @Override
-    public void onNewInstanceInfo(AutoDiscInstanceInfo info)
-    {
+    public void onNewInstanceInfo(AutoDiscInstanceInfo info) {
         // We will test this in the
     }
 
     @Override
-    public void onNewTopicInfo(AutoDiscTopicInfo info)
-    {
+    public void onNewTopicInfo(AutoDiscTopicInfo info) {
 
     }
 
-    static class GlobalEventListener implements IAutodiscGlobalEventListener
-    {
+    static class GlobalEventListener implements IAutodiscGlobalEventListener {
         AutoDiscInstanceInfo receivedInstanceInfo;
         AutoDiscTopicInfo receivedTopicInfo;
 
         @Override
-        public void onNewInstanceInfo(AutoDiscInstanceInfo info)
-        {
+        public void onNewInstanceInfo(AutoDiscInstanceInfo info) {
             this.receivedInstanceInfo = info;
         }
 
         @Override
-        public void onNewTopicInfo(AutoDiscTopicInfo info)
-        {
+        public void onNewTopicInfo(AutoDiscTopicInfo info) {
             this.receivedTopicInfo = info;
         }
 
-        public void reset()
-        {
+        public void reset() {
             receivedInstanceInfo = null;
             receivedTopicInfo = null;
         }
     }
 
-    static class AutoDiscPatternListener implements IAutodiscPubTopicPatternListener
-    {
+    static class AutoDiscPatternListener implements IAutodiscPubTopicPatternListener {
         String topicAdded;
         String topicRemoved;
 
-        public void reset()
-        {
+        public void reset() {
             topicAdded = null;
             topicRemoved = null;
         }
 
         @Override
-        public void onNewPubTopicForPattern(AutoDiscTopicInfo topicInfo, String topicPattern)
-        {
+        public void onNewPubTopicForPattern(AutoDiscTopicInfo topicInfo, String topicPattern) {
             topicAdded = topicInfo.getTopicName();
         }
 
         @Override
-        public void onPubTopicForPatternRemoved(AutoDiscTopicInfo topicInfo, String topicPattern)
-        {
+        public void onPubTopicForPatternRemoved(AutoDiscTopicInfo topicInfo, String topicPattern) {
             topicRemoved = topicInfo.getTopicName();
         }
     }
 
-    static class AutoDiscInstanceListener implements IAutodiscInstanceListener
-    {
+    static class AutoDiscInstanceListener implements IAutodiscInstanceListener {
         AutoDiscInstanceInfo receivedInstanceMsg;
         AutoDiscInstanceInfo timedOutInstanceMsg;
 
         @Override
-        public void onNewAutoDiscInstanceInfo(AutoDiscInstanceInfo info)
-        {
+        public void onNewAutoDiscInstanceInfo(AutoDiscInstanceInfo info) {
             receivedInstanceMsg = info;
         }
 
         @Override
-        public void onTimedOutAutoDiscInstanceInfo(AutoDiscInstanceInfo info)
-        {
+        public void onTimedOutAutoDiscInstanceInfo(AutoDiscInstanceInfo info) {
             timedOutInstanceMsg = info;
         }
 
-        public void reset()
-        {
+        public void reset() {
             receivedInstanceMsg = null;
             timedOutInstanceMsg = null;
         }
     }
 
-    static class AutoDiscTopicListener implements IAutodiscTopicSubListener
-    {
+    static class AutoDiscTopicListener implements IAutodiscTopicSubListener {
         AutoDiscTopicInfo receivedTopicMsg;
         AutoDiscTopicInfo timedTopicMsg;
         AutoDiscTopicSocketInfo receivedTopicSocketMsg;
         AutoDiscTopicSocketInfo timedTopicSocketMsg;
 
-        public void reset()
-        {
+        public void reset() {
             receivedTopicMsg = null;
             timedTopicMsg = null;
             receivedTopicSocketMsg = null;
@@ -472,51 +442,42 @@ public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListene
         }
 
         @Override
-        public void onNewAutoDiscTopicInfo(AutoDiscTopicInfo info)
-        {
+        public void onNewAutoDiscTopicInfo(AutoDiscTopicInfo info) {
             this.receivedTopicMsg = info;
         }
 
         @Override
-        public void onTimedOutAutoDiscTopicInfo(AutoDiscTopicInfo info)
-        {
+        public void onTimedOutAutoDiscTopicInfo(AutoDiscTopicInfo info) {
             this.timedTopicMsg = info;
         }
 
         @Override
-        public void onNewAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info)
-        {
+        public void onNewAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info) {
             this.receivedTopicSocketMsg = info;
         }
 
         @Override
-        public void onTimedOutAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info)
-        {
+        public void onTimedOutAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info) {
             this.timedTopicSocketMsg = info;
         }
     }
 
-    static class AutoDiscReceiverImpl extends AbstractAutodiscReceiver
-    {
-        AutoDiscReceiverImpl(UUID instanceId, Aeron aeron, AutoDiscoveryConfig config, IAutodiscGlobalEventListener globalListener)
-        {
+    static class AutoDiscReceiverImpl extends AbstractAutodiscReceiver {
+        AutoDiscReceiverImpl(UUID instanceId, Aeron aeron, AutoDiscoveryConfig config, IAutodiscGlobalEventListener globalListener) {
             super(instanceId, aeron, config, globalListener);
         }
 
         @Override
-        public Subscription createSubscription(UUID instanceId, Aeron aeron, AutoDiscoveryConfig config)
-        {
+        public Subscription createSubscription(UUID instanceId, Aeron aeron, AutoDiscoveryConfig config) {
             final String ipcChannel = AeronChannelHelper.createIpcChannelString();
             return aeron.addSubscription(ipcChannel, STREAM_ID);
         }
 
-        protected boolean processAutoDiscDaemonServerInfoMsg(AutoDiscDaemonServerInfo autoDiscDaemonServerInfo)
-        {
+        protected boolean processAutoDiscDaemonServerInfoMsg(AutoDiscDaemonServerInfo autoDiscDaemonServerInfo) {
             return false;
         }
 
-        protected int checkAutoDiscDaemonServerInfoTimeouts()
-        {
+        protected int checkAutoDiscDaemonServerInfoTimeouts() {
             return 0;
         }
     }

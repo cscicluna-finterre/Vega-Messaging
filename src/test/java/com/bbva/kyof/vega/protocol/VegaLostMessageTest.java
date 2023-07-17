@@ -7,9 +7,6 @@ import com.bbva.kyof.vega.protocol.common.VegaInstanceParams;
 import com.bbva.kyof.vega.protocol.publisher.ITopicPublisher;
 import com.bbva.kyof.vega.protocol.subscriber.ITopicSubListener;
 import com.bbva.kyof.vega.util.net.AeronChannelHelper;
-
-import java.lang.reflect.Field;
-
 import lombok.Getter;
 import org.agrona.concurrent.UnsafeBuffer;
 import org.junit.AfterClass;
@@ -17,6 +14,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -24,8 +22,7 @@ import java.util.*;
  * Test for loss messages
  * Created by cnebrera on 31/06/2018.
  */
-public class VegaLostMessageTest
-{
+public class VegaLostMessageTest {
     private static final String CONFIG_FILE = Objects.requireNonNull(ConfigReaderTest.class.getClassLoader().getResource("config/lossTest.xml")).getPath();
 
     private UnsafeBuffer sendBuffer = new UnsafeBuffer(ByteBuffer.allocate(128));
@@ -33,14 +30,13 @@ public class VegaLostMessageTest
     private static final int NUM_MESSAGES = 1000;
 
     @BeforeClass
-    public static void beforeClass() throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
-    {
+    public static void beforeClass() throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         // Add system properties to simulate lost
         System.setProperty("aeron.SendChannelEndpoint.supplier", "io.aeron.driver.ext.DebugSendChannelEndpointSupplier");
         System.setProperty("aeron.ReceiveChannelEndpoint.supplier", "io.aeron.driver.ext.DebugReceiveChannelEndpointSupplier");
         System.setProperty("aeron.debug.receive.data.loss.rate", "0.80");
         System.setProperty("aeron.debug.receive.data.loss.seed", "-1");
-        
+
         // Remove reliability on the channels
         Field reliable = AeronChannelHelper.class.getDeclaredField("reliable");
         reliable.setAccessible(true);
@@ -48,8 +44,7 @@ public class VegaLostMessageTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         // Remove system properties
         final Properties properties = System.getProperties();
         properties.remove("aeron.SendChannelEndpoint.supplier");
@@ -64,15 +59,13 @@ public class VegaLostMessageTest
     }
 
     @Test
-    public void testMessageLost() throws Exception
-    {
+    public void testMessageLost() throws Exception {
         final VegaInstanceParams params1 = VegaInstanceParams.builder().
                 instanceName("Instance1").
                 configurationFile(CONFIG_FILE).build();
 
         // Create 2 application instances, use auto-closeable just in case
-        try(final IVegaInstance vegaInstance = VegaInstance.createNewInstance(params1))
-        {
+        try (final IVegaInstance vegaInstance = VegaInstance.createNewInstance(params1)) {
             // Create a receiver listener for normal subscriptions and a separate one for wildcard
             final ReceiverListener receiverListener = new ReceiverListener();
             final ReceiverListener wildCardReceiverListener = new ReceiverListener();
@@ -98,8 +91,7 @@ public class VegaLostMessageTest
             Thread.sleep(5000);
 
             // Send messages
-            for(int i = 0; i < NUM_MESSAGES; i++)
-            {
+            for (int i = 0; i < NUM_MESSAGES; i++) {
                 this.sendMessage(utopicPub);
                 this.sendRequest(utopicPub, receiverListener);
                 this.sendMessage(mtopicPub);
@@ -113,8 +105,7 @@ public class VegaLostMessageTest
         }
     }
 
-    private void sendMessage(final ITopicPublisher publisher)
-    {
+    private void sendMessage(final ITopicPublisher publisher) {
         // Write the message in the buffer
         sendBuffer.putInt(0, 33);
 
@@ -122,8 +113,7 @@ public class VegaLostMessageTest
         publisher.sendMsg(sendBuffer, 0, 4);
     }
 
-    private void sendRequest(final ITopicPublisher publisher, final ReceiverListener listener)
-    {
+    private void sendRequest(final ITopicPublisher publisher, final ReceiverListener listener) {
         // Write the message in the buffer
         sendBuffer.putInt(0, 33);
 
@@ -131,53 +121,45 @@ public class VegaLostMessageTest
         publisher.sendRequest(sendBuffer, 0, 4, 10, listener);
     }
 
-    class ReceiverListener implements ITopicSubListener, IResponseListener
-    {
+    class ReceiverListener implements ITopicSubListener, IResponseListener {
         private Map<UUID, TopicReceiver> receiversByTopicId = new HashMap<>();
 
-        void addTopicPublisher(final UUID topicPubId)
-        {
+        void addTopicPublisher(final UUID topicPubId) {
             receiversByTopicId.put(topicPubId, new TopicReceiver());
         }
 
         @Override
-        public void onMessageReceived(final IRcvMessage receivedMessage)
-        {
-            final RcvMessage msg = (RcvMessage)receivedMessage;
+        public void onMessageReceived(final IRcvMessage receivedMessage) {
+            final RcvMessage msg = (RcvMessage) receivedMessage;
             this.receiversByTopicId.get(msg.getTopicPublisherId()).processReceivedMessage(msg.getSequenceNumber());
         }
 
         @Override
-        public void onRequestReceived(final IRcvRequest receivedRequest)
-        {
-            final RcvRequest msg = (RcvRequest)receivedRequest;
+        public void onRequestReceived(final IRcvRequest receivedRequest) {
+            final RcvRequest msg = (RcvRequest) receivedRequest;
             this.receiversByTopicId.get(msg.getTopicPublisherId()).processReceivedMessage(msg.getSequenceNumber());
         }
 
         @Override
-        public void onMessageLost(final IMsgLostReport lostReport)
-        {
+        public void onMessageLost(final IMsgLostReport lostReport) {
             // Update loss info number
             this.receiversByTopicId.get(lostReport.getTopicPublisherId()).processLossMessage(lostReport.getNumberLostMessages());
         }
 
         @Override
-        public void onRequestTimeout(ISentRequest originalSentRequest)
-        {
+        public void onRequestTimeout(ISentRequest originalSentRequest) {
         }
 
         @Override
-        public void onResponseReceived(ISentRequest originalSentRequest, IRcvResponse response)
-        {
+        public void onResponseReceived(ISentRequest originalSentRequest, IRcvResponse response) {
         }
 
-        /** True if all the topic contains loss messages */
-        boolean lostMessagesInAllTopics()
-        {
-            for(final TopicReceiver topicReceiver : this.receiversByTopicId.values())
-            {
-                if (topicReceiver.messagesLost == 0)
-                {
+        /**
+         * True if all the topic contains loss messages
+         */
+        boolean lostMessagesInAllTopics() {
+            for (final TopicReceiver topicReceiver : this.receiversByTopicId.values()) {
+                if (topicReceiver.messagesLost == 0) {
                     return false;
                 }
             }
@@ -186,19 +168,19 @@ public class VegaLostMessageTest
         }
     }
 
-    class TopicReceiver
-    {
-        @Getter private int messagesLost = 0;
-        @Getter private int messagesRcv = 0;
-        @Getter private long nextExpectedSeq = 1;
+    class TopicReceiver {
+        @Getter
+        private int messagesLost = 0;
+        @Getter
+        private int messagesRcv = 0;
+        @Getter
+        private long nextExpectedSeq = 1;
         private boolean firstMessage = true;
 
-        void processReceivedMessage(long rcvSequence)
-        {
+        void processReceivedMessage(long rcvSequence) {
             this.messagesRcv++;
 
-            if (this.firstMessage)
-            {
+            if (this.firstMessage) {
                 this.nextExpectedSeq = rcvSequence;
                 this.firstMessage = false;
             }
@@ -208,8 +190,7 @@ public class VegaLostMessageTest
             this.nextExpectedSeq = rcvSequence + 1;
         }
 
-        void processLossMessage(final long numberOfLossMessages)
-        {
+        void processLossMessage(final long numberOfLossMessages) {
             // Update loss info number
             this.messagesLost += numberOfLossMessages;
 

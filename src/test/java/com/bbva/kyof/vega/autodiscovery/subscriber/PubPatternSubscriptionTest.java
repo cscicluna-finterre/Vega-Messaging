@@ -10,11 +10,9 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 04/08/16.
  */
-public class PubPatternSubscriptionTest
-{
+public class PubPatternSubscriptionTest {
     @Test
-    public void testMatchEqualsHashCode()
-    {
+    public void testMatchEqualsHashCode() {
         final ListenerImpl listener1 = new ListenerImpl();
         final ListenerImpl listener2 = new ListenerImpl();
         final PubPatternSubscription subscription1 = new PubPatternSubscription("a.*", listener1);
@@ -37,8 +35,7 @@ public class PubPatternSubscriptionTest
     }
 
     @Test
-    public void testAdverts()
-    {
+    public void testAdverts() {
         final UUID instanceId = UUID.randomUUID();
         final ListenerImpl listener = new ListenerImpl();
         final AutoDiscTopicInfo topicInfo1 = new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "ab");
@@ -89,20 +86,17 @@ public class PubPatternSubscriptionTest
         Assert.assertTrue(listener.removedNotifications == 2);
     }
 
-    public class ListenerImpl implements IAutodiscPubTopicPatternListener
-    {
+    public class ListenerImpl implements IAutodiscPubTopicPatternListener {
         int addedNotifications = 0;
         int removedNotifications = 0;
 
         @Override
-        public void onNewPubTopicForPattern(AutoDiscTopicInfo topicInfo, String topicPattern)
-        {
+        public void onNewPubTopicForPattern(AutoDiscTopicInfo topicInfo, String topicPattern) {
             addedNotifications++;
         }
 
         @Override
-        public void onPubTopicForPatternRemoved(AutoDiscTopicInfo topicInfo, String topicPattern)
-        {
+        public void onPubTopicForPatternRemoved(AutoDiscTopicInfo topicInfo, String topicPattern) {
             removedNotifications++;
         }
     }

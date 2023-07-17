@@ -9,17 +9,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class created to test {@link HashMapOfHashSet}
- *
+ * <p>
  * Created by XE52727 on 12/07/2016.
  */
-public class HashMapOfHashSetTest
-{
-    /** Instance of collection */
+public class HashMapOfHashSetTest {
+    /**
+     * Instance of collection
+     */
     private HashMapOfHashSet<Integer, String> hashMapOfHashSet = new HashMapOfHashSet<>();
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
         this.hashMapOfHashSet.put(1, "1");
         this.hashMapOfHashSet.put(1, "2");
         this.hashMapOfHashSet.put(2, "3");
@@ -27,15 +27,13 @@ public class HashMapOfHashSetTest
     }
 
     @After
-    public void tearDown()
-    {
+    public void tearDown() {
         // Clear instance
         this.hashMapOfHashSet.clear();
     }
 
     @Test
-    public void testPutGetContains()
-    {
+    public void testPutGetContains() {
         // Check the keys
         Assert.assertTrue(this.hashMapOfHashSet.containsKey(1));
         Assert.assertTrue(this.hashMapOfHashSet.containsKey(2));
@@ -53,8 +51,7 @@ public class HashMapOfHashSetTest
     }
 
     @Test
-    public void testRemovals()
-    {
+    public void testRemovals() {
         // Remove one element from the set for key 1
         Assert.assertTrue(this.hashMapOfHashSet.remove(1, "1"));
         Assert.assertTrue(this.hashMapOfHashSet.containsValue(1, "2"));
@@ -86,8 +83,7 @@ public class HashMapOfHashSetTest
     }
 
     @Test
-    public void testClearList()
-    {
+    public void testClearList() {
         // Clear all the internal information
         this.hashMapOfHashSet.clear();
 
@@ -97,8 +93,7 @@ public class HashMapOfHashSetTest
     }
 
     @Test
-    public void testConsumeIfKeyEquals()
-    {
+    public void testConsumeIfKeyEquals() {
         AtomicInteger sum = new AtomicInteger(0);
         this.hashMapOfHashSet.consumeIfKeyEquals(1, (value) -> sum.addAndGet(Integer.valueOf(value)));
         Assert.assertEquals(sum.get(), 3);
@@ -109,8 +104,7 @@ public class HashMapOfHashSetTest
     }
 
     @Test
-    public void testRemoveAndConsumeIfKeyEquals()
-    {
+    public void testRemoveAndConsumeIfKeyEquals() {
         AtomicInteger sum = new AtomicInteger(0);
         this.hashMapOfHashSet.removeAndConsumeIfKeyEquals(1, (value) -> sum.addAndGet(Integer.valueOf(value)));
         Assert.assertEquals(sum.get(), 3);
@@ -132,16 +126,14 @@ public class HashMapOfHashSetTest
     }
 
     @Test
-    public void testConsumeIfKeyMatchFilter()
-    {
+    public void testConsumeIfKeyMatchFilter() {
         AtomicInteger sum = new AtomicInteger(0);
         this.hashMapOfHashSet.consumeIfKeyMatchFilter((key) -> key % 2 == 0, (value) -> sum.addAndGet(Integer.valueOf(value)));
         Assert.assertEquals(sum.get(), 7);
     }
 
     @Test
-    public void anyValueForKeyMatchFilter()
-    {
+    public void anyValueForKeyMatchFilter() {
         Assert.assertTrue(this.hashMapOfHashSet.anyValueForKeyMatchFilter(1, (value) -> value.equals("1")));
         Assert.assertTrue(this.hashMapOfHashSet.anyValueForKeyMatchFilter(1, (value) -> value.equals("1")));
         Assert.assertTrue(this.hashMapOfHashSet.anyValueForKeyMatchFilter(1, (value) -> value.equals("2")));

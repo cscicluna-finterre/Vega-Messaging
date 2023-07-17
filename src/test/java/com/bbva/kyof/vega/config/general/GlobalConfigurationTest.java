@@ -16,38 +16,32 @@ import java.util.LinkedList;
  * Class to test {@link GlobalConfiguration}
  * Created by XE52727 on 22/06/16.
  */
-public class GlobalConfigurationTest
-{
+public class GlobalConfigurationTest {
     // Configuration
     private static final String EXTERNAL_DRIVER_DIR = CommandLineParserTest.class.getClassLoader().getResource("externalDriverDir").getPath();
 
     @Test
-    public void emptyConstructor() throws VegaException
-    {
+    public void emptyConstructor() throws VegaException {
         new GlobalConfiguration();
     }
 
     @Test(expected = VegaException.class)
-    public void missingDriverType() throws VegaException
-    {
+    public void missingDriverType() throws VegaException {
         new GlobalConfiguration().completeAndValidateConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void nullRvcPollerConfig() throws VegaException
-    {
+    public void nullRvcPollerConfig() throws VegaException {
         GlobalConfiguration.builder().driverType(AeronDriverType.EMBEDDED).build().completeAndValidateConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void emptyRvcPollerConfig() throws VegaException
-    {
+    public void emptyRvcPollerConfig() throws VegaException {
         GlobalConfiguration.builder().driverType(AeronDriverType.EMBEDDED).rcvPollerConfig(new LinkedList<>()).build().completeAndValidateConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void invalidRvcPollerConfig() throws VegaException
-    {
+    public void invalidRvcPollerConfig() throws VegaException {
         GlobalConfiguration.builder().
                 driverType(AeronDriverType.EMBEDDED).
                 rcvPollerConfig(Collections.singletonList(new RcvPollerConfig())).
@@ -56,8 +50,7 @@ public class GlobalConfigurationTest
     }
 
     @Test(expected = VegaException.class)
-    public void duplicatedRvcPollerConfig() throws VegaException
-    {
+    public void duplicatedRvcPollerConfig() throws VegaException {
         final RcvPollerConfig pollerConfig = this.createValidRcvPollerConfig("poller1");
         final RcvPollerConfig pollerConfig2 = this.createValidRcvPollerConfig("poller1");
 
@@ -70,16 +63,14 @@ public class GlobalConfigurationTest
     }
 
     @Test(expected = VegaException.class)
-    public void emptyAutoDiscConfig() throws VegaException
-    {
+    public void emptyAutoDiscConfig() throws VegaException {
         final GlobalConfiguration.GlobalConfigurationBuilder builder = GlobalConfiguration.builder().driverType(AeronDriverType.EMBEDDED);
         this.addRcvPollerConfig(builder);
         builder.build().completeAndValidateConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void emptyResponsesConfig() throws VegaException
-    {
+    public void emptyResponsesConfig() throws VegaException {
         final GlobalConfiguration.GlobalConfigurationBuilder builder = GlobalConfiguration.builder().driverType(AeronDriverType.EMBEDDED);
         this.addRcvPollerConfig(builder);
         this.addAutoDiscConfig(builder);
@@ -87,8 +78,7 @@ public class GlobalConfigurationTest
     }
 
     @Test(expected = VegaException.class)
-    public void invalidPollerResponsesConfig() throws VegaException
-    {
+    public void invalidPollerResponsesConfig() throws VegaException {
         final GlobalConfiguration.GlobalConfigurationBuilder builder = GlobalConfiguration.builder().driverType(AeronDriverType.EMBEDDED);
         this.addRcvPollerConfig(builder);
         this.addAutoDiscConfig(builder);
@@ -97,8 +87,7 @@ public class GlobalConfigurationTest
     }
 
     @Test(expected = VegaException.class)
-    public void nullTopicTemplateConfig() throws VegaException
-    {
+    public void nullTopicTemplateConfig() throws VegaException {
         final GlobalConfiguration.GlobalConfigurationBuilder builder = GlobalConfiguration.builder().driverType(AeronDriverType.EMBEDDED);
         this.addRcvPollerConfig(builder);
         this.addAutoDiscConfig(builder);
@@ -107,8 +96,7 @@ public class GlobalConfigurationTest
     }
 
     @Test(expected = VegaException.class)
-    public void emptyTopicTemplateConfig() throws VegaException
-    {
+    public void emptyTopicTemplateConfig() throws VegaException {
         final GlobalConfiguration.GlobalConfigurationBuilder builder = GlobalConfiguration.builder().driverType(AeronDriverType.EMBEDDED);
         this.addRcvPollerConfig(builder);
         this.addAutoDiscConfig(builder);
@@ -118,8 +106,7 @@ public class GlobalConfigurationTest
     }
 
     @Test(expected = VegaException.class)
-    public void duplicatedTopicTemplateConfig() throws VegaException
-    {
+    public void duplicatedTopicTemplateConfig() throws VegaException {
         final GlobalConfiguration.GlobalConfigurationBuilder builder = GlobalConfiguration.builder().driverType(AeronDriverType.EMBEDDED);
         this.addRcvPollerConfig(builder);
         this.addAutoDiscConfig(builder);
@@ -129,8 +116,7 @@ public class GlobalConfigurationTest
     }
 
     @Test(expected = VegaException.class)
-    public void nullTopicConfig() throws VegaException
-    {
+    public void nullTopicConfig() throws VegaException {
         final GlobalConfiguration.GlobalConfigurationBuilder builder = GlobalConfiguration.builder().driverType(AeronDriverType.EMBEDDED);
         this.addRcvPollerConfig(builder);
         this.addAutoDiscConfig(builder);
@@ -140,8 +126,7 @@ public class GlobalConfigurationTest
     }
 
     @Test(expected = VegaException.class)
-    public void emptyTopicConfig() throws VegaException
-    {
+    public void emptyTopicConfig() throws VegaException {
         final GlobalConfiguration.GlobalConfigurationBuilder builder = GlobalConfiguration.builder().driverType(AeronDriverType.EMBEDDED);
         this.addRcvPollerConfig(builder);
         this.addAutoDiscConfig(builder);
@@ -152,8 +137,7 @@ public class GlobalConfigurationTest
     }
 
     @Test(expected = VegaException.class)
-    public void invalidTopicConfig() throws VegaException
-    {
+    public void invalidTopicConfig() throws VegaException {
         final GlobalConfiguration.GlobalConfigurationBuilder builder = GlobalConfiguration.builder().driverType(AeronDriverType.EMBEDDED);
         this.addRcvPollerConfig(builder);
         this.addAutoDiscConfig(builder);
@@ -164,8 +148,7 @@ public class GlobalConfigurationTest
     }
 
     @Test(expected = VegaException.class)
-    public void duplicatedTopicConfig() throws VegaException
-    {
+    public void duplicatedTopicConfig() throws VegaException {
         final GlobalConfiguration.GlobalConfigurationBuilder builder = GlobalConfiguration.builder().driverType(AeronDriverType.EMBEDDED);
         this.addRcvPollerConfig(builder);
         this.addAutoDiscConfig(builder);
@@ -180,8 +163,7 @@ public class GlobalConfigurationTest
     }
 
     @Test(expected = VegaException.class)
-    public void invalidTopicSecurityConfig() throws VegaException
-    {
+    public void invalidTopicSecurityConfig() throws VegaException {
         final GlobalConfiguration.GlobalConfigurationBuilder builder = GlobalConfiguration.builder().driverType(AeronDriverType.EMBEDDED);
         this.addRcvPollerConfig(builder);
         this.addAutoDiscConfig(builder);
@@ -194,8 +176,7 @@ public class GlobalConfigurationTest
     }
 
     @Test(expected = VegaException.class)
-    public void duplicatedTopicSecurityConfig() throws VegaException
-    {
+    public void duplicatedTopicSecurityConfig() throws VegaException {
         final GlobalConfiguration.GlobalConfigurationBuilder builder = GlobalConfiguration.builder().driverType(AeronDriverType.EMBEDDED);
         this.addRcvPollerConfig(builder);
         this.addAutoDiscConfig(builder);
@@ -215,8 +196,7 @@ public class GlobalConfigurationTest
     }
 
     @Test(expected = VegaException.class)
-    public void duplicatedTopicSecurityTemplateConfig() throws VegaException
-    {
+    public void duplicatedTopicSecurityTemplateConfig() throws VegaException {
         final GlobalConfiguration.GlobalConfigurationBuilder builder = GlobalConfiguration.builder().driverType(AeronDriverType.EMBEDDED);
         this.addRcvPollerConfig(builder);
         this.addAutoDiscConfig(builder);
@@ -233,8 +213,7 @@ public class GlobalConfigurationTest
     }
 
     @Test
-    public void validConfig() throws VegaException
-    {
+    public void validConfig() throws VegaException {
         final GlobalConfiguration.GlobalConfigurationBuilder builder = GlobalConfiguration.builder().driverType(AeronDriverType.EXTERNAL);
         builder.externalDriverDir(EXTERNAL_DRIVER_DIR);
         this.addRcvPollerConfig(builder);
@@ -282,8 +261,7 @@ public class GlobalConfigurationTest
     }
 
     @Test
-    public void validConfigNoTopicSec() throws VegaException
-    {
+    public void validConfigNoTopicSec() throws VegaException {
         final GlobalConfiguration.GlobalConfigurationBuilder builder = GlobalConfiguration.builder().driverType(AeronDriverType.EXTERNAL);
         builder.externalDriverDir(EXTERNAL_DRIVER_DIR);
         this.addRcvPollerConfig(builder);
@@ -301,60 +279,49 @@ public class GlobalConfigurationTest
         Assert.assertNull(configuration.getTopicSecurityTemplateForTopic("secure"));
     }
 
-    private RcvPollerConfig createValidRcvPollerConfig(final String pollerName)
-    {
+    private RcvPollerConfig createValidRcvPollerConfig(final String pollerName) {
         return RcvPollerConfig.builder().name(pollerName).idleStrategyType(IdleStrategyType.BUSY_SPIN).build();
     }
 
-    private TopicTemplateConfig createTopicTemplateConfig(final String name)
-    {
+    private TopicTemplateConfig createTopicTemplateConfig(final String name) {
         return TopicTemplateConfig.builder().name(name).rcvPoller("poller").transportType(TransportMediaType.UNICAST).build();
     }
 
-    private TopicSecurityTemplateConfig createTopicSecurityTemplateConfig(final String name)
-    {
+    private TopicSecurityTemplateConfig createTopicSecurityTemplateConfig(final String name) {
         return TopicSecurityTemplateConfig.builder().name(name).
                 pubSecIds(new HashSet<>(Collections.singletonList(11111))).
                 subSecIds(new HashSet<>(Collections.singletonList(22222))).build();
     }
 
-    private AutoDiscoveryConfig createValidAutoDiscConfig()
-    {
+    private AutoDiscoveryConfig createValidAutoDiscConfig() {
         return AutoDiscoveryConfig.builder().autoDiscoType(AutoDiscoType.MULTICAST).build();
     }
 
-    private void addRcvPollerConfig(final GlobalConfiguration.GlobalConfigurationBuilder builer)
-    {
+    private void addRcvPollerConfig(final GlobalConfiguration.GlobalConfigurationBuilder builer) {
         builer.rcvPollerConfig(Collections.singletonList(createValidRcvPollerConfig("poller")));
     }
 
-    private void addAutoDiscConfig(final GlobalConfiguration.GlobalConfigurationBuilder builer)
-    {
+    private void addAutoDiscConfig(final GlobalConfiguration.GlobalConfigurationBuilder builer) {
         builer.autodiscConfig(this.createValidAutoDiscConfig());
     }
 
-    private void addResponsesConfig(final GlobalConfiguration.GlobalConfigurationBuilder builer)
-    {
+    private void addResponsesConfig(final GlobalConfiguration.GlobalConfigurationBuilder builer) {
         builer.responsesConfig(ResponsesConfig.builder().rcvPoller("poller").build());
     }
 
-    private void addTopicTemplateConfig(final GlobalConfiguration.GlobalConfigurationBuilder builder)
-    {
+    private void addTopicTemplateConfig(final GlobalConfiguration.GlobalConfigurationBuilder builder) {
         builder.topicTemplate(Collections.singletonList(this.createTopicTemplateConfig("template")));
     }
 
-    private void addTopicConfig(final GlobalConfiguration.GlobalConfigurationBuilder builder)
-    {
+    private void addTopicConfig(final GlobalConfiguration.GlobalConfigurationBuilder builder) {
         builder.topic(Collections.singletonList(TopicConfig.builder().template("template").pattern("ab.*").build()));
     }
 
-    private void addTopicSecurityTemplateConfig(final GlobalConfiguration.GlobalConfigurationBuilder builder)
-    {
+    private void addTopicSecurityTemplateConfig(final GlobalConfiguration.GlobalConfigurationBuilder builder) {
         builder.topicSecurityTemplate(Collections.singletonList(this.createTopicSecurityTemplateConfig("secTemplate")));
     }
 
-    private void addTopicSecurityConfig(final GlobalConfiguration.GlobalConfigurationBuilder builder)
-    {
+    private void addTopicSecurityConfig(final GlobalConfiguration.GlobalConfigurationBuilder builder) {
         builder.topicSecurity(Collections.singletonList(TopicSecurityConfig.builder().template("secTemplate").pattern("sec.*").build()));
     }
 }

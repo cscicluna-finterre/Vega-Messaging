@@ -9,35 +9,30 @@ import org.junit.Test;
 /**
  * Created by cnebrera on 01/08/16.
  */
-public class ResponsesConfigTest
-{
+public class ResponsesConfigTest {
     private ResponsesConfig.ResponsesConfigBuilder emptyBuilder;
     private ResponsesConfig.ResponsesConfigBuilder minimumBuilder;
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
         this.emptyBuilder = ResponsesConfig.builder();
         this.minimumBuilder = ResponsesConfig.builder();
         this.minimumBuilder.rcvPoller("poller1");
     }
 
     @Test
-    public void empyConstructor()
-    {
+    public void empyConstructor() {
         new ResponsesConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void validateEmptyBuilder() throws Exception
-    {
+    public void validateEmptyBuilder() throws Exception {
         // Validation should fail, it is missing compulsory param poller name
         this.emptyBuilder.build().completeAndValidateConfig();
     }
 
     @Test
-    public void validateDefaultParams() throws Exception
-    {
+    public void validateDefaultParams() throws Exception {
         final ResponsesConfig config = this.minimumBuilder.build();
         config.completeAndValidateConfig();
 
@@ -50,8 +45,7 @@ public class ResponsesConfigTest
     }
 
     @Test
-    public void testAlternativeUnicastHostname() throws VegaException
-    {
+    public void testAlternativeUnicastHostname() throws VegaException {
         //by default...
         ResponsesConfig config = minimumBuilder.build();
 
@@ -65,17 +59,17 @@ public class ResponsesConfigTest
 
 
         //resolved
-        SubnetAddress subnetAddress =  ConfigUtils.getFullMaskSubnetFromStringOrDefault(null);
+        SubnetAddress subnetAddress = ConfigUtils.getFullMaskSubnetFromStringOrDefault(null);
         final String resolved = subnetAddress.getIpAddres().getHostName();
         minimumBuilder.isResolveHostname(true);
-        config =  minimumBuilder.build();
+        config = minimumBuilder.build();
         config.completeAndValidateConfig();
         Assert.assertEquals(resolved, config.getHostname());
 
         //by conf
         final String hostname = "test-autodisc-hostname";
         minimumBuilder.hostname(hostname);
-        config =  minimumBuilder.build();
+        config = minimumBuilder.build();
         Assert.assertEquals(hostname, config.getHostname());
     }
 }

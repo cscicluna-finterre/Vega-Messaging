@@ -9,24 +9,24 @@ import org.agrona.concurrent.SigIntBarrier;
 
 /**
  * Media driver  prepared to be launched in stand alone mode. <p>
- *
+ * <p>
  * Configured for low latency communications using an internal dedicated threading model and BusySpin idle strategy for internal threads
  */
 @Slf4j
-public final class StandAloneLowLatencyMediaDriver
-{
-    /** Private constructor to avoid instantiation */
-    private StandAloneLowLatencyMediaDriver()
-    {
+public final class StandAloneLowLatencyMediaDriver {
+    /**
+     * Private constructor to avoid instantiation
+     */
+    private StandAloneLowLatencyMediaDriver() {
         // Nothing to do here
     }
 
     /**
      * Launch the driver
+     *
      * @param args driver argument property files
      */
-    public static void main(final String[] args)
-    {
+    public static void main(final String[] args) {
         SystemUtil.loadPropertiesFiles(args);
 
         final MediaDriver.Context ctx = new MediaDriver.Context()
@@ -35,8 +35,7 @@ public final class StandAloneLowLatencyMediaDriver
                 .receiverIdleStrategy(new BusySpinIdleStrategy())
                 .senderIdleStrategy(new BusySpinIdleStrategy());
 
-        try (final MediaDriver ignored = MediaDriver.launch(ctx))
-        {
+        try (final MediaDriver ignored = MediaDriver.launch(ctx)) {
             log.info("Driver started...");
 
             new SigIntBarrier().await();

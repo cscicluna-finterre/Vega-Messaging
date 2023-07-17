@@ -8,13 +8,7 @@ import com.bbva.kyof.vega.config.general.ConfigReader;
 import com.bbva.kyof.vega.config.general.ConfigReaderTest;
 import com.bbva.kyof.vega.config.general.TopicTemplateConfig;
 import com.bbva.kyof.vega.config.general.TransportMediaType;
-import com.bbva.kyof.vega.msg.IRcvMessage;
-import com.bbva.kyof.vega.msg.IRcvRequest;
-import com.bbva.kyof.vega.msg.MsgReqHeader;
-import com.bbva.kyof.vega.msg.MsgType;
-import com.bbva.kyof.vega.msg.RcvMessage;
-import com.bbva.kyof.vega.msg.RcvRequest;
-import com.bbva.kyof.vega.msg.RcvResponse;
+import com.bbva.kyof.vega.msg.*;
 import com.bbva.kyof.vega.protocol.AutoDiscManagerMock;
 import com.bbva.kyof.vega.protocol.common.VegaContext;
 import com.bbva.kyof.vega.protocol.control.ISecurityRequesterNotifier;
@@ -27,30 +21,17 @@ import io.aeron.driver.MediaDriver;
 import org.agrona.CloseHelper;
 import org.agrona.concurrent.UnsafeBuffer;
 import org.easymock.EasyMock;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Objects;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class SubscribersManagerUnicastTest implements ITopicSubListener
-{
+public class SubscribersManagerUnicastTest implements ITopicSubListener {
     private static final String validConfigFile = Objects.requireNonNull(ConfigReaderTest.class.getClassLoader().getResource("config/subscribersManagerTestConfig.xml")).getPath();
 
     private static MediaDriver MEDIA_DRIVER;
@@ -66,8 +47,7 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
     private SubscribersManagerUnicast subscriberManager;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         final Aeron.Context ctx1 = new Aeron.Context();
@@ -102,29 +82,25 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
     }
 
     @AfterClass
-    public static void afterClass()
-    {
+    public static void afterClass() {
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Before
-    public void before()
-    {
+    public void before() {
         final ISecurityRequesterNotifier securityRequesterNotifier = EasyMock.createNiceMock(ISecurityRequesterNotifier.class);
         EasyMock.replay(securityRequesterNotifier);
         subscriberManager = new SubscribersManagerUnicast(VEGA_CONTEXT, POLLERS_MANAGER, RELATIONS, securityRequesterNotifier);
     }
 
     @After
-    public void after()
-    {
+    public void after() {
         subscriberManager.close();
     }
 
     @Test
-    public void testSubscribeUnsubscribe() throws Exception
-    {
+    public void testSubscribeUnsubscribe() throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         // Subscribe to 4 TOPICS, since there are ony 2 ports some of the aeron subscribers will be repeated
@@ -176,8 +152,7 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
     }
 
     @Test
-    public void testReceive() throws Exception
-    {
+    public void testReceive() throws Exception {
         // Subscribe to 4 TOPICS, since there are ony 2 ports some of the aeron subscribers will be repeated
         subscriberManager.subscribeToTopic("utopic1", TEMPLATE_UCAST, null, this);
         subscriberManager.subscribeToTopic("utopic2", TEMPLATE_UCAST, null, this);
@@ -213,8 +188,7 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
     }
 
     @Test
-    public void testAdverts()
-    {
+    public void testAdverts() {
         final UUID instanceId = UUID.randomUUID();
         final AutoDiscTopicSocketInfo topicSocketInfo1 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(), 34, 34534, 23, TestConstants.EMPTY_HOSTNAME);
         subscriberManager.onNewAutoDiscTopicSocketInfo(topicSocketInfo1);
@@ -222,33 +196,25 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
     }
 
     @Test
-    public void testResponseSubParams()
-    {
+    public void testResponseSubParams() {
         Assert.assertEquals(subscriberManager.getResponsesSubscriberParams().getTransportType(), TransportMediaType.UNICAST);
     }
 
-    private void sendMessageAndCheckArrival(final AeronPublisher aeronPublisher, boolean shouldArrive)
-    {
+    private void sendMessageAndCheckArrival(final AeronPublisher aeronPublisher, boolean shouldArrive) {
         final UnsafeBuffer buffer = new UnsafeBuffer(ByteBuffer.allocate(128));
         buffer.putInt(0, 128);
 
         aeronPublisher.sendMessage(MsgType.DATA, UUID.randomUUID(), buffer, new Random().nextLong(), 0, 4);
 
-        try
-        {
+        try {
             Thread.sleep(100);
-        }
-        catch (InterruptedException e)
-        {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        if (shouldArrive)
-        {
+        if (shouldArrive) {
             Assert.assertNotNull(POLLER_LISTENER.receivedMsg);
-        }
-        else
-        {
+        } else {
             assertNull(POLLER_LISTENER.receivedMsg);
         }
 
@@ -256,51 +222,42 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
     }
 
     @Override
-    public void onMessageReceived(IRcvMessage receivedMessage)
-    {
+    public void onMessageReceived(IRcvMessage receivedMessage) {
 
     }
 
     @Override
-    public void onRequestReceived(IRcvRequest receivedRequest)
-    {
+    public void onRequestReceived(IRcvRequest receivedRequest) {
 
     }
 
-    static class ReceiverListener implements ISubscribersPollerListener
-    {
+    static class ReceiverListener implements ISubscribersPollerListener {
         volatile IRcvMessage receivedMsg = null;
 
         @Override
-        public void onDataMsgReceived(RcvMessage msg)
-        {
+        public void onDataMsgReceived(RcvMessage msg) {
             this.receivedMsg = msg.promote();
         }
 
         @Override
-        public void onEncryptedDataMsgReceived(RcvMessage msg)
-        {
+        public void onEncryptedDataMsgReceived(RcvMessage msg) {
 
         }
 
         @Override
-        public void onDataRequestMsgReceived(RcvRequest request)
-        {
+        public void onDataRequestMsgReceived(RcvRequest request) {
         }
 
         @Override
-        public void onDataResponseMsgReceived(RcvResponse response)
-        {
+        public void onDataResponseMsgReceived(RcvResponse response) {
         }
 
         @Override
-        public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader)
-        {
+        public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader) {
 
         }
 
-        private void reset()
-        {
+        private void reset() {
             this.receivedMsg = null;
         }
     }

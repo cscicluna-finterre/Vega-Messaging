@@ -2,11 +2,10 @@ package com.bbva.kyof.vega.autodiscovery.sniffer;
 
 import com.bbva.kyof.vega.util.net.InetUtil;
 import com.bbva.kyof.vega.util.net.SubnetAddress;
+import jakarta.xml.bind.annotation.XmlTransient;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
-
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Contains the configuration for the multicast sniffer.
@@ -15,8 +14,7 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @ToString
 @Builder
-public class SnifferParameters
-{
+public class SnifferParameters {
     /**
      * Default stream id
      */
@@ -66,13 +64,11 @@ public class SnifferParameters
      *
      * @throws SnifferException exception thrown if there is any problem in the validation or there are missing parameters
      */
-    void validateSnifferParameters() throws SnifferException
-    {
+    void validateSnifferParameters() throws SnifferException {
 
         this.validateMulticastConfig();
         this.checkSubnet();
-        if (this.timeout == null)
-        {
+        if (this.timeout == null) {
             this.timeout = DEFAULT_CLIENT_TIMEOUT;
         }
 
@@ -83,19 +79,16 @@ public class SnifferParameters
      *
      * @throws SnifferException if any parameter is not valid
      */
-    private void validateMulticastConfig() throws SnifferException
-    {
+    private void validateMulticastConfig() throws SnifferException {
         // Check the multicast address
-        if (this.ipAddress == null)
-        {
+        if (this.ipAddress == null) {
             this.ipAddress = DEFAULT_MULTICAST_ADDRESS;
         }
 
         validateMulticastAddress(this.ipAddress);
 
         // Check the multicast port
-        if (this.port == null)
-        {
+        if (this.port == null) {
             this.port = DEFAULT_MULTICAST_PORT;
         }
         validatePortNumber(this.port);
@@ -106,8 +99,7 @@ public class SnifferParameters
      *
      * @throws SnifferException if any error happens checking the subnet
      */
-    private void checkSubnet() throws SnifferException
-    {
+    private void checkSubnet() throws SnifferException {
         // Create the subnet address
         this.subnetAddress = getFullMaskSubnetFromStringOrDefault(this.subnet);
     }
@@ -118,10 +110,8 @@ public class SnifferParameters
      * @param port the port to validate
      * @throws SnifferException exception thrown if the port is not valid
      */
-    static void validatePortNumber(final int port) throws SnifferException
-    {
-        if (!InetUtil.isValidPortNumber(port))
-        {
+    static void validatePortNumber(final int port) throws SnifferException {
+        if (!InetUtil.isValidPortNumber(port)) {
             throw new SnifferException(String.format("The port %d is not a valid port number", port));
         }
     }
@@ -132,18 +122,15 @@ public class SnifferParameters
      * @param address the address to validate
      * @throws SnifferException exception thrown if the address is invalid
      */
-    static void validateMulticastAddress(final String address) throws SnifferException
-    {
-        if (!InetUtil.isValidMulticastAddress(address))
-        {
+    static void validateMulticastAddress(final String address) throws SnifferException {
+        if (!InetUtil.isValidMulticastAddress(address)) {
             throw new SnifferException(String.format("Invalid multicast address %s", address));
         }
 
         final int intAddress = InetUtil.convertIpAddressToInt(address);
 
         // It has to be an ODD address
-        if (intAddress % 2 == 0)
-        {
+        if (intAddress % 2 == 0) {
             throw new SnifferException(String.format("The sniffer multicast address has to be odd. Provided address %s is invalid", address));
         }
     }
@@ -160,40 +147,29 @@ public class SnifferParameters
      * @return the subnet
      * @throws SnifferException if any error happens
      */
-    static SubnetAddress getFullMaskSubnetFromStringOrDefault(final String subnet) throws SnifferException
-    {
+    static SubnetAddress getFullMaskSubnetFromStringOrDefault(final String subnet) throws SnifferException {
         // If subnet is null, find the default subnet
-        if (subnet == null)
-        {
+        if (subnet == null) {
             // Find a suitable interface address
             final SubnetAddress defaultSubnet = InetUtil.getDefaultSubnet();
 
-            if (defaultSubnet == null)
-            {
+            if (defaultSubnet == null) {
                 throw new SnifferException("Cannot find a suitable interface for multicast autodiscovery");
-            }
-            else
-            {
+            } else {
                 return defaultSubnet;
             }
-        }
-        else
-        {
+        } else {
             // Check that the provided interface address is valid and convert to full mask
-            try
-            {
+            try {
                 // Find the first interface address that matches the subnet
                 final SubnetAddress fullMaskSubnet = InetUtil.validateSubnetAndConvertToFullMask(new SubnetAddress(subnet));
 
-                if (fullMaskSubnet == null)
-                {
+                if (fullMaskSubnet == null) {
                     throw new SnifferException("The provided subnet " + subnet + " don't match any valid interface address on the machine");
                 }
 
                 return fullMaskSubnet;
-            }
-            catch (final IllegalArgumentException e)
-            {
+            } catch (final IllegalArgumentException e) {
                 throw new SnifferException("The provided subnet " + subnet + " is malformed", e);
             }
         }

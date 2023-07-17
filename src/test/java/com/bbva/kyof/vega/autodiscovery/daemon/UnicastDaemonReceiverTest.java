@@ -5,9 +5,9 @@ import com.bbva.kyof.vega.Version;
 import com.bbva.kyof.vega.autodiscovery.model.*;
 import com.bbva.kyof.vega.msg.BaseHeader;
 import com.bbva.kyof.vega.msg.MsgType;
-import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import com.bbva.kyof.vega.serialization.IUnsafeSerializable;
 import com.bbva.kyof.vega.serialization.UnsafeBufferSerializer;
+import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import io.aeron.Aeron;
 import io.aeron.Publication;
 import io.aeron.driver.MediaDriver;
@@ -24,8 +24,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 05/08/16.
  */
-public class UnicastDaemonReceiverTest
-{
+public class UnicastDaemonReceiverTest {
     private static final UUID SENDER_INSTANCE_ID = UUID.randomUUID();
 
     private final ByteBuffer sendBuffer = ByteBuffer.allocate(1024);
@@ -39,8 +38,7 @@ public class UnicastDaemonReceiverTest
     private static Publication PUBLICATION;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
         final Aeron.Context ctx = new Aeron.Context();
         ctx.aeronDirectoryName(MEDIA_DRIVER.aeronDirectoryName());
@@ -62,16 +60,14 @@ public class UnicastDaemonReceiverTest
     }
 
     @AfterClass
-    public static void afterClass()
-    {
+    public static void afterClass() {
         RECEIVER.close();
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Test
-    public void testClientInfoMsgs() throws Exception
-    {
+    public void testClientInfoMsgs() throws Exception {
         LISTENER.reset();
 
         // Create a publication to send messages to the deaemon
@@ -123,8 +119,7 @@ public class UnicastDaemonReceiverTest
     }
 
     @Test
-    public void testOtherInfoMsgs() throws Exception
-    {
+    public void testOtherInfoMsgs() throws Exception {
         LISTENER.reset();
 
         Assert.assertFalse(LISTENER.msgToFordward);
@@ -175,19 +170,16 @@ public class UnicastDaemonReceiverTest
         this.callReceiverLifeCycle();
     }
 
-    private void callReceiverLifeCycle()
-    {
+    private void callReceiverLifeCycle() {
         RECEIVER.pollForNewMessages();
         RECEIVER.checkNextClientTimeout();
     }
 
-    private void sendMessage(final byte msgType, final IUnsafeSerializable serializable)
-    {
+    private void sendMessage(final byte msgType, final IUnsafeSerializable serializable) {
         this.sendMessage(msgType, serializable, false);
     }
 
-    private void sendMessage(final byte msgType, final IUnsafeSerializable serializable, boolean wrongVersion)
-    {
+    private void sendMessage(final byte msgType, final IUnsafeSerializable serializable, boolean wrongVersion) {
         // Prepare the send buffer
         this.sendBuffer.clear();
         this.sendBufferSerializer.wrap(this.sendBuffer);
@@ -195,12 +187,9 @@ public class UnicastDaemonReceiverTest
         // Set msg type and write the base header
         BaseHeader baseHeader;
 
-        if (wrongVersion)
-        {
-            baseHeader = new BaseHeader(msgType, Version.toIntegerRepresentation((byte)55, (byte)3, (byte)1));
-        }
-        else
-        {
+        if (wrongVersion) {
+            baseHeader = new BaseHeader(msgType, Version.toIntegerRepresentation((byte) 55, (byte) 3, (byte) 1));
+        } else {
             baseHeader = new BaseHeader(msgType, Version.LOCAL_VERSION);
         }
 
@@ -214,39 +203,33 @@ public class UnicastDaemonReceiverTest
         PUBLICATION.offer(this.sendBufferSerializer.getInternalBuffer(), 0, this.sendBufferSerializer.getOffset());
     }
 
-    static class EventListener implements IDaemonReceiverListener
-    {
+    static class EventListener implements IDaemonReceiverListener {
         AutoDiscDaemonClientInfo newClientInfo;
         AutoDiscDaemonClientInfo clientInfoRemoved;
         boolean msgToFordward;
         AutoDiscDaemonClientInfo receiveAutoDiscDaemonClientInfo;
 
         @Override
-        public void onRemovedAutoDiscDaemonClientInfo(AutoDiscDaemonClientInfo clientInfo)
-        {
+        public void onRemovedAutoDiscDaemonClientInfo(AutoDiscDaemonClientInfo clientInfo) {
             clientInfoRemoved = clientInfo;
         }
 
         @Override
-        public void onNewMessageToFordward(DirectBuffer buffer, int offset, int length)
-        {
+        public void onNewMessageToFordward(DirectBuffer buffer, int offset, int length) {
             msgToFordward = true;
         }
 
         @Override
-        public void onNewAutoDiscDaemonClientInfo(AutoDiscDaemonClientInfo info)
-        {
+        public void onNewAutoDiscDaemonClientInfo(AutoDiscDaemonClientInfo info) {
             newClientInfo = info;
         }
 
         @Override
-        public void onReceiveAutoDiscDaemonClientInfo(AutoDiscDaemonClientInfo info)
-        {
+        public void onReceiveAutoDiscDaemonClientInfo(AutoDiscDaemonClientInfo info) {
             receiveAutoDiscDaemonClientInfo = info;
         }
 
-        public void reset()
-        {
+        public void reset() {
             newClientInfo = null;
             clientInfoRemoved = null;
             msgToFordward = false;

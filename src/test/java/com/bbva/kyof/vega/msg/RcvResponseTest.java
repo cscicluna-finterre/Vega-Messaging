@@ -10,11 +10,9 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 02/08/16.
  */
-public class RcvResponseTest
-{
+public class RcvResponseTest {
     @Test
-    public void tryGettersSettersAndPromote()
-    {
+    public void tryGettersSettersAndPromote() {
         // Create the message
         final UUID instanceId = UUID.randomUUID();
         final UUID requestId = UUID.randomUUID();

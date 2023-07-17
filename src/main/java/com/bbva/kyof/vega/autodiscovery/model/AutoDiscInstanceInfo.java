@@ -11,58 +11,88 @@ import java.util.UUID;
 /**
  * Represent the information of a vega instance. Containing the name and unique Id of the instance plus the information regarding
  * response reception socket for the instance.<p>
- *
+ * <p>
  * Also contains the serialization methods to convert the objects to binary messages.
  */
 @AllArgsConstructor
 @NoArgsConstructor
-public class AutoDiscInstanceInfo implements IAutoDiscInfo
-{
-    /** Number of internal fields of type Integer */
+public class AutoDiscInstanceInfo implements IAutoDiscInfo {
+    /**
+     * Number of internal fields of type Integer
+     */
     private static final int NUM_INT_FIELDS = 6;
 
-    /** Serialized size for the members that have a fixed size */
+    /**
+     * Serialized size for the members that have a fixed size
+     */
     private static final int FIX_MEMBERS_SERIALIZED_SIZE = UnsafeBufferSerializer.UUID_SIZE + UnsafeBufferSerializer.INT_SIZE * NUM_INT_FIELDS;
 
-    /** Name of the vega library instance */
-    @Getter private String instanceName;
+    /**
+     * Name of the vega library instance
+     */
+    @Getter
+    private String instanceName;
 
-    /** Unique id of the vega library instance */
-    @Getter private UUID uniqueId;
+    /**
+     * Unique id of the vega library instance
+     */
+    @Getter
+    private UUID uniqueId;
 
-    /** Transport ip for responses being sent to the vega instance represented by this object */
-    @Getter private int responseTransportIp;
+    /**
+     * Transport ip for responses being sent to the vega instance represented by this object
+     */
+    @Getter
+    private int responseTransportIp;
 
-    /** Transport port  for responses being sent to the vega instance represented by this object */
-    @Getter private int responseTransportPort;
+    /**
+     * Transport port  for responses being sent to the vega instance represented by this object
+     */
+    @Getter
+    private int responseTransportPort;
 
-    /** Transport stream id for responses being sent to the vega instance represented by this object */
-    @Getter private int responseTransportStreamId;
+    /**
+     * Transport stream id for responses being sent to the vega instance represented by this object
+     */
+    @Getter
+    private int responseTransportStreamId;
 
-    /** Transport hostname for responses being sent to the vega instance represented by this object */
-    @Getter private String responseTransportHostname;
+    /**
+     * Transport hostname for responses being sent to the vega instance represented by this object
+     */
+    @Getter
+    private String responseTransportHostname;
 
-    /** Transport ip for control messages receiver */
-    @Getter private int controlRcvTransportIp;
+    /**
+     * Transport ip for control messages receiver
+     */
+    @Getter
+    private int controlRcvTransportIp;
 
-    /** Transport port for control messages receiver */
-    @Getter private int controlRcvTransportPort;
+    /**
+     * Transport port for control messages receiver
+     */
+    @Getter
+    private int controlRcvTransportPort;
 
-    /** Transport stream id for for control messages receiver */
-    @Getter private int controlRcvTransportStreamId;
+    /**
+     * Transport stream id for for control messages receiver
+     */
+    @Getter
+    private int controlRcvTransportStreamId;
 
-    /** Transport hostname for control messages receiver*/
-    @Getter private String controlRcvHostname;
+    /**
+     * Transport hostname for control messages receiver
+     */
+    @Getter
+    private String controlRcvHostname;
 
     @Override
-    public boolean equals(final Object target)
-    {
-        if (this == target)
-        {
+    public boolean equals(final Object target) {
+        if (this == target) {
             return true;
         }
-        if (target == null || getClass() != target.getClass())
-        {
+        if (target == null || getClass() != target.getClass()) {
             return false;
         }
 
@@ -72,14 +102,12 @@ public class AutoDiscInstanceInfo implements IAutoDiscInfo
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return this.uniqueId.hashCode();
     }
 
     @Override
-    public void fromBinary(final UnsafeBufferSerializer buffer)
-    {
+    public void fromBinary(final UnsafeBufferSerializer buffer) {
         this.instanceName = buffer.readString();
         this.uniqueId = buffer.readUUID();
         this.responseTransportIp = buffer.readInt();
@@ -93,8 +121,7 @@ public class AutoDiscInstanceInfo implements IAutoDiscInfo
     }
 
     @Override
-    public void toBinary(final UnsafeBufferSerializer buffer)
-    {
+    public void toBinary(final UnsafeBufferSerializer buffer) {
         buffer.writeString(this.instanceName);
         buffer.writeUUID(this.uniqueId);
         buffer.writeInt(this.responseTransportIp);
@@ -108,8 +135,7 @@ public class AutoDiscInstanceInfo implements IAutoDiscInfo
     }
 
     @Override
-    public int serializedSize()
-    {
+    public int serializedSize() {
         return FIX_MEMBERS_SERIALIZED_SIZE
                 + UnsafeBufferSerializer.serializedSize(this.instanceName)
                 + UnsafeBufferSerializer.serializedSize(this.responseTransportHostname)
@@ -117,8 +143,7 @@ public class AutoDiscInstanceInfo implements IAutoDiscInfo
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "AutoDiscInstanceInfo{" +
                 "instanceName='" + instanceName + '\'' +
                 ", uniqueId=" + uniqueId +

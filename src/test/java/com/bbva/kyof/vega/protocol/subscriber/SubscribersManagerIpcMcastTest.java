@@ -28,8 +28,7 @@ import java.util.*;
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class SubscribersManagerIpcMcastTest implements ITopicSubListener
-{
+public class SubscribersManagerIpcMcastTest implements ITopicSubListener {
     private static final String KEYS_DIR_PATH = Objects.requireNonNull(CommandLineParserTest.class.getClassLoader().getResource("keys")).getPath();
 
     private static final String validConfigFile = Objects.requireNonNull(ConfigReaderTest.class.getClassLoader().getResource("config/subscribersManagerTestConfig.xml")).getPath();
@@ -56,8 +55,7 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
 
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         final Aeron.Context ctx1 = new Aeron.Context();
@@ -89,29 +87,25 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
     }
 
     @AfterClass
-    public static void afterClass()
-    {
+    public static void afterClass() {
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Before
-    public void before()
-    {
+    public void before() {
         final ISecurityRequesterNotifier securityRequesterNotifier = EasyMock.createNiceMock(ISecurityRequesterNotifier.class);
         EasyMock.replay(securityRequesterNotifier);
         subscriberManager = new SubscribersManagerIpcMcast(VEGA_CONTEXT, POLLERS_MANAGER, RELATIONS, securityRequesterNotifier);
     }
 
     @After
-    public void after()
-    {
+    public void after() {
         subscriberManager.close();
     }
 
     @Test
-    public void testMultipleTopicSocketsWithSameParameters() throws Exception
-    {
+    public void testMultipleTopicSocketsWithSameParameters() throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         // Subscribe to topic
@@ -122,11 +116,11 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
         final AeronPublisher publisher1 = new AeronPublisher(VEGA_CONTEXT, pubParams1);
 
         final AutoDiscTopicSocketInfo topicSocketInfo1 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(),
-                pubParams1.getIpAddress(), pubParams1.getPort(), pubParams1.getStreamId(),TestConstants.EMPTY_HOSTNAME);
+                pubParams1.getIpAddress(), pubParams1.getPort(), pubParams1.getStreamId(), TestConstants.EMPTY_HOSTNAME);
         final AutoDiscTopicSocketInfo topicSocketInfo2 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(),
-                pubParams1.getIpAddress(), pubParams1.getPort(), pubParams1.getStreamId(),TestConstants.EMPTY_HOSTNAME);
+                pubParams1.getIpAddress(), pubParams1.getPort(), pubParams1.getStreamId(), TestConstants.EMPTY_HOSTNAME);
         final AutoDiscTopicSocketInfo secureTopicSocketInfo = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(),
-                pubParams1.getIpAddress(), pubParams1.getPort(), pubParams1.getStreamId(), TestConstants.EMPTY_HOSTNAME ,22);
+                pubParams1.getIpAddress(), pubParams1.getPort(), pubParams1.getStreamId(), TestConstants.EMPTY_HOSTNAME, 22);
 
         // Wait a bit
         Thread.sleep(2000);
@@ -179,8 +173,7 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
     }
 
     @Test
-    public void testMultipleTopicSocketsDifferentParameters() throws Exception
-    {
+    public void testMultipleTopicSocketsDifferentParameters() throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         // Subscribe to topic
@@ -245,8 +238,7 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
     }
 
     @Test
-    public void testCallsOnClosed() throws Exception
-    {
+    public void testCallsOnClosed() throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         // Subscribe to topic
@@ -260,8 +252,7 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
     }
 
     @Test
-    public void testEdgeCases() throws Exception
-    {
+    public void testEdgeCases() throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         // Subscribe to topic
@@ -281,8 +272,7 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
     }
 
     @Test
-    public void testSecure() throws Exception
-    {
+    public void testSecure() throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         // Create security template configuration for the subscriber topic
@@ -329,20 +319,16 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
         subscriberManager.unsubscribeFromTopic("mtopic1");
     }
 
-    private void sendMessageAndCheckArrival(final AeronPublisher aeronPublisher, boolean shouldArrive) throws InterruptedException
-    {
+    private void sendMessageAndCheckArrival(final AeronPublisher aeronPublisher, boolean shouldArrive) throws InterruptedException {
         final UnsafeBuffer buffer = new UnsafeBuffer(ByteBuffer.allocate(128));
         buffer.putInt(0, 128);
 
         aeronPublisher.sendMessage(MsgType.DATA, UUID.randomUUID(), buffer, new Random().nextLong(), 0, 4);
         Thread.sleep(500);
 
-        if (shouldArrive)
-        {
+        if (shouldArrive) {
             Assert.assertNotNull(POLLER_LISTENER.receivedMsg);
-        }
-        else
-        {
+        } else {
             Assert.assertNull(POLLER_LISTENER.receivedMsg);
         }
 
@@ -350,51 +336,42 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
     }
 
     @Override
-    public void onMessageReceived(IRcvMessage receivedMessage)
-    {
+    public void onMessageReceived(IRcvMessage receivedMessage) {
 
     }
 
     @Override
-    public void onRequestReceived(IRcvRequest receivedRequest)
-    {
+    public void onRequestReceived(IRcvRequest receivedRequest) {
 
     }
 
-    static class ReceiverListener implements ISubscribersPollerListener
-    {
+    static class ReceiverListener implements ISubscribersPollerListener {
         volatile IRcvMessage receivedMsg = null;
 
         @Override
-        public void onDataMsgReceived(RcvMessage msg)
-        {
+        public void onDataMsgReceived(RcvMessage msg) {
             this.receivedMsg = msg.promote();
         }
 
         @Override
-        public void onEncryptedDataMsgReceived(RcvMessage msg)
-        {
+        public void onEncryptedDataMsgReceived(RcvMessage msg) {
 
         }
 
         @Override
-        public void onDataRequestMsgReceived(RcvRequest request)
-        {
+        public void onDataRequestMsgReceived(RcvRequest request) {
         }
 
         @Override
-        public void onDataResponseMsgReceived(RcvResponse response)
-        {
+        public void onDataResponseMsgReceived(RcvResponse response) {
         }
 
         @Override
-        public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader)
-        {
+        public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader) {
 
         }
 
-        private void reset()
-        {
+        private void reset() {
             this.receivedMsg = null;
         }
     }

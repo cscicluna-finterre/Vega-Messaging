@@ -1,12 +1,12 @@
 package com.bbva.kyof.vega.autodiscovery.daemon;
 
 import com.bbva.kyof.vega.Version;
-import com.bbva.kyof.vega.autodiscovery.model.AutoDiscDaemonClientInfo;
 import com.bbva.kyof.vega.autodiscovery.advert.ActiveAdvertsQueue;
+import com.bbva.kyof.vega.autodiscovery.model.AutoDiscDaemonClientInfo;
 import com.bbva.kyof.vega.msg.BaseHeader;
 import com.bbva.kyof.vega.msg.MsgType;
-import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import com.bbva.kyof.vega.serialization.UnsafeBufferSerializer;
+import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import io.aeron.Aeron;
 import io.aeron.Subscription;
 import io.aeron.logbuffer.Header;
@@ -17,39 +17,49 @@ import java.io.Closeable;
 
 /**
  * Class that handles all the receiving functionality for the Unicast Daemon.
- *
+ * <p>
  * It will create the unicast sockets for reception of messages from the clients and process incoming messages.
  */
 @Slf4j
-class UnicastDaemonReceiver implements Closeable
-{
-    /** Aeron Subscription to receive messages from the clients */
+class UnicastDaemonReceiver implements Closeable {
+    /**
+     * Aeron Subscription to receive messages from the clients
+     */
     private final Subscription subscription;
 
-    /** Reusable buffer serializer for the incomming messages */
+    /**
+     * Reusable buffer serializer for the incomming messages
+     */
     private final UnsafeBufferSerializer bufferSerializer = new UnsafeBufferSerializer();
 
-    /** Reusable base header for received messages */
+    /**
+     * Reusable base header for received messages
+     */
     private final BaseHeader reusableBaseHeader = new BaseHeader();
 
-    /** Listener that will receive the events of added and removed clients */
+    /**
+     * Listener that will receive the events of added and removed clients
+     */
     private final IDaemonReceiverListener listener;
 
-    /** Reusable auto-discovery instance info used to avoid object creation during deserialization */
+    /**
+     * Reusable auto-discovery instance info used to avoid object creation during deserialization
+     */
     private AutoDiscDaemonClientInfo reusableDaemonClientInfo = new AutoDiscDaemonClientInfo();
 
-    /** Queue with all active adverts of daemon clients information */
+    /**
+     * Queue with all active adverts of daemon clients information
+     */
     private final ActiveAdvertsQueue<AutoDiscDaemonClientInfo> activeDaemonClients;
 
     /**
      * Create a new receiver class for unicast daemon messages
      *
-     * @param aeron the aeron instance that will be used to create the subscription
+     * @param aeron      the aeron instance that will be used to create the subscription
      * @param parameters the parameters of the daemon
-     * @param listener the listener for events related to connected and disconnected clients
+     * @param listener   the listener for events related to connected and disconnected clients
      */
-    UnicastDaemonReceiver(final Aeron aeron, final DaemonParameters parameters, final IDaemonReceiverListener listener)
-    {
+    UnicastDaemonReceiver(final Aeron aeron, final DaemonParameters parameters, final IDaemonReceiverListener listener) {
         this.listener = listener;
 
         // Create the queue of active daemons
@@ -67,24 +77,23 @@ class UnicastDaemonReceiver implements Closeable
 
     /**
      * Poll to get the next message in the subscription
+     *
      * @return the number of read messages
      */
-    int pollForNewMessages()
-    {
+    int pollForNewMessages() {
         return this.subscription.poll(this::processRcvMsg, 1);
     }
 
     /**
      * Check for the next active client advert timeout
+     *
      * @return 1 if there is a timeout, 0 in other case
      */
-    int checkNextClientTimeout()
-    {
+    int checkNextClientTimeout() {
         final AutoDiscDaemonClientInfo timedOutInfo = this.activeDaemonClients.returnNextTimedOutElement();
 
         // If not null, the active advert has timed out
-        if (timedOutInfo != null)
-        {
+        if (timedOutInfo != null) {
             log.info("Client timed out [{}]", timedOutInfo);
 
             // Notify about the removal
@@ -96,8 +105,7 @@ class UnicastDaemonReceiver implements Closeable
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         log.info("Closing UnicastDaemonReceiver");
 
         this.subscription.close();
@@ -107,15 +115,13 @@ class UnicastDaemonReceiver implements Closeable
     /**
      * Process a received message from the unicast subscription
      *
-     * @param buffer the buffer containing the message contents
-     * @param offset the offset of the message in the buffer
-     * @param length the length of the message
+     * @param buffer      the buffer containing the message contents
+     * @param offset      the offset of the message in the buffer
+     * @param length      the length of the message
      * @param aeronHeader the aeron message header
      */
-    private void processRcvMsg(final DirectBuffer buffer, final int offset, final int length, final Header aeronHeader)
-    {
-        try
-        {
+    private void processRcvMsg(final DirectBuffer buffer, final int offset, final int length, final Header aeronHeader) {
+        try {
             // Wrap the buffer into the serializer
             this.bufferSerializer.wrap(buffer, offset, length);
 
@@ -123,20 +129,17 @@ class UnicastDaemonReceiver implements Closeable
             this.reusableBaseHeader.fromBinary(this.bufferSerializer);
 
             // Check the version
-            if (!this.reusableBaseHeader.isVersionCompatible())
-            {
+            if (!this.reusableBaseHeader.isVersionCompatible()) {
                 log.warn("Autodiscovery message received from incompatible library version [{}]", Version.toStringRep(this.reusableBaseHeader.getVersion()));
                 return;
             }
 
-            if (log.isTraceEnabled())
-            {
+            if (log.isTraceEnabled()) {
                 log.trace("Autodiscovery client message of type [{}] received", this.reusableBaseHeader.getMsgType());
             }
 
             // Check the message type
-            switch (this.reusableBaseHeader.getMsgType())
-            {
+            switch (this.reusableBaseHeader.getMsgType()) {
                 case MsgType.AUTO_DISC_DAEMON_CLIENT_INFO:
                     this.reusableDaemonClientInfo.fromBinary(this.bufferSerializer);
                     this.onClientInfoReceived(this.reusableDaemonClientInfo);
@@ -150,9 +153,7 @@ class UnicastDaemonReceiver implements Closeable
                     log.warn("Wrong message type [{}] received on autodiscovery", this.reusableBaseHeader.getMsgType());
                     break;
             }
-        }
-        catch (final RuntimeException e)
-        {
+        } catch (final RuntimeException e) {
             log.error("Unexpected error processing received autodiscovery message", e);
         }
     }
@@ -162,16 +163,13 @@ class UnicastDaemonReceiver implements Closeable
      *
      * @param msg the client information message
      */
-    private void onClientInfoReceived(final AutoDiscDaemonClientInfo msg)
-    {
-        if (log.isTraceEnabled())
-        {
+    private void onClientInfoReceived(final AutoDiscDaemonClientInfo msg) {
+        if (log.isTraceEnabled()) {
             log.trace("Processing daemon client information message [{}]", msg);
         }
 
         // If is an addition of new information, store and notify about it
-        if (this.activeDaemonClients.addOrUpdateAdvert(msg))
-        {
+        if (this.activeDaemonClients.addOrUpdateAdvert(msg)) {
             log.info("Discovered new client [{}]", msg);
 
             // Restart the reusable autodiscovery info object since the original has been stored

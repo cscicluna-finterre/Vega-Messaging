@@ -6,17 +6,17 @@ import org.agrona.DirectBuffer;
 /**
  * Listener interface to implement in order to get notifications from incomming messages in the Unicast Daemon
  */
-interface IDaemonReceiverListener
-{
+interface IDaemonReceiverListener {
     /**
      * Called when a client is considered disconnected due to timeout
+     *
      * @param clientInfo the disconnected client information
      */
     void onRemovedAutoDiscDaemonClientInfo(AutoDiscDaemonClientInfo clientInfo);
 
     /**
      * Called when a new auto-discovery message that should be forwarded arrives to the daemon.
-     *
+     * <p>
      * Any message that is not a client info message will be forwarded to all clients connected to the daemon.
      *
      * @param buffer the buffer containing the original message

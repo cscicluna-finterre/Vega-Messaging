@@ -13,11 +13,9 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Created by cnebrera on 04/08/16.
  */
-public class ActiveTopicAdvertsQueueTest extends ActiveAdvertsQueueTest
-{
+public class ActiveTopicAdvertsQueueTest extends ActiveAdvertsQueueTest {
     @Test
-    public void testSingleElement() throws Exception
-    {
+    public void testSingleElement() throws Exception {
         final ActiveTopicAdvertsQueue<AutoDiscTopicInfo> queue = new ActiveTopicAdvertsQueue<>(200);
         final UUID instanceId = UUID.randomUUID();
         final UUID uniqueId = UUID.randomUUID();
@@ -47,8 +45,7 @@ public class ActiveTopicAdvertsQueueTest extends ActiveAdvertsQueueTest
     }
 
     @Test
-    public void testMultipleElement() throws Exception
-    {
+    public void testMultipleElement() throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         final UUID uniqueId1 = UUID.randomUUID();
@@ -95,8 +92,7 @@ public class ActiveTopicAdvertsQueueTest extends ActiveAdvertsQueueTest
     }
 
     @Test
-    public void testMultipleElementWithUpdates() throws Exception
-    {
+    public void testMultipleElementWithUpdates() throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         final UUID uniqueId1 = UUID.randomUUID();
@@ -130,8 +126,7 @@ public class ActiveTopicAdvertsQueueTest extends ActiveAdvertsQueueTest
     }
 
     @Test
-    public void testMultipleElementAndTimeouts() throws Exception
-    {
+    public void testMultipleElementAndTimeouts() throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         final UUID uniqueId1 = UUID.randomUUID();

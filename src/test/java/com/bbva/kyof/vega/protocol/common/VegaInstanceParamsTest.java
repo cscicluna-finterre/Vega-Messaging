@@ -7,14 +7,14 @@ import org.junit.Test;
 /**
  * Created by cnebrera on 11/11/2016.
  */
-public class VegaInstanceParamsTest
-{
-    /** File containing the configuration */
+public class VegaInstanceParamsTest {
+    /**
+     * File containing the configuration
+     */
     private static final String validConfigFile = VegaInstanceParamsTest.class.getClassLoader().getResource("config/validConfiguration.xml").getPath();
 
     @Test
-    public void testGettersSetters()
-    {
+    public void testGettersSetters() {
         final SecurityParams securityParams = SecurityParams.builder().build();
 
         final VegaInstanceParams params = VegaInstanceParams.builder().instanceName("instance").
@@ -31,29 +31,25 @@ public class VegaInstanceParamsTest
     }
 
     @Test(expected = VegaException.class)
-    public void testValidationFailDueToInstanceName() throws VegaException
-    {
+    public void testValidationFailDueToInstanceName() throws VegaException {
         final VegaInstanceParams params = VegaInstanceParams.builder().build();
         params.validateParams();
     }
 
     @Test(expected = VegaException.class)
-    public void testValidationFailDueToConfig() throws VegaException
-    {
+    public void testValidationFailDueToConfig() throws VegaException {
         final VegaInstanceParams params = VegaInstanceParams.builder().instanceName("instanceName").build();
         params.validateParams();
     }
 
     @Test(expected = VegaException.class)
-    public void testValidationFailDueToNotFoundConfig() throws VegaException
-    {
+    public void testValidationFailDueToNotFoundConfig() throws VegaException {
         final VegaInstanceParams params = VegaInstanceParams.builder().instanceName("instanceName").configurationFile("no").build();
         params.validateParams();
     }
 
     @Test(expected = VegaException.class)
-    public void testValidationFailDueToInvalidSecurityParams() throws VegaException
-    {
+    public void testValidationFailDueToInvalidSecurityParams() throws VegaException {
         final VegaInstanceParams params = VegaInstanceParams.builder().
                 instanceName("instanceName").
                 configurationFile(validConfigFile)
@@ -62,8 +58,7 @@ public class VegaInstanceParamsTest
     }
 
     @Test
-    public void testValidationOk() throws VegaException
-    {
+    public void testValidationOk() throws VegaException {
         final VegaInstanceParams params = VegaInstanceParams.builder().
                 instanceName("instanceName").
                 configurationFile(validConfigFile)

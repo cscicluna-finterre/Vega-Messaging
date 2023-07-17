@@ -1,6 +1,5 @@
 package com.bbva.kyof.vega.protocol.subscriber;
 
-import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscInstanceInfo;
 import com.bbva.kyof.vega.config.general.ConfigReader;
 import com.bbva.kyof.vega.config.general.ConfigReaderTest;
@@ -20,8 +19,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 18/08/16.
  */
-public class ResponsePublishersManagerTest
-{
+public class ResponsePublishersManagerTest {
     private static final String validConfigFile = ConfigReaderTest.class.getClassLoader().getResource("config/subscribersManagerTestConfig.xml").getPath();
 
     private static MediaDriver MEDIA_DRIVER;
@@ -34,8 +32,7 @@ public class ResponsePublishersManagerTest
     private static ResponsePublishersManager RESPONSE_PUB_MANAGER;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         final Aeron.Context ctx1 = new Aeron.Context();
@@ -55,16 +52,14 @@ public class ResponsePublishersManagerTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         RESPONSE_PUB_MANAGER.close();
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Test
-    public void testNewAutodiscInstanceInfo() throws Exception
-    {
+    public void testNewAutodiscInstanceInfo() throws Exception {
         final AutoDiscInstanceInfo instanceInfo1 = new AutoDiscInstanceInfo("instName1", UUID.randomUUID(), IP_ADDRESS, 33333, 2, HOSTNAME, IP_ADDRESS, 33333, 10, HOSTNAME);
         final AutoDiscInstanceInfo instanceInfo2 = new AutoDiscInstanceInfo("instName2", UUID.randomUUID(), IP_ADDRESS, 33333, 2, HOSTNAME, IP_ADDRESS, 33333, 10, HOSTNAME);
         final AutoDiscInstanceInfo instanceInfo3 = new AutoDiscInstanceInfo("instName3", UUID.randomUUID(), IP_ADDRESS, 33333, 5, HOSTNAME, IP_ADDRESS, 33333, 15, HOSTNAME);
@@ -103,8 +98,7 @@ public class ResponsePublishersManagerTest
     }
 
     @Test
-    public void testDuplicatedEvents() throws Exception
-    {
+    public void testDuplicatedEvents() throws Exception {
         final AutoDiscInstanceInfo instanceInfo1 = new AutoDiscInstanceInfo("instName1", UUID.randomUUID(), IP_ADDRESS, 33333, 2, HOSTNAME, IP_ADDRESS, 33333, 10, HOSTNAME);
 
         // Add response publishers and check

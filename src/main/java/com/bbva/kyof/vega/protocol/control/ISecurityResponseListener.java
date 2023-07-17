@@ -6,8 +6,7 @@ import com.bbva.kyof.vega.msg.MsgSecurityResp;
 /**
  * Listener to implement in order to listen to security response messages
  */
-interface ISecurityResponseListener
-{
+interface ISecurityResponseListener {
     /**
      * Called when a new security response is received
      *

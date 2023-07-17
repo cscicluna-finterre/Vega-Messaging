@@ -32,24 +32,35 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Main framework class that represents an instance of the messaging library
  */
 @Slf4j
-public final class VegaInstance implements IVegaInstance, AvailableImageHandler, UnavailableImageHandler, ErrorHandler
-{
-    /** Context of the instance with all the common information */
+public final class VegaInstance implements IVegaInstance, AvailableImageHandler, UnavailableImageHandler, ErrorHandler {
+    /**
+     * Context of the instance with all the common information
+     */
     private final VegaContext vegaContext;
 
-    /** Manager for publications */
+    /**
+     * Manager for publications
+     */
     private final SendManager sendManager;
 
-    /** Manager for reception */
+    /**
+     * Manager for reception
+     */
     private final ReceiveManager receiveManager;
 
-    /** Manager for control messages */
+    /**
+     * Manager for control messages
+     */
     private final ControlMsgsManager controlMsgsManager;
 
-    /** Embedded media driver, null if the daemon is using an stand alone media driver or unmanaged media driver */
+    /**
+     * Embedded media driver, null if the daemon is using an stand alone media driver or unmanaged media driver
+     */
     private final EmbeddedMediaDriver embeddedMediaDriver;
 
-    /** True if the manager has been stopped or is currently stopped */
+    /**
+     * True if the manager has been stopped or is currently stopped
+     */
     private final AtomicBoolean stoppedOrStopping = new AtomicBoolean(false);
 
 
@@ -59,8 +70,7 @@ public final class VegaInstance implements IVegaInstance, AvailableImageHandler,
      * @param parameters the parameters to initialize the instance
      * @throws VegaException exception thrown if there a configuration problem
      */
-    private VegaInstance(final VegaInstanceParams parameters) throws VegaException
-    {
+    private VegaInstance(final VegaInstanceParams parameters) throws VegaException {
         log.info("Creating a new Vega manager instance. Version [{}] Parameters [{}]", Version.LOCAL_VERSION, parameters);
 
         // Validate the parameters before continue
@@ -71,20 +81,16 @@ public final class VegaInstance implements IVegaInstance, AvailableImageHandler,
 
         // Load the configuration. The file configuration overrides the programmatic one.
         final GlobalConfiguration config;
-        if (parameters.getConfigurationFile() != null)
-        {
+        if (parameters.getConfigurationFile() != null) {
             // If the file exists, read the configuration file
             config = ConfigReader.readConfiguration(parameters.getConfigurationFile());
-        }
-        else
-        {
+        } else {
             // It the file does not exist, use the programmatic configuration
             config = parameters.getGlobalConfiguration();
         }
 
         // Make sure that if there are secure configured topics in configuration, the parameters also contains the security information
-        if (config.hasAnySecureTopic() && parameters.getSecurityParams() == null)
-        {
+        if (config.hasAnySecureTopic() && parameters.getSecurityParams() == null) {
             log.error("Secure configured topics found in configuration but no security parameters have been provided for the instance");
             throw new VegaException("Security parameters have to be provided if there are secure topics configured");
         }
@@ -97,33 +103,24 @@ public final class VegaInstance implements IVegaInstance, AvailableImageHandler,
         aeronContext.unavailableImageHandler(this);
 
         // Set the error handler for Aeron Errors, use the provided one or the default
-        if (parameters.getAeronErrorHandler() != null)
-        {
+        if (parameters.getAeronErrorHandler() != null) {
             aeronContext.errorHandler(parameters.getAeronErrorHandler());
-        }
-        else
-        {
+        } else {
             aeronContext.errorHandler(this);
         }
 
         // Start the embedded media driver if required, use the unmanaged one or the external
-        if (unmanagedMediaDriver != null)
-        {
+        if (unmanagedMediaDriver != null) {
             this.embeddedMediaDriver = null;
             aeronContext.aeronDirectoryName(unmanagedMediaDriver.aeronDirectoryName());
-        }
-        else if (config.getDriverType() == AeronDriverType.EXTERNAL)
-        {
+        } else if (config.getDriverType() == AeronDriverType.EXTERNAL) {
             this.embeddedMediaDriver = null;
 
             // If a driver directory has been settled, configure it
-            if (config.getExternalDriverDir() != null)
-            {
+            if (config.getExternalDriverDir() != null) {
                 aeronContext.aeronDirectoryName(config.getExternalDriverDir());
             }
-        }
-        else
-        {
+        } else {
             this.embeddedMediaDriver = new EmbeddedMediaDriver(config.getEmbeddedDriverConfigFile(), config.getDriverType());
             aeronContext.aeronDirectoryName(this.embeddedMediaDriver.getDriverDirectoryName());
         }
@@ -186,67 +183,57 @@ public final class VegaInstance implements IVegaInstance, AvailableImageHandler,
      * @return the instance created
      * @throws VegaException exception thrown if there a configuration problem
      */
-    public static IVegaInstance createNewInstance(final VegaInstanceParams parameters) throws VegaException
-    {
+    public static IVegaInstance createNewInstance(final VegaInstanceParams parameters) throws VegaException {
         return new VegaInstance(parameters);
     }
 
     @Override
-    public UUID getInstanceId()
-    {
+    public UUID getInstanceId() {
         return this.vegaContext.getInstanceUniqueId();
     }
 
     @Override
-    public ITopicPublisher createPublisher(@NonNull final String topicName) throws VegaException
-    {
+    public ITopicPublisher createPublisher(@NonNull final String topicName) throws VegaException {
         log.info("Creating publisher for topic [{}]", topicName);
         return this.sendManager.createTopicPublisher(topicName);
     }
 
     @Override
-    public void destroyPublisher(@NonNull final String topicName) throws VegaException
-    {
+    public void destroyPublisher(@NonNull final String topicName) throws VegaException {
         log.info("Destroying publisher for topic [{}]", topicName);
         this.sendManager.destroyTopicPublisher(topicName);
     }
 
     @Override
-    public void subscribeToTopic(@NonNull final String topicName, @NonNull final ITopicSubListener listener) throws VegaException
-    {
+    public void subscribeToTopic(@NonNull final String topicName, @NonNull final ITopicSubListener listener) throws VegaException {
         log.info("Subscribing to topic [{}]", topicName);
         this.receiveManager.subscribeToTopic(topicName, listener);
     }
 
     @Override
-    public void unsubscribeFromTopic(@NonNull final String topicName) throws VegaException
-    {
+    public void unsubscribeFromTopic(@NonNull final String topicName) throws VegaException {
         log.info("Unsubscribing from topic [{}]", topicName);
         this.receiveManager.unsubscribeFromTopic(topicName);
     }
 
     @Override
-    public void subscribeToPattern(@NonNull final String topicPattern, @NonNull final ITopicSubListener listener) throws VegaException
-    {
+    public void subscribeToPattern(@NonNull final String topicPattern, @NonNull final ITopicSubListener listener) throws VegaException {
         log.info("Subscribing to topic pattern [{}]", topicPattern);
         this.receiveManager.subscribeToPattern(topicPattern, listener);
     }
 
     @Override
-    public void unsubscribeFromPattern(@NonNull final String topicPattern) throws VegaException
-    {
+    public void unsubscribeFromPattern(@NonNull final String topicPattern) throws VegaException {
         log.info("Unsubscribing from topic pattern [{}]", topicPattern);
         this.receiveManager.unsubscribefromPattern(topicPattern);
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         log.info("Stopping the Manager ID [{}]", this.vegaContext.getInstanceUniqueId());
 
         // Make sure it is not stopped or stopping already
-        if (!this.stoppedOrStopping.compareAndSet(false, true))
-        {
+        if (!this.stoppedOrStopping.compareAndSet(false, true)) {
             return;
         }
 
@@ -268,8 +255,7 @@ public final class VegaInstance implements IVegaInstance, AvailableImageHandler,
         // Stop the Aeron connection
         this.vegaContext.getAeron().close();
 
-        if (this.embeddedMediaDriver != null)
-        {
+        if (this.embeddedMediaDriver != null) {
             this.embeddedMediaDriver.close();
         }
 
@@ -277,29 +263,25 @@ public final class VegaInstance implements IVegaInstance, AvailableImageHandler,
     }
 
     @Override
-    public void onAvailableImage(final Image image)
-    {
+    public void onAvailableImage(final Image image) {
         final Subscription subscription = image.subscription();
         log.info("Available Aeron image: channel={} streamId={} session={}",
                 subscription.channel(), subscription.streamId(), image.sessionId());
     }
 
     @Override
-    public void onUnavailableImage(final Image image)
-    {
+    public void onUnavailableImage(final Image image) {
         final Subscription subscription = image.subscription();
         log.info("Unavailable Aeron image: channel={} streamId={} session={}",
                 subscription.channel(), subscription.streamId(), image.sessionId());
     }
 
     @Override
-    public void onError(final Throwable throwable)
-    {
+    public void onError(final Throwable throwable) {
         // Print the error on the log
         log.error("Unexpected Internal Aeron Error", throwable);
 
-        if(throwable instanceof DriverTimeoutException)
-        {
+        if (throwable instanceof DriverTimeoutException) {
             log.error("Timeout from media driver, the system will exit...");
         }
 

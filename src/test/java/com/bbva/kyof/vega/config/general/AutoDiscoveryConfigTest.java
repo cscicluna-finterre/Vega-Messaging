@@ -1,7 +1,5 @@
 package com.bbva.kyof.vega.config.general;
 
-import com.bbva.kyof.vega.config.general.AutoDiscoType;
-import com.bbva.kyof.vega.config.general.AutoDiscoveryConfig;
 import com.bbva.kyof.vega.exception.VegaException;
 import com.bbva.kyof.vega.util.net.SubnetAddress;
 import org.junit.Assert;
@@ -13,8 +11,7 @@ import java.util.Collections;
 /**
  * Created by cnebrera on 01/08/16.
  */
-public class AutoDiscoveryConfigTest
-{
+public class AutoDiscoveryConfigTest {
     public static final String TEST_RESOLVER_DAEMON_ADDRESS = "192.168.1.1";
     public static final int TEST_RESOLVER_DAEMON_PORT = 37000;
     private AutoDiscoveryConfig.AutoDiscoveryConfigBuilder emptyBuilder;
@@ -22,8 +19,7 @@ public class AutoDiscoveryConfigTest
     private AutoDiscoveryConfig.AutoDiscoveryConfigBuilder minimumUcastBuilder;
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
         this.emptyBuilder = AutoDiscoveryConfig.builder();
         this.minimumMcastBuilder = AutoDiscoveryConfig.builder();
         this.minimumMcastBuilder.autoDiscoType(AutoDiscoType.MULTICAST);
@@ -32,21 +28,18 @@ public class AutoDiscoveryConfigTest
     }
 
     @Test
-    public void empyConstructor()
-    {
+    public void empyConstructor() {
         new AutoDiscoveryConfig();
     }
 
     @Test(expected = VegaException.class)
-    public void validateEmptyBuilder() throws Exception
-    {
+    public void validateEmptyBuilder() throws Exception {
         // Validation should fail, it is missing compulsory param auto discovery type
         this.emptyBuilder.build().completeAndValidateConfig();
     }
 
     @Test
-    public void validateMcastMinBuilderAndTestDefaultParams() throws Exception
-    {
+    public void validateMcastMinBuilderAndTestDefaultParams() throws Exception {
         final AutoDiscoveryConfig config = this.minimumMcastBuilder.build();
         config.completeAndValidateConfig();
 
@@ -64,15 +57,13 @@ public class AutoDiscoveryConfigTest
     }
 
     @Test(expected = VegaException.class)
-    public void validateUnicastEmptyBuilder() throws Exception
-    {
+    public void validateUnicastEmptyBuilder() throws Exception {
         // Validation should fail, it is missing compulsory params unicast daemon address
         this.minimumUcastBuilder.build().completeAndValidateConfig();
     }
 
     @Test
-    public void validateUcastMinBuilderAndTestDefaultParams() throws Exception
-    {
+    public void validateUcastMinBuilderAndTestDefaultParams() throws Exception {
         // Set a daemon address to prevent it from failint
         this.minimumUcastBuilder.unicastInfoArray(Collections.singletonList(new UnicastInfo(TEST_RESOLVER_DAEMON_ADDRESS, TEST_RESOLVER_DAEMON_PORT)));
         final AutoDiscoveryConfig unicastConfig = this.minimumUcastBuilder.build();
@@ -95,14 +86,13 @@ public class AutoDiscoveryConfigTest
     }
 
     @Test
-    public void testHostname() throws VegaException
-    {
+    public void testHostname() throws VegaException {
         //default hostname as EMPTY
         final AutoDiscoveryConfig.AutoDiscoveryConfigBuilder builder = AutoDiscoveryConfig.builder();
         builder.autoDiscoType(AutoDiscoType.UNICAST_DAEMON);
-        builder.unicastInfoArray(Collections.singletonList(new UnicastInfo(TEST_RESOLVER_DAEMON_ADDRESS,37000)));
+        builder.unicastInfoArray(Collections.singletonList(new UnicastInfo(TEST_RESOLVER_DAEMON_ADDRESS, 37000)));
 
-        AutoDiscoveryConfig config =  builder.build();
+        AutoDiscoveryConfig config = builder.build();
         Assert.assertNull(config.getHostname());
         Assert.assertNull(config.getIsResolveHostname());
         config.completeAndValidateConfig();
@@ -113,17 +103,17 @@ public class AutoDiscoveryConfigTest
 
 
         //resolved
-        SubnetAddress subnetAddress =  ConfigUtils.getFullMaskSubnetFromStringOrDefault(null);
+        SubnetAddress subnetAddress = ConfigUtils.getFullMaskSubnetFromStringOrDefault(null);
         final String resolved = subnetAddress.getIpAddres().getHostName();
         builder.isResolveHostname(true);
-        config =  builder.build();
+        config = builder.build();
         config.completeAndValidateConfig();
         Assert.assertEquals(resolved, config.getHostname());
 
         //by conf
         final String hostname = "test-autodisc-hostname";
         builder.hostname(hostname);
-        config =  builder.build();
+        config = builder.build();
         Assert.assertEquals(hostname, config.getHostname());
     }
 }

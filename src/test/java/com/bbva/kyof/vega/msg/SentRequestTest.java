@@ -9,23 +9,20 @@ import java.util.Random;
 /**
  * Created by cnebrera on 02/08/16.
  */
-public class SentRequestTest implements IResponseListener
-{
+public class SentRequestTest implements IResponseListener {
     private SentRequest sentRequest;
     private int numResponses;
     private boolean hasTimedOut;
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
         this.sentRequest = new SentRequest("topicName", 100, this, new Random());
         this.numResponses = 0;
         this.hasTimedOut = false;
     }
 
     @Test
-    public void testGetterSetter()
-    {
+    public void testGetterSetter() {
         Assert.assertEquals(sentRequest.getTopicName(), "topicName");
         Assert.assertNotNull(sentRequest.getRequestId());
         Assert.assertNull(sentRequest.getSentResult());
@@ -33,15 +30,13 @@ public class SentRequestTest implements IResponseListener
     }
 
     @Test
-    public void testClose()
-    {
+    public void testClose() {
         this.sentRequest.closeRequest();
         Assert.assertTrue(this.sentRequest.isClosed());
     }
 
     @Test
-    public void testExpired() throws Exception
-    {
+    public void testExpired() throws Exception {
         Assert.assertFalse(this.sentRequest.hasExpired());
 
         Thread.sleep(300);
@@ -50,8 +45,7 @@ public class SentRequestTest implements IResponseListener
     }
 
     @Test
-    public void testResetExpiration() throws Exception
-    {
+    public void testResetExpiration() throws Exception {
         Assert.assertFalse(this.sentRequest.hasExpired());
         this.sentRequest.resetExpiration(1000);
         Thread.sleep(300);
@@ -59,33 +53,30 @@ public class SentRequestTest implements IResponseListener
     }
 
     @Test
-    public void testResponseReceived()
-    {
+    public void testResponseReceived() {
         this.sentRequest.onResponseReceived(new RcvResponse());
         this.sentRequest.onResponseReceived(new RcvResponse());
 
         Assert.assertTrue(this.sentRequest.getNumberOfResponses() == this.numResponses);
-        Assert.assertTrue(this.sentRequest.getNumberOfResponses() == 2) ;
+        Assert.assertTrue(this.sentRequest.getNumberOfResponses() == 2);
 
         // Close, there should be no new responses
         this.sentRequest.closeRequest();
         this.sentRequest.onResponseReceived(new RcvResponse());
 
         Assert.assertTrue(this.sentRequest.getNumberOfResponses() == this.numResponses);
-        Assert.assertTrue(this.sentRequest.getNumberOfResponses() == 2) ;
+        Assert.assertTrue(this.sentRequest.getNumberOfResponses() == 2);
     }
 
     @Test
-    public void testTimeout()
-    {
+    public void testTimeout() {
         this.sentRequest.onRequestTimeout();
 
         Assert.assertTrue(this.hasTimedOut);
     }
 
     @Test
-    public void testTimeoutAfterClose()
-    {
+    public void testTimeoutAfterClose() {
         this.sentRequest.closeRequest();
         this.sentRequest.onRequestTimeout();
 
@@ -93,8 +84,7 @@ public class SentRequestTest implements IResponseListener
     }
 
     @Test
-    public void testWithNoListeners()
-    {
+    public void testWithNoListeners() {
         final SentRequest request = new SentRequest("topicName", 100, null, new Random());
 
         request.onRequestTimeout();
@@ -106,19 +96,15 @@ public class SentRequestTest implements IResponseListener
     }
 
     @Test
-    public void testUncaughtExceptions()
-    {
-        final IResponseListener respListener = new IResponseListener()
-        {
+    public void testUncaughtExceptions() {
+        final IResponseListener respListener = new IResponseListener() {
             @Override
-            public void onResponseReceived(ISentRequest originalSentRequest, IRcvResponse response)
-            {
+            public void onResponseReceived(ISentRequest originalSentRequest, IRcvResponse response) {
                 throw new IllegalArgumentException();
             }
 
             @Override
-            public void onRequestTimeout(ISentRequest originalSentRequest)
-            {
+            public void onRequestTimeout(ISentRequest originalSentRequest) {
                 throw new IllegalArgumentException();
             }
         };
@@ -132,14 +118,12 @@ public class SentRequestTest implements IResponseListener
     }
 
     @Override
-    public void onRequestTimeout(ISentRequest originalSentRequest)
-    {
+    public void onRequestTimeout(ISentRequest originalSentRequest) {
         this.hasTimedOut = true;
     }
 
     @Override
-    public void onResponseReceived(ISentRequest originalSentRequest, IRcvResponse response)
-    {
+    public void onResponseReceived(ISentRequest originalSentRequest, IRcvResponse response) {
         this.numResponses++;
     }
 }

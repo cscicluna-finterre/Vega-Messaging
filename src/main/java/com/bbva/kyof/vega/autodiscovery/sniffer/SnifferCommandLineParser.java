@@ -1,19 +1,13 @@
 package com.bbva.kyof.vega.autodiscovery.sniffer;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
+import org.apache.commons.cli.*;
 
 /**
  * Parser for the command line arguments of the sniffer
  */
 @Slf4j
-class SnifferCommandLineParser
-{
+class SnifferCommandLineParser {
     /**
      * Port option for the multicast connection
      */
@@ -42,8 +36,7 @@ class SnifferCommandLineParser
      *
      * @param options options object to add the common options to
      */
-    private void addCommonCommandLineOptions(final Options options)
-    {
+    private void addCommonCommandLineOptions(final Options options) {
         options.addOption(this.commPortOption);
         options.addOption(this.subnetOption);
         options.addOption(this.ipAddressOption);
@@ -56,8 +49,7 @@ class SnifferCommandLineParser
      * @param args command line arguments
      * @throws SnifferException exception thrown if there is a problem reading or validating the command line
      */
-    SnifferParameters parseCommandLine(final String[] args) throws SnifferException
-    {
+    SnifferParameters parseCommandLine(final String[] args) throws SnifferException {
         log.info("Parsing command line arguments: {}", (Object) args);
 
         // Create the options
@@ -68,12 +60,9 @@ class SnifferCommandLineParser
 
         // Parse the command line
         final CommandLineParser commandLineParser = new PosixParser();
-        try
-        {
+        try {
             this.commandLine = commandLineParser.parse(commandLineOptions, args);
-        }
-        catch (final ParseException e)
-        {
+        } catch (final ParseException e) {
             log.error("Error parsing command line arguments", e);
             throw new SnifferException(e);
         }
@@ -87,8 +76,7 @@ class SnifferCommandLineParser
      *
      * @throws SnifferException exception thrown if the validation is not correct
      */
-    private SnifferParameters parseAndValidateCommandLine() throws SnifferException
-    {
+    private SnifferParameters parseAndValidateCommandLine() throws SnifferException {
         final String subnetAddress = this.getCmdStringOption(this.subnetOption);
         final String ipAddress = this.getCmdStringOption(this.ipAddressOption);
         final Integer port = this.getCmdIntegerOption(this.commPortOption);
@@ -110,10 +98,8 @@ class SnifferCommandLineParser
      * @param option the representing option of the command line
      * @return the value of the option, exception if unsettled
      */
-    private String getCmdStringOption(final Option option)
-    {
-        if (commandLine.hasOption(option.getOpt()))
-        {
+    private String getCmdStringOption(final Option option) {
+        if (commandLine.hasOption(option.getOpt())) {
             return commandLine.getOptionValue(option.getOpt()).trim();
         }
 
@@ -126,10 +112,8 @@ class SnifferCommandLineParser
      * @param option the representing option of the command line
      * @return the value of the option, exception if unsettled
      */
-    private Integer getCmdIntegerOption(final Option option)
-    {
-        if (commandLine.hasOption(option.getOpt()))
-        {
+    private Integer getCmdIntegerOption(final Option option) {
+        if (commandLine.hasOption(option.getOpt())) {
             return Integer.parseInt(commandLine.getOptionValue(option.getOpt()).trim());
         }
 
@@ -142,10 +126,8 @@ class SnifferCommandLineParser
      * @param option the representing option of the command line
      * @return the value of the option, exception if unsettled
      */
-    private Long getCmdLongOption(final Option option)
-    {
-        if (commandLine.hasOption(option.getOpt()))
-        {
+    private Long getCmdLongOption(final Option option) {
+        if (commandLine.hasOption(option.getOpt())) {
             return Long.parseLong(commandLine.getOptionValue(option.getOpt()).trim());
         }
 

@@ -9,21 +9,27 @@ import java.util.UUID;
 
 /**
  * Represent a received message.
- *
+ * <p>
  * This class is not thread safe!
  */
 @NoArgsConstructor
-public class RcvMessage extends BaseRcvMessage implements IRcvMessage
-{
-    /** TopicPublisherId of the topic publisher that sent the message */
-    @Getter @Setter private UUID topicPublisherId;
+public class RcvMessage extends BaseRcvMessage implements IRcvMessage {
+    /**
+     * TopicPublisherId of the topic publisher that sent the message
+     */
+    @Getter
+    @Setter
+    private UUID topicPublisherId;
 
-    /** Sequence Number corresponding to the topic publisher that sent the message */
-    @Getter @Setter private long sequenceNumber;
-    
+    /**
+     * Sequence Number corresponding to the topic publisher that sent the message
+     */
+    @Getter
+    @Setter
+    private long sequenceNumber;
+
     @Override
-    public IRcvMessage promote()
-    {
+    public IRcvMessage promote() {
         // Create the promoted message
         final RcvMessage promotedMsg = new RcvMessage();
         // Promote contents
@@ -37,8 +43,7 @@ public class RcvMessage extends BaseRcvMessage implements IRcvMessage
      *
      * @param promotedMsg the promoted message to clone the contents into
      */
-    void promote(final RcvMessage promotedMsg)
-    {
+    void promote(final RcvMessage promotedMsg) {
         super.promote(promotedMsg);
         promotedMsg.topicPublisherId = this.topicPublisherId;
         promotedMsg.sequenceNumber = this.sequenceNumber;

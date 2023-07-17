@@ -30,12 +30,11 @@ import java.util.UUID;
 
 /**
  * Test {@link AutodiscManager} class
- * 
+ * <p>
  * Created by XE52727 on 31/05/16.
  */
 @Slf4j
-public class AutodiscManagerTest
-{
+public class AutodiscManagerTest {
     private final static SubnetAddress SUBNET = InetUtil.getDefaultSubnet();
     private final static String IP = SUBNET.getIpAddres().getHostAddress();
 
@@ -52,8 +51,7 @@ public class AutodiscManagerTest
     private static UnicastDaemon DAEMON;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         final Aeron.Context ctx1 = new Aeron.Context();
@@ -80,8 +78,7 @@ public class AutodiscManagerTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         // Stop daemon and managers
         DAEMON.close();
         AERON1.close();
@@ -90,14 +87,12 @@ public class AutodiscManagerTest
     }
 
     @After
-    public void after() throws Exception
-    {
+    public void after() throws Exception {
         Thread.sleep(2000);
     }
 
     @Test
-    public void testMcastSubscribeToInstance() throws Exception
-    {
+    public void testMcastSubscribeToInstance() throws Exception {
         final AutodiscManager mcastManager1 = this.createMulticastManager(AERON1);
         final AutodiscManager mcastManager2 = this.createMulticastManager(AERON2);
 
@@ -111,8 +106,7 @@ public class AutodiscManagerTest
     }
 
     @Test
-    public void testUcastSubscribeToInstance() throws Exception
-    {
+    public void testUcastSubscribeToInstance() throws Exception {
         final AutodiscManager ucastManager1 = this.createUnicastManager(AERON1);
         final AutodiscManager ucastManager2 = this.createUnicastManager(AERON2);
 
@@ -122,8 +116,7 @@ public class AutodiscManagerTest
         ucastManager2.close();
     }
 
-    private void testSubscribeToInstance(final AutodiscManager manager1, final AutodiscManager manager2) throws Exception
-    {
+    private void testSubscribeToInstance(final AutodiscManager manager1, final AutodiscManager manager2) throws Exception {
         final AutoDiscInstanceInfo manager1InstanceInfo = new AutoDiscInstanceInfo("manager1", manager1.getInstanceId(), 122, 34566, 55, TestConstants.EMPTY_HOSTNAME, 132, 34567, 6, TestConstants.EMPTY_HOSTNAME);
         final AutoDiscInstanceInfo manager2InstanceInfo = new AutoDiscInstanceInfo("manager2", manager2.getInstanceId(), 122, 34566, 55, TestConstants.EMPTY_HOSTNAME, 132, 34567, 6, TestConstants.EMPTY_HOSTNAME);
 
@@ -187,8 +180,7 @@ public class AutodiscManagerTest
     }
 
     @Test
-    public void testMcastSubscribeToTopic() throws Exception
-    {
+    public void testMcastSubscribeToTopic() throws Exception {
         final AutodiscManager ucastManager1 = this.createMulticastManager(AERON1);
         final AutodiscManager ucastManager2 = this.createMulticastManager(AERON2);
 
@@ -199,8 +191,7 @@ public class AutodiscManagerTest
     }
 
     @Test
-    public void testUcastSubscribeToTopic() throws Exception
-    {
+    public void testUcastSubscribeToTopic() throws Exception {
         final AutodiscManager ucastManager1 = this.createUnicastManager(AERON1);
         final AutodiscManager ucastManager2 = this.createUnicastManager(AERON2);
 
@@ -210,8 +201,7 @@ public class AutodiscManagerTest
         ucastManager2.close();
     }
 
-    private void testSubscribeToTopic(final AutodiscManager manager1, final AutodiscManager manager2) throws Exception
-    {
+    private void testSubscribeToTopic(final AutodiscManager manager1, final AutodiscManager manager2) throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         AutoDiscTopicInfo topicInfo1PubIpc = new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1");
@@ -289,8 +279,7 @@ public class AutodiscManagerTest
     }
 
     @Test
-    public void testMcastSubscribeToTopicSocket() throws Exception
-    {
+    public void testMcastSubscribeToTopicSocket() throws Exception {
         final AutodiscManager ucastManager1 = this.createMulticastManager(AERON1);
         final AutodiscManager ucastManager2 = this.createMulticastManager(AERON2);
 
@@ -301,8 +290,7 @@ public class AutodiscManagerTest
     }
 
     @Test
-    public void testUcastSubscribeToTopicSocket() throws Exception
-    {
+    public void testUcastSubscribeToTopicSocket() throws Exception {
         final AutodiscManager ucastManager1 = this.createUnicastManager(AERON2);
         final AutodiscManager ucastManager2 = this.createUnicastManager(AERON2);
 
@@ -312,8 +300,7 @@ public class AutodiscManagerTest
         ucastManager2.close();
     }
 
-    private void testSubscribeToTopicSocket(final AutodiscManager manager1, final AutodiscManager manager2) throws Exception
-    {
+    private void testSubscribeToTopicSocket(final AutodiscManager manager1, final AutodiscManager manager2) throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         AutoDiscTopicSocketInfo topicInfo1PubIpc = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1", UUID.randomUUID(), 4566, 2344, 23444,
@@ -363,8 +350,7 @@ public class AutodiscManagerTest
     }
 
     @Test
-    public void testMcastSubscribeToPattern() throws Exception
-    {
+    public void testMcastSubscribeToPattern() throws Exception {
         final AutodiscManager mcastManager1 = this.createMulticastManager(AERON1);
         final AutodiscManager mcastManager2 = this.createMulticastManager(AERON2);
 
@@ -375,8 +361,7 @@ public class AutodiscManagerTest
     }
 
     @Test
-    public void testUcastSubscribeToPattern() throws Exception
-    {
+    public void testUcastSubscribeToPattern() throws Exception {
         final AutodiscManager ucastManager1 = this.createUnicastManager(AERON1);
         final AutodiscManager ucastManager2 = this.createUnicastManager(AERON2);
 
@@ -386,8 +371,7 @@ public class AutodiscManagerTest
         ucastManager2.close();
     }
 
-    private void testSubscribeToPattern(final AutodiscManager manager1, final AutodiscManager manager2) throws Exception
-    {
+    private void testSubscribeToPattern(final AutodiscManager manager1, final AutodiscManager manager2) throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         AutoDiscTopicInfo topicInfo1PubIpc = new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic1");
@@ -435,8 +419,7 @@ public class AutodiscManagerTest
         Assert.assertFalse(patternListener2.getAliveTopics().contains(topicInfo2PubUni.getTopicName()));
     }
 
-    private AutodiscManager createMulticastManager(final Aeron aeron) throws VegaException
-    {
+    private AutodiscManager createMulticastManager(final Aeron aeron) throws VegaException {
         // Create multicast autodiscovery manager
         AutoDiscoveryConfig multicastConfig = AutoDiscoveryConfig.builder().
                 autoDiscoType(AutoDiscoType.MULTICAST).
@@ -447,80 +430,72 @@ public class AutodiscManagerTest
         return new AutodiscManager(aeron, multicastConfig, UUID.randomUUID());
     }
 
-    private AutodiscManager createUnicastManager(final Aeron aeron) throws VegaException
-    {
+    private AutodiscManager createUnicastManager(final Aeron aeron) throws VegaException {
         // Create unicast autodiscovery manager
         AutoDiscoveryConfig unicastConfig = AutoDiscoveryConfig.builder().
                 autoDiscoType(AutoDiscoType.UNICAST_DAEMON).
                 refreshInterval(1000L).
                 timeout(2000L).
-                unicastInfoArray(Collections.singletonList(new UnicastInfo(IP,PORT_UNICAST_DAEMON))).
+                unicastInfoArray(Collections.singletonList(new UnicastInfo(IP, PORT_UNICAST_DAEMON))).
                 build();
         unicastConfig.completeAndValidateConfig();
 
         return new AutodiscManager(aeron, unicastConfig, UUID.randomUUID());
     }
 
-    private static class AutoDiscPatternListener implements IAutodiscPubTopicPatternListener
-    {
-        @Getter final Set<String> aliveTopics = Collections.synchronizedSet(new HashSet<>());
+    private static class AutoDiscPatternListener implements IAutodiscPubTopicPatternListener {
+        @Getter
+        final Set<String> aliveTopics = Collections.synchronizedSet(new HashSet<>());
 
         @Override
-        public void onNewPubTopicForPattern(AutoDiscTopicInfo topicInfo, String topicPattern)
-        {
+        public void onNewPubTopicForPattern(AutoDiscTopicInfo topicInfo, String topicPattern) {
             aliveTopics.add(topicInfo.getTopicName());
         }
 
         @Override
-        public void onPubTopicForPatternRemoved(AutoDiscTopicInfo topicInfo, String topicPattern)
-        {
+        public void onPubTopicForPatternRemoved(AutoDiscTopicInfo topicInfo, String topicPattern) {
             aliveTopics.remove(topicInfo.getTopicName());
         }
     }
 
-    private static class AutoDiscInstanceListener implements IAutodiscInstanceListener
-    {
-        @Getter final Set<AutoDiscInstanceInfo> activeInstances = Collections.synchronizedSet(new HashSet<>());
+    private static class AutoDiscInstanceListener implements IAutodiscInstanceListener {
+        @Getter
+        final Set<AutoDiscInstanceInfo> activeInstances = Collections.synchronizedSet(new HashSet<>());
 
         @Override
-        public void onNewAutoDiscInstanceInfo(AutoDiscInstanceInfo info)
-        {
+        public void onNewAutoDiscInstanceInfo(AutoDiscInstanceInfo info) {
             activeInstances.add(info);
         }
 
         @Override
-        public void onTimedOutAutoDiscInstanceInfo(AutoDiscInstanceInfo info)
-        {
+        public void onTimedOutAutoDiscInstanceInfo(AutoDiscInstanceInfo info) {
             activeInstances.remove(info);
         }
     }
 
-    private static class AutoDiscTopicListener implements IAutodiscTopicSubListener
-    {
-        @Getter final Set<AutoDiscTopicInfo> activeTopics = Collections.synchronizedSet(new HashSet<>());
-        @Getter final Set<AutoDiscTopicSocketInfo> activeTopicSockets = Collections.synchronizedSet(new HashSet<>());
+    private static class AutoDiscTopicListener implements IAutodiscTopicSubListener {
+        @Getter
+        final Set<AutoDiscTopicInfo> activeTopics = Collections.synchronizedSet(new HashSet<>());
+        @Getter
+        final Set<AutoDiscTopicSocketInfo> activeTopicSockets = Collections.synchronizedSet(new HashSet<>());
 
         @Override
-        public void onNewAutoDiscTopicInfo(AutoDiscTopicInfo info)
-        {
+        public void onNewAutoDiscTopicInfo(AutoDiscTopicInfo info) {
             this.activeTopics.add(info);
         }
 
         @Override
-        public void onTimedOutAutoDiscTopicInfo(AutoDiscTopicInfo info)
-        {
+        public void onTimedOutAutoDiscTopicInfo(AutoDiscTopicInfo info) {
             this.activeTopics.remove(info);
         }
 
         @Override
-        public void onNewAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info)
-        {
+        public void onNewAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info) {
             this.activeTopicSockets.add(info);
         }
 
         @Override
-        public void onTimedOutAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info)
-        {
+        public void onTimedOutAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info) {
             this.activeTopicSockets.remove(info);
         }
     }

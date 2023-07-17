@@ -22,12 +22,7 @@ import io.aeron.driver.MediaDriver;
 import org.agrona.CloseHelper;
 import org.agrona.concurrent.UnsafeBuffer;
 import org.easymock.EasyMock;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.nio.ByteBuffer;
 import java.util.Collections;
@@ -38,8 +33,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 11/08/16.
  */
-public class PublishersManagerUnicastTest
-{
+public class PublishersManagerUnicastTest {
     private static final String KEYS_DIR = SecurityParamsTest.class.getClassLoader().getResource("keys").getPath();
 
     private static final long SEND_POLL_WAIT = 500;
@@ -54,8 +48,7 @@ public class PublishersManagerUnicastTest
     private OwnSecPubTopicsChangesListener secureChangesListener;
 
     @BeforeClass
-    public static void beforeClass() throws Exception
-    {
+    public static void beforeClass() throws Exception {
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
 
         final Aeron.Context ctx1 = new Aeron.Context();
@@ -93,28 +86,24 @@ public class PublishersManagerUnicastTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
 
     @Before
-    public void before()
-    {
+    public void before() {
         secureChangesListener = new OwnSecPubTopicsChangesListener();
         publisherManager = new PublishersManagerUnicast(VEGA_CONTEXT, secureChangesListener);
     }
 
     @After
-    public void after()
-    {
+    public void after() {
         publisherManager.close();
     }
 
     @Test
-    public void testCreateRemoveSend() throws Exception
-    {
+    public void testCreateRemoveSend() throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         final String ipAddress = SUBNET_ADDRESS.getIpAddres().getHostAddress();
@@ -263,8 +252,7 @@ public class PublishersManagerUnicastTest
     }
 
     @Test
-    public void testSecureCreateRemoveSend() throws Exception
-    {
+    public void testSecureCreateRemoveSend() throws Exception {
         final UUID instanceId = UUID.randomUUID();
 
         final String ipAddress = SUBNET_ADDRESS.getIpAddres().getHostAddress();
@@ -329,8 +317,7 @@ public class PublishersManagerUnicastTest
         this.publisherManager.onTimedOutAutoDiscTopicSocketInfo(topicSocketInfo2);
     }
 
-    private void sendMessageAndCheckArrival(ITopicPublisher topicPublisher, SimpleReceiver simpleReceiver, boolean shouldArrive) throws InterruptedException
-    {
+    private void sendMessageAndCheckArrival(ITopicPublisher topicPublisher, SimpleReceiver simpleReceiver, boolean shouldArrive) throws InterruptedException {
         final UnsafeBuffer buffer = new UnsafeBuffer(ByteBuffer.allocate(128));
         buffer.putInt(0, 128);
 
@@ -338,20 +325,16 @@ public class PublishersManagerUnicastTest
         Thread.sleep(SEND_POLL_WAIT);
         simpleReceiver.pollReceivedMessage();
 
-        if (shouldArrive)
-        {
+        if (shouldArrive) {
             Assert.assertTrue((simpleReceiver.getReusableReceivedMsg().getTopicPublisherId() != null));
-        }
-        else
-        {
+        } else {
             Assert.assertTrue((simpleReceiver.getReusableReceivedMsg().getTopicPublisherId() == null));
         }
 
         simpleReceiver.reset();
     }
 
-    private void sendSecureMessageAndCheckArrival(ITopicPublisher topicPublisher, AESCrypto decoder, SimpleReceiver simpleReceiver, boolean shouldArrive) throws Exception
-    {
+    private void sendSecureMessageAndCheckArrival(ITopicPublisher topicPublisher, AESCrypto decoder, SimpleReceiver simpleReceiver, boolean shouldArrive) throws Exception {
         final UnsafeBuffer buffer = new UnsafeBuffer(ByteBuffer.allocate(128));
         buffer.putInt(0, 128);
 
@@ -361,13 +344,10 @@ public class PublishersManagerUnicastTest
 
         final IRcvMessage rcvMessage = simpleReceiver.getReusableReceivedMsg();
 
-        if (!shouldArrive)
-        {
+        if (!shouldArrive) {
             Assert.assertNull(rcvMessage.getContents());
             return;
-        }
-        else
-        {
+        } else {
             Assert.assertNotNull(rcvMessage.getContents());
         }
 
@@ -387,24 +367,20 @@ public class PublishersManagerUnicastTest
         simpleReceiver.reset();
     }
 
-    private static class OwnSecPubTopicsChangesListener implements IOwnSecPubTopicsChangesListener
-    {
+    private static class OwnSecPubTopicsChangesListener implements IOwnSecPubTopicsChangesListener {
         private final Set<UUID> secureTopicPubAdded = new HashSet<>();
 
         @Override
-        public void onOwnSecureTopicPublisherAdded(UUID topicPubId, byte[] sessionKey, TopicSecurityTemplateConfig securityConfig)
-        {
+        public void onOwnSecureTopicPublisherAdded(UUID topicPubId, byte[] sessionKey, TopicSecurityTemplateConfig securityConfig) {
             secureTopicPubAdded.add(topicPubId);
         }
 
         @Override
-        public void onOwnSecuredTopicPublisherRemoved(UUID topicPubId)
-        {
+        public void onOwnSecuredTopicPublisherRemoved(UUID topicPubId) {
             secureTopicPubAdded.remove(topicPubId);
         }
 
-        public boolean containsPubId(final UUID id)
-        {
+        public boolean containsPubId(final UUID id) {
             return this.secureTopicPubAdded.contains(id);
         }
     }

@@ -20,15 +20,13 @@ import java.nio.ByteBuffer;
  * Test for the {@link VegaInstance} class
  * Created by XE48745 on 15/09/2015.
  */
-public class VegaInstanceMemoryTest
-{
+public class VegaInstanceMemoryTest {
     private static final String STAND_ALONE_CONFIG = ConfigReaderTest.class.getClassLoader().getResource("config/vegaInstanceLowLatencyEmbeddedDriverTestConfig.xml").getPath();
     private static int NUM_THREADS = 2;
     private static Level ORIG_LOG_LEVEL;
 
     @BeforeClass
-    public static void beforeClass()
-    {
+    public static void beforeClass() {
         // Return log level to trace for normal unit tests
         Logger root = (Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
         ORIG_LOG_LEVEL = root.getLevel();
@@ -36,8 +34,7 @@ public class VegaInstanceMemoryTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
-    {
+    public static void afterClass() throws Exception {
         // Return log level to trace for normal unit tests
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         root.setLevel(ORIG_LOG_LEVEL);
@@ -45,16 +42,14 @@ public class VegaInstanceMemoryTest
 
     @Test
     @Ignore
-    public void infiniteSendReceive() throws Exception
-    {
+    public void infiniteSendReceive() throws Exception {
         final VegaInstanceParams params1 = VegaInstanceParams.builder().
                 instanceName("Instance1").
                 configurationFile(STAND_ALONE_CONFIG).build();
 
 
         // Create 2 application instances, use auto-closeable just in case
-        try(final IVegaInstance instance = VegaInstance.createNewInstance(params1))
-        {
+        try (final IVegaInstance instance = VegaInstance.createNewInstance(params1)) {
             // Subscribe to 2 topis of each type
             final ReceiverListener utopic1Listener = new ReceiverListener();
             final ReceiverListener utopic2Listener = new ReceiverListener();
@@ -80,14 +75,12 @@ public class VegaInstanceMemoryTest
             // Wait to give the auto-discovery time to work
             Thread.sleep(1000);
 
-            for (int i = 0; i < NUM_THREADS; i++)
-            {
+            for (int i = 0; i < NUM_THREADS; i++) {
                 new Thread(() ->
                 {
                     UnsafeBuffer sendBuffer = new UnsafeBuffer(ByteBuffer.allocate(128));
 
-                    while (true)
-                    {
+                    while (true) {
                         // Test send receive
                         this.send(utopic1Pub, sendBuffer);
                         this.send(utopic2Pub, sendBuffer);
@@ -107,16 +100,14 @@ public class VegaInstanceMemoryTest
                 }).start();
             }
 
-            while (true)
-            {
+            while (true) {
                 Thread.sleep(1000);
             }
         }
     }
 
 
-    private void send(final ITopicPublisher publisher, final UnsafeBuffer sendBuffer)
-    {
+    private void send(final ITopicPublisher publisher, final UnsafeBuffer sendBuffer) {
         // Write the message in the buffer
         sendBuffer.putInt(0, 33);
 
@@ -124,8 +115,7 @@ public class VegaInstanceMemoryTest
         publisher.sendMsg(sendBuffer, 0, 4);
     }
 
-    private void sendReq(final ITopicPublisher publisher, final ReceiverListener listener, final UnsafeBuffer sendBuffer)
-    {
+    private void sendReq(final ITopicPublisher publisher, final ReceiverListener listener, final UnsafeBuffer sendBuffer) {
         // Write the message in the buffer
         sendBuffer.putInt(0, 33);
 
@@ -133,16 +123,13 @@ public class VegaInstanceMemoryTest
         publisher.sendRequest(sendBuffer, 0, 4, 1000, listener);
     }
 
-    static class ReceiverListener implements ITopicSubListener, IResponseListener
-    {
+    static class ReceiverListener implements ITopicSubListener, IResponseListener {
         @Override
-        public void onMessageReceived(final IRcvMessage receivedMessage)
-        {
+        public void onMessageReceived(final IRcvMessage receivedMessage) {
         }
 
         @Override
-        public void onRequestReceived(IRcvRequest receivedRequest)
-        {
+        public void onRequestReceived(IRcvRequest receivedRequest) {
             final int receiveReqInt = receivedRequest.getContents().getInt(receivedRequest.getContentOffset());
 
             // Send a response
@@ -153,13 +140,11 @@ public class VegaInstanceMemoryTest
         }
 
         @Override
-        public void onRequestTimeout(ISentRequest originalSentRequest)
-        {
+        public void onRequestTimeout(ISentRequest originalSentRequest) {
         }
 
         @Override
-        public void onResponseReceived(ISentRequest originalSentRequest, IRcvResponse response)
-        {
+        public void onResponseReceived(ISentRequest originalSentRequest, IRcvResponse response) {
             // Close the original request
             originalSentRequest.closeRequest();
         }

@@ -13,11 +13,10 @@ import java.util.List;
 
 /**
  * Class create to test {@link InetUtil}
- *
+ * <p>
  * Created by XE52727 on 12/07/2016.
  */
-public class InetUtilTest
-{
+public class InetUtilTest {
     private static final String MULTICAST_ADDRESS_1_STRING = "224.168.0.1";
     private static final String TEST_ADDRESS_1_STRING = "192.168.0.1";
     private static final String TEST_ADDRESS_2_STRING = "192.172.4.255";
@@ -30,28 +29,24 @@ public class InetUtilTest
     private static InetAddress TEST_ADDRESS_3;
 
     @BeforeClass
-    public static void setUp() throws Exception
-    {
+    public static void setUp() throws Exception {
         TEST_ADDRESS_1 = InetUtil.getInetAddressFromString(TEST_ADDRESS_1_STRING);
         TEST_ADDRESS_2 = InetUtil.getInetAddressFromString(TEST_ADDRESS_2_STRING);
         TEST_ADDRESS_3 = InetUtil.getInetAddressFromString(TEST_ADDRESS_3_STRING);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void getAddressFromInvalidString() throws Exception
-    {
+    public void getAddressFromInvalidString() throws Exception {
         InetUtil.getInetAddressFromString(INVALID_HOST_ADDRESS_STRING);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void getAddressFromIp6String() throws Exception
-    {
+    public void getAddressFromIp6String() throws Exception {
         InetUtil.getInetAddressFromString(IP6_ADDRESS);
     }
 
     @Test
-    public void checkValidAddressAndPort() throws Exception
-    {
+    public void checkValidAddressAndPort() throws Exception {
         // Multicast
         Assert.assertTrue(InetUtil.isValidMulticastAddress(MULTICAST_ADDRESS_1_STRING));
         Assert.assertFalse(InetUtil.isValidMulticastAddress(TEST_ADDRESS_1_STRING));
@@ -70,8 +65,7 @@ public class InetUtilTest
     }
 
     @Test
-    public void intConvertTest() throws Exception
-    {
+    public void intConvertTest() throws Exception {
         // Convert the addresses to Int
         int intAddress1 = InetUtil.convertIpAddressToInt(TEST_ADDRESS_1);
         int intAddress2 = InetUtil.convertIpAddressToInt(TEST_ADDRESS_2);
@@ -84,8 +78,7 @@ public class InetUtilTest
     }
 
     @Test
-    public void intConvertTestFromString() throws Exception
-    {
+    public void intConvertTestFromString() throws Exception {
         // Convert the addresses to Int from String
         int intAddress1 = InetUtil.convertIpAddressToInt(TEST_ADDRESS_1_STRING);
         int intAddress2 = InetUtil.convertIpAddressToInt(TEST_ADDRESS_2_STRING);
@@ -103,8 +96,7 @@ public class InetUtilTest
     }
 
     @Test
-    public void increaseDecreaseAddress() throws Exception
-    {
+    public void increaseDecreaseAddress() throws Exception {
         // Convert address to int
         int intAddress1 = InetUtil.convertIpAddressToInt("192.168.0.0");
 
@@ -129,8 +121,7 @@ public class InetUtilTest
 
 
     @Test
-    public void findFirstInterfaceAddressForSubnet() throws Exception
-    {
+    public void findFirstInterfaceAddressForSubnet() throws Exception {
         final InterfaceAddress result = InetUtil.getDefaultInterfaceAddress();
 
         Assert.assertNotNull(result);
@@ -138,8 +129,7 @@ public class InetUtilTest
     }
 
     @Test
-    public void findFirstInterfaceAddressWithSubnet() throws Exception
-    {
+    public void findFirstInterfaceAddressWithSubnet() throws Exception {
         // Create the subnet with the found interface
         final SubnetAddress validSubnet = this.createSubnetFromFirstInterface();
 
@@ -158,8 +148,7 @@ public class InetUtilTest
     }
 
     @Test
-    public void findAllInterfaceAddresses() throws Exception
-    {
+    public void findAllInterfaceAddresses() throws Exception {
         final List<InterfaceAddress> result = InetUtil.getAllInterfaceAddresses();
 
         Assert.assertTrue(result.size() > 0);
@@ -168,8 +157,7 @@ public class InetUtilTest
     }
 
     @Test
-    public void findAllInterfaceAddressesWithSubnet() throws Exception
-    {
+    public void findAllInterfaceAddressesWithSubnet() throws Exception {
         final SubnetAddress validSubnet = createSubnetFromFirstInterface();
 
         final List<InterfaceAddress> result = InetUtil.getAllInterfaceAddresses();
@@ -186,8 +174,7 @@ public class InetUtilTest
     }
 
     @Test
-    public void getDefaultSubnet() throws Exception
-    {
+    public void getDefaultSubnet() throws Exception {
         final SubnetAddress defaultSubnet = InetUtil.getDefaultSubnet();
         Assert.assertNotNull(defaultSubnet);
         Assert.assertTrue(defaultSubnet.getMask() == SubnetAddress.FULL_MASK);
@@ -195,8 +182,7 @@ public class InetUtilTest
     }
 
     @Test
-    public void validateSubnetAndConvertToFullMask() throws Exception
-    {
+    public void validateSubnetAndConvertToFullMask() throws Exception {
         final SubnetAddress defaultSubnet = InetUtil.getDefaultSubnet();
         final SubnetAddress convertedAddress = InetUtil.validateSubnetAndConvertToFullMask(defaultSubnet);
 
@@ -207,9 +193,10 @@ public class InetUtilTest
         Assert.assertNull(InetUtil.validateSubnetAndConvertToFullMask(new SubnetAddress("1.0.0.0/32")));
     }
 
-    /** Create a valid subnetAddress from the first valid interface **/
-    private SubnetAddress createSubnetFromFirstInterface() throws VegaException
-    {
+    /**
+     * Create a valid subnetAddress from the first valid interface
+     **/
+    private SubnetAddress createSubnetFromFirstInterface() throws VegaException {
         // Get the first interface, we will use it to get the subnet
         final InterfaceAddress result = InetUtil.getDefaultInterfaceAddress();
 

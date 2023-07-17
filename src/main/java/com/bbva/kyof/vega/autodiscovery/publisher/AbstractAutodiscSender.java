@@ -19,59 +19,77 @@ import java.nio.ByteBuffer;
 
 /**
  * Abstract class that is the base of specific implementations of the publication functionality for auto-discovery.<p>
- *
+ * <p>
  * The class handles all publication related features. The information to publish has to be previously registered, once
  * registered every time "sendNextTopicAdverts" is called it will fetch the next element to publish and send it if the last time
  * it was sent is bigger than the refresh interval. <p>
- *
+ * <p>
  * It keep track of the last time each element was sent to prevent sending them before the refresh interval time. <p>
- *
+ * <p>
  * Some information is also resent when a message arrives to the auto-discovery manager from the receiver to speed up
  * the discovery process. <p>
- *
+ * <p>
  * The class is not thread-safe!
  */
 @Slf4j
-public abstract class AbstractAutodiscSender implements Closeable
-{
-    /** Send buffer size, with 1024 should be enough for autodiscovery messages */
+public abstract class AbstractAutodiscSender implements Closeable {
+    /**
+     * Send buffer size, with 1024 should be enough for autodiscovery messages
+     */
     private static final int SEND_BUFFER_SIZE = 1024;
 
-    /** Reusable buffer serializer used to serialize the messages into the reusable send buffer */
+    /**
+     * Reusable buffer serializer used to serialize the messages into the reusable send buffer
+     */
     private final UnsafeBufferSerializer sendBufferSerializer = new UnsafeBufferSerializer();
 
-    /** Queue containing all the registered information regarding topic-socket pairs */
+    /**
+     * Queue containing all the registered information regarding topic-socket pairs
+     */
     private final RegisteredInfoQueue<AutoDiscTopicSocketInfo> registeredTopicSocketInfos;
 
-    /** Queue containing all the registered information regarding topic publishers or subscribers */
+    /**
+     * Queue containing all the registered information regarding topic publishers or subscribers
+     */
     private final RegisteredInfoQueue<AutoDiscTopicInfo> registeredTopicInfos;
 
-    /** Contains the information regarding the vega library instance that has to be periodically published */
+    /**
+     * Contains the information regarding the vega library instance that has to be periodically published
+     */
     private volatile RegisteredInfo<AutoDiscInstanceInfo> registeredInstanceInfo = null;
 
-    /** Autodiscovery configuration */
+    /**
+     * Autodiscovery configuration
+     */
     private final AutoDiscoveryConfig config;
 
-    /** Reusable base header for the messages*/
+    /**
+     * Reusable base header for the messages
+     */
     private final BaseHeader reusableBaseHeader;
 
-    /** Variable used to control to print a warning each second when does not exists a valid publication, **/
+    /**
+     * Variable used to control to print a warning each second when does not exists a valid publication,
+     **/
     private long lastPublicationNullWarn = System.currentTimeMillis();
 
-    /** Handle the sending of discovery topic adverts */
+    /**
+     * Handle the sending of discovery topic adverts
+     */
     private final IAdvertsUniformSender<AutoDiscTopicInfo> advertsUniformTopicSender;
 
-    /** Handle the sending of discovery topicSocket adverts */
+    /**
+     * Handle the sending of discovery topicSocket adverts
+     */
     private final IAdvertsUniformSender<AutoDiscTopicSocketInfo> advertsUniformTopicSocketSender;
 
     /**
      * Constructor to create a new auto-discovery abstract publisher
      *
-     * @param aeron the Aeron instance object
+     * @param aeron  the Aeron instance object
      * @param config the autodiscovery configuration
      */
-    AbstractAutodiscSender(final Aeron aeron, final AutoDiscoveryConfig config)
-    {
+    AbstractAutodiscSender(final Aeron aeron, final AutoDiscoveryConfig config) {
         // Initialize the queues of registered info with the refresh interval in the configuration
         this.registeredTopicSocketInfos = new RegisteredInfoQueue<>(config.getRefreshInterval());
         this.registeredTopicInfos = new RegisteredInfoQueue<>(config.getRefreshInterval());
@@ -91,7 +109,7 @@ public abstract class AbstractAutodiscSender implements Closeable
 
     /**
      * Getter for the publication.
-     *
+     * <p>
      * It is abstract because the unicast and multicast environments are different
      *
      * @return the publication
@@ -99,8 +117,7 @@ public abstract class AbstractAutodiscSender implements Closeable
     public abstract Publication getPublication();
 
     @Override
-    public void close()
-    {
+    public void close() {
         log.info("Closing auto discovery sender: registeredTopicSocketInfos & registeredTopicInfos");
 
         this.registeredTopicSocketInfos.clear();
@@ -109,13 +126,12 @@ public abstract class AbstractAutodiscSender implements Closeable
 
     /**
      * Register the auto-discovery instance info of the current library instance to be periodically advert.
-     *
+     * <p>
      * For this type of info there only one instance, but we have keep the methods pattern to be homogeneous
      *
      * @param instanceInfo the instance information
      */
-    public void registerInstance(final AutoDiscInstanceInfo instanceInfo)
-    {
+    public void registerInstance(final AutoDiscInstanceInfo instanceInfo) {
         log.debug("Registering autodisc instance info [{}]", instanceInfo);
 
         // Broadcast the new information immediately
@@ -128,8 +144,7 @@ public abstract class AbstractAutodiscSender implements Closeable
     /**
      * Unregister the auto-discovery instance info of the current library instance to close sending periodical adverts
      */
-    public void unRegisterInstance()
-    {
+    public void unRegisterInstance() {
         log.debug("Unregistering autodisc instance info ");
 
         // Remove it
@@ -141,8 +156,7 @@ public abstract class AbstractAutodiscSender implements Closeable
      *
      * @param topicInfo the topic information
      */
-    public void registerTopic(final AutoDiscTopicInfo topicInfo)
-    {
+    public void registerTopic(final AutoDiscTopicInfo topicInfo) {
         log.debug("Registering autodisc topic info [{}]", topicInfo);
 
         // Broadcast the new information immediately
@@ -157,8 +171,7 @@ public abstract class AbstractAutodiscSender implements Closeable
      *
      * @param topicInfo the topic information
      */
-    public void unregisterTopic(final AutoDiscTopicInfo topicInfo)
-    {
+    public void unregisterTopic(final AutoDiscTopicInfo topicInfo) {
         log.debug("Unregistering topic info [{}]", topicInfo);
 
         // Remove it from que queue
@@ -170,8 +183,7 @@ public abstract class AbstractAutodiscSender implements Closeable
      *
      * @param topicSocketInfo the topic-socket pair information
      */
-    public void registerTopicSocket(final AutoDiscTopicSocketInfo topicSocketInfo)
-    {
+    public void registerTopicSocket(final AutoDiscTopicSocketInfo topicSocketInfo) {
         log.debug("Registering autodisc topic socket info [{}]", topicSocketInfo);
 
         // Broadcast the new information immediately to speed up the autodiscovery process
@@ -186,8 +198,7 @@ public abstract class AbstractAutodiscSender implements Closeable
      *
      * @param topicSocketInfo the topic-socket pair information
      */
-    public void unregisterTopicSocket(final AutoDiscTopicSocketInfo topicSocketInfo)
-    {
+    public void unregisterTopicSocket(final AutoDiscTopicSocketInfo topicSocketInfo) {
         log.debug("Unregistering topic socket info [{}]", topicSocketInfo);
 
         // Remove it from the queue
@@ -197,28 +208,26 @@ public abstract class AbstractAutodiscSender implements Closeable
     /**
      * Send the next topic adverts. It will check the last time the advert was sent against the refresh interval configured.
      * If the refresh interval is reached the advert is sent. <p>
-     *
+     * <p>
      * It will only sent a maximum of 1 advert of each type (topic, topicsocket, instance) per call and return the number of
      * adverts that have been sent.
      *
      * @return the number of messages sent.
      */
-    public int sendNextTopicAdverts()
-    {
+    public int sendNextTopicAdverts() {
         // Get current time
         final long currentTime = System.currentTimeMillis();
 
         // Send topics and topicSocket adverts uniformly
         int numAdvertsSent =
                 this.advertsUniformTopicSender.sendBurstAdverts(this.registeredTopicInfos,
-                    info -> sendMessageIfNotNull(MsgType.AUTO_DISC_TOPIC, info))
-                + this.advertsUniformTopicSocketSender.sendBurstAdverts(this.registeredTopicSocketInfos,
-                    info -> sendMessageIfNotNull(MsgType.AUTO_DISC_TOPIC_SOCKET, info));
+                        info -> sendMessageIfNotNull(MsgType.AUTO_DISC_TOPIC, info))
+                        + this.advertsUniformTopicSocketSender.sendBurstAdverts(this.registeredTopicSocketInfos,
+                        info -> sendMessageIfNotNull(MsgType.AUTO_DISC_TOPIC_SOCKET, info));
 
         // Check topic info and topic socket info and send (topics may remain unsent at the last interval)
         // Only send adverts on allowed intervals
-        if(numAdvertsSent > 0)
-        {
+        if (numAdvertsSent > 0) {
             numAdvertsSent += this.sendMessageIfNotNull(MsgType.AUTO_DISC_TOPIC, this.registeredTopicInfos.getNextIfShouldSend(currentTime))
                     + this.sendMessageIfNotNull(MsgType.AUTO_DISC_TOPIC_SOCKET, this.registeredTopicSocketInfos.getNextIfShouldSend(currentTime));
         }
@@ -226,8 +235,7 @@ public abstract class AbstractAutodiscSender implements Closeable
 
         // Check instance info and send
         final RegisteredInfo<AutoDiscInstanceInfo> instanceInfo = this.registeredInstanceInfo;
-        if (instanceInfo != null)
-        {
+        if (instanceInfo != null) {
             numAdvertsSent += this.sendMessageIfNotNull(MsgType.AUTO_DISC_INSTANCE, instanceInfo.getIfShouldSendAndResetIfRequired(currentTime));
         }
 
@@ -236,19 +244,17 @@ public abstract class AbstractAutodiscSender implements Closeable
 
     /**
      * Republish all the information registered about the given topic for an specific transport type. <p>
-     *
+     * <p>
      * This information includes both topic info and topic socket info for the given topic name. <p>
-     *
+     * <p>
      * This method is used to speed up the auto-discovery process by resending all topic information when another
      * client is interested on adverts for the topic. <p>
      *
-     * @param topicName the name of the topic
+     * @param topicName     the name of the topic
      * @param transportType transport type and direction for the topic
      */
-    public void republishAllInfoAboutTopic(final String topicName, final AutoDiscTransportType transportType)
-    {
-        if (log.isTraceEnabled())
-        {
+    public void republishAllInfoAboutTopic(final String topicName, final AutoDiscTransportType transportType) {
+        if (log.isTraceEnabled()) {
             log.trace("Republishing all information about topic [{}] with transport type [{}]", topicName, transportType);
         }
 
@@ -269,10 +275,8 @@ public abstract class AbstractAutodiscSender implements Closeable
     /**
      * Republish the stored instance information
      */
-    public void republishInstanceInfo()
-    {
-        if (log.isTraceEnabled())
-        {
+    public void republishInstanceInfo() {
+        if (log.isTraceEnabled()) {
             log.trace("Republishing current instance information [{}]", this.registeredInstanceInfo);
         }
 
@@ -280,8 +284,7 @@ public abstract class AbstractAutodiscSender implements Closeable
         final RegisteredInfo<AutoDiscInstanceInfo> instanceInfo = this.registeredInstanceInfo;
 
         // If settled, reset timeout and send again
-        if (instanceInfo != null)
-        {
+        if (instanceInfo != null) {
             instanceInfo.resetNextExpectedSent(System.currentTimeMillis());
             this.sendMessageIfNotNull(MsgType.AUTO_DISC_INSTANCE, instanceInfo.getInfo());
         }
@@ -290,25 +293,21 @@ public abstract class AbstractAutodiscSender implements Closeable
     /**
      * Send the provided message if is not null
      *
-     * @param msgType the message type to send
+     * @param msgType      the message type to send
      * @param serializable the message in the form of a serializable object
      * @return 0 if not sent, 1 if sent
      */
-    int sendMessageIfNotNull(final byte msgType, final IUnsafeSerializable serializable)
-    {
+    int sendMessageIfNotNull(final byte msgType, final IUnsafeSerializable serializable) {
         // Check for null
-        if (serializable == null)
-        {
+        if (serializable == null) {
             return 0;
         }
 
-        if (log.isTraceEnabled())
-        {
+        if (log.isTraceEnabled()) {
             log.trace("Sending auto-discovery advert message [{}]", serializable);
         }
 
-        try
-        {
+        try {
             // Reset the send buffer serializer offset
             this.sendBufferSerializer.setOffset(0);
 
@@ -325,24 +324,18 @@ public abstract class AbstractAutodiscSender implements Closeable
             //In multicast mode, it does exist an enabled publication always
             Publication publication = this.getPublication();
 
-            if (publication == null)
-            {
+            if (publication == null) {
                 //Only print one warning each second
-                if(System.currentTimeMillis() - lastPublicationNullWarn > 1000)
-                {
+                if (System.currentTimeMillis() - lastPublicationNullWarn > 1000) {
                     lastPublicationNullWarn = System.currentTimeMillis();
                     log.warn(
-                            "It is not possible to send auto-discovery advert message, because it does not exist an enabled publication for msgType = {}", MsgType.toString(msgType) );
+                            "It is not possible to send auto-discovery advert message, because it does not exist an enabled publication for msgType = {}", MsgType.toString(msgType));
                 }
-            }
-            else
-            {
+            } else {
                 publication.offer(this.sendBufferSerializer.getInternalBuffer(), 0, this.sendBufferSerializer.getOffset());
                 return 1;
             }
-        }
-        catch (final RuntimeException e)
-        {
+        } catch (final RuntimeException e) {
             log.error("Unexpected error sending auto-discovery advert message", e);
         }
 
@@ -351,29 +344,25 @@ public abstract class AbstractAutodiscSender implements Closeable
 
     /**
      * Send the provided message if is not null to all the publishers
-     *
+     * <p>
      * Although this method is for the unicast case, it is placed here for reuse the reusable variables
      *
-     * @param msgType the message type to send
-     * @param serializable the message in the form of a serializable object
+     * @param msgType               the message type to send
+     * @param serializable          the message in the form of a serializable object
      * @param publicationsInfoArray array with all the publications to send the message
      * @return 0 if not sent, 1 if sent
      */
-    int sendMessageIfNotNullToAllPublications(final byte msgType, final IUnsafeSerializable serializable, final PublicationInfo[] publicationsInfoArray)
-    {
+    int sendMessageIfNotNullToAllPublications(final byte msgType, final IUnsafeSerializable serializable, final PublicationInfo[] publicationsInfoArray) {
         // Check for null
-        if (serializable == null)
-        {
+        if (serializable == null) {
             return 0;
         }
 
-        if (log.isTraceEnabled())
-        {
+        if (log.isTraceEnabled()) {
             log.trace("Sending auto-discovery advert message [{}]", serializable);
         }
 
-        try
-        {
+        try {
             // Reset the send buffer serializer offset
             this.sendBufferSerializer.setOffset(0);
 
@@ -385,14 +374,11 @@ public abstract class AbstractAutodiscSender implements Closeable
             serializable.toBinary(this.sendBufferSerializer);
 
             // Send the same message to all the publishers
-            for(int i = 0; i < publicationsInfoArray.length; i++)
-            {
+            for (int i = 0; i < publicationsInfoArray.length; i++) {
                 publicationsInfoArray[i].getPublication().offer(this.sendBufferSerializer.getInternalBuffer(), 0, this.sendBufferSerializer.getOffset());
             }
             return 1;
-        }
-        catch (final RuntimeException e)
-        {
+        } catch (final RuntimeException e) {
             log.error("Unexpected error sending auto-discovery advert message", e);
         }
 

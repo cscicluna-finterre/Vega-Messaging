@@ -14,8 +14,7 @@ import java.util.UUID;
  * The class is not thread-safe!
  */
 @Slf4j
-public class SnifferMcastReceiver extends AbstractSnifferReceiver
-{
+public class SnifferMcastReceiver extends AbstractSnifferReceiver {
     /**
      * Create a new autodiscovery subscriber handler
      *
@@ -27,14 +26,12 @@ public class SnifferMcastReceiver extends AbstractSnifferReceiver
     public SnifferMcastReceiver(final UUID instanceId,
                                 final Aeron aeron,
                                 final SnifferParameters parameters,
-                                final ISnifferListener snifferListener)
-    {
+                                final ISnifferListener snifferListener) {
         super(instanceId, aeron, parameters, snifferListener);
     }
 
     @Override
-    public Subscription createSubscription(final UUID instanceId, final Aeron aeron, final SnifferParameters parameters, final ISnifferListener snifferListener)
-    {
+    public Subscription createSubscription(final UUID instanceId, final Aeron aeron, final SnifferParameters parameters, final ISnifferListener snifferListener) {
         // Create the aeron channel
         final String channel = AeronChannelHelper.createMulticastChannelString(parameters.getIpAddress(), parameters.getPort(), parameters.getSubnetAddress());
 

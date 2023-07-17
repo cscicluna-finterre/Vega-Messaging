@@ -11,63 +11,68 @@ import java.util.function.Consumer;
  * @param <K> Key type of the hashmap
  * @param <V> Value type of the hashmap
  */
-public final class HashMapStack<K, V>
-{
-    /** The internal map of elements */
+public final class HashMapStack<K, V> {
+    /**
+     * The internal map of elements
+     */
     private final Map<K, StackElement> hashMap;
 
-    /** The head of the elements on inserted order, represents the most recent inserted element */
+    /**
+     * The head of the elements on inserted order, represents the most recent inserted element
+     */
     private StackElement head;
 
-    /** The tail of the elements on inserted order, represent the oldest inserted element */
+    /**
+     * The tail of the elements on inserted order, represent the oldest inserted element
+     */
     private StackElement tail;
 
-    /** Constructs a new empty map with default size */
-    public HashMapStack()
-    {
+    /**
+     * Constructs a new empty map with default size
+     */
+    public HashMapStack() {
         this.hashMap = new HashMap<>();
     }
 
     /**
      * Constructs a new linked hashmap given the initial capacity
+     *
      * @param initialCapacity initial capacity of the map
      */
-    public HashMapStack(final int initialCapacity)
-    {
+    public HashMapStack(final int initialCapacity) {
         this.hashMap = new HashMap<>(initialCapacity);
     }
 
     /**
      * Constructs a new linked hashmap given the initial capacity and load factor
+     *
      * @param initialCapacity initial capacity of the map
-     * @param loadFactor load factor of the map
+     * @param loadFactor      load factor of the map
      */
-    public HashMapStack(final int initialCapacity, final float loadFactor)
-    {
+    public HashMapStack(final int initialCapacity, final float loadFactor) {
         this.hashMap = new HashMap<>(initialCapacity, loadFactor);
     }
 
     /**
      * Returns true if there if the key is stored in the map
+     *
      * @param key the key
      * @return true if stored
      */
-    public boolean containsKey(final K key)
-    {
+    public boolean containsKey(final K key) {
         return this.hashMap.containsKey(key);
     }
 
     /**
      * Return the element that match the given key
+     *
      * @param key the key to match
      * @return the elment that match the key, null if none
      */
-    public V get(final K key)
-    {
+    public V get(final K key) {
         final StackElement element = this.hashMap.get(key);
 
-        if (element != null)
-        {
+        if (element != null) {
             return element.value;
         }
 
@@ -77,16 +82,13 @@ public final class HashMapStack<K, V>
     /**
      * Put a new element in the map. It wont put it if already contained
      *
-     * @param key the element key
+     * @param key   the element key
      * @param value the element value
-     *
      * @return true if added, false if it already exists
      */
-    public boolean put(final K key, final V value)
-    {
+    public boolean put(final K key, final V value) {
         // Check if it already exists first
-        if (this.hashMap.containsKey(key))
-        {
+        if (this.hashMap.containsKey(key)) {
             return false;
         }
 
@@ -98,11 +100,11 @@ public final class HashMapStack<K, V>
 
     /**
      * Put a new element on the map, if already contained it will remove the old one first
-     * @param key the key to remove and add
+     *
+     * @param key   the key to remove and add
      * @param value the value to add
      */
-    public void removeAndPut(final K key, final V value)
-    {
+    public void removeAndPut(final K key, final V value) {
         // First remove the key in case is already there
         this.remove(key);
 
@@ -112,23 +114,20 @@ public final class HashMapStack<K, V>
 
     /**
      * Add a new value to the head of the map
-     * @param key the key
+     *
+     * @param key   the key
      * @param value the value
      */
-    private void addNewHead(final K key, final V value)
-    {
+    private void addNewHead(final K key, final V value) {
         // Create the new element and add to the map
         final StackElement newElement = new StackElement(key, value);
         this.hashMap.put(key, newElement);
 
         // If there were no elements
-        if (this.head == null)
-        {
+        if (this.head == null) {
             this.head = newElement;
             this.tail = newElement;
-        }
-        else
-        {
+        } else {
             final StackElement previoussHead = this.head;
             this.head = newElement;
             newElement.next = previoussHead;
@@ -138,17 +137,16 @@ public final class HashMapStack<K, V>
 
     /**
      * Remove the element with the given key, return the element if removed, null if not removed
+     *
      * @param key the key of the element to remove
      * @return the removed element, null if not found
      */
-    public V remove(final K key)
-    {
+    public V remove(final K key) {
         // Remove from the map
         final StackElement removedElement = this.hashMap.remove(key);
 
         // If removed, fix the double linked list and update newest and eldest element
-        if (removedElement != null)
-        {
+        if (removedElement != null) {
             this.removeStackElement(removedElement);
             return removedElement.value;
         }
@@ -158,29 +156,23 @@ public final class HashMapStack<K, V>
 
     /**
      * Remove the given stack element from the double linked list
+     *
      * @param elementToRemove the element to remove
      */
-    private void removeStackElement(final StackElement elementToRemove)
-    {
+    private void removeStackElement(final StackElement elementToRemove) {
         // Get previous and next elements in the linked list
         final StackElement previousElement = elementToRemove.previous;
         final StackElement nextElement = elementToRemove.next;
 
-        if (previousElement == null)
-        {
+        if (previousElement == null) {
             this.head = nextElement;
-        }
-        else
-        {
+        } else {
             previousElement.next = nextElement;
         }
 
-        if (nextElement == null)
-        {
+        if (nextElement == null) {
             this.tail = previousElement;
-        }
-        else
-        {
+        } else {
             nextElement.previous = previousElement;
         }
     }
@@ -188,10 +180,8 @@ public final class HashMapStack<K, V>
     /**
      * @return the eldest key in the map, null if empty
      */
-    public K getEldestKey()
-    {
-        if (this.tail == null)
-        {
+    public K getEldestKey() {
+        if (this.tail == null) {
             return null;
         }
 
@@ -201,10 +191,8 @@ public final class HashMapStack<K, V>
     /**
      * @return the eldest value in the map, null if empty
      */
-    public V getEldestValue()
-    {
-        if (this.tail == null)
-        {
+    public V getEldestValue() {
+        if (this.tail == null) {
             return null;
         }
 
@@ -214,10 +202,8 @@ public final class HashMapStack<K, V>
     /**
      * @return the newest key in the map, null if empty
      */
-    public K getNewestKey()
-    {
-        if (this.head == null)
-        {
+    public K getNewestKey() {
+        if (this.head == null) {
             return null;
         }
 
@@ -227,10 +213,8 @@ public final class HashMapStack<K, V>
     /**
      * @return the newest value in the map, null if empty
      */
-    public V getNewestValue()
-    {
-        if (this.head == null)
-        {
+    public V getNewestValue() {
+        if (this.head == null) {
             return null;
         }
 
@@ -240,16 +224,14 @@ public final class HashMapStack<K, V>
     /**
      * @return true if the map is empty
      */
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return this.hashMap.isEmpty();
     }
 
     /**
      * Clear the contents
      */
-    public void clear()
-    {
+    public void clear() {
         this.hashMap.clear();
         this.tail = null;
         this.head = null;
@@ -258,21 +240,19 @@ public final class HashMapStack<K, V>
     /**
      * @return the number of elements
      */
-    public int size()
-    {
+    public int size() {
         return hashMap.size();
     }
 
     /**
      * Consume all values in the set
+     *
      * @param consumer the consumer for the values
      */
-    public void consumeAllValues(final Consumer<V> consumer)
-    {
+    public void consumeAllValues(final Consumer<V> consumer) {
         StackElement currentElement = this.head;
 
-        while (currentElement != null)
-        {
+        while (currentElement != null) {
             consumer.accept(currentElement.value);
             currentElement = currentElement.next;
         }
@@ -281,25 +261,31 @@ public final class HashMapStack<K, V>
     /**
      * Internal class that represent one element in the map. Each element is part of a double linked list
      */
-    private class StackElement
-    {
-        /** Next element in the double linked list */
+    private class StackElement {
+        /**
+         * Next element in the double linked list
+         */
         private StackElement next;
-        /** Previous element in the double linked list */
+        /**
+         * Previous element in the double linked list
+         */
         private StackElement previous;
-        /** Element key */
+        /**
+         * Element key
+         */
         private final K key;
-        /** Element value */
+        /**
+         * Element value
+         */
         private final V value;
 
         /**
          * Create a new stack element
          *
-         * @param key the element key
+         * @param key   the element key
          * @param value the element value
          */
-        StackElement(final K key, final V value)
-        {
+        StackElement(final K key, final V value) {
             this.key = key;
             this.value = value;
         }
