@@ -84,7 +84,7 @@ class TopicSubscriber implements Closeable {
      */
     void onMessageReceived(final RcvMessage receivedMessage) {
         final ITopicSubListener currentNormalListener = this.normalListener;
-        log.warn("Received seq number, {}", receivedMessage.getSequenceNumber());
+        // log.warn("Received seq number, {}", receivedMessage.getSequenceNumber());
         final MsgLostReport lostReport = this.checkMessageLoss(receivedMessage);
 
         if (notDuplicatedData(lostReport) && currentNormalListener != null) {
@@ -278,11 +278,11 @@ class TopicSubscriber implements Closeable {
                     msg.getTopicPublisherId()
             );
 
-            log.warn("Message loss detected (backpressure?): expected={}, message={}, missing={}, size={}",
-                    expectedSequenceNumber,
-                    msg.getSequenceNumber(),
-                    lossResult,
-                    msg.getContentLength());
+            // log.warn("Message loss detected (backpressure?): expected={}, message={}, missing={}, size={}",
+            //         expectedSequenceNumber,
+            //         msg.getSequenceNumber(),
+            //         lossResult,
+            //         msg.getContentLength());
 
             // Update expected sequence number to the next one received
             expectedSequenceNumber.set(msg.getSequenceNumber() + 1);
